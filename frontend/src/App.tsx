@@ -4,7 +4,7 @@ import './App.css';
 
 function App() {
   return (
-    <div className="App">
+    <div className="App min-h-screen max-w-md bg-slate-300 relative mx-auto overscroll-y-none touch-none">
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <p>
