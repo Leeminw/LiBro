@@ -19,18 +19,18 @@ public class UserBookServiceImpl implements UserBookService{
     private final UserBookRepository userBookRepository;
 
     public List<BookDetailResponseDto> getUserBookList(){
-        User user = User.builder().build();
+//        User user = User.builder().build();
+//
+//        Optional<List<UserBook>> userBookList = userBookRepository.findByUser(user);
+//        List<BookDetailResponseDto> result = new ArrayList<>();
+//        if(userBookList.isEmpty()) return result;
+//        for(UserBook userbook : userBookList.get()){
+//            BookDetailResponseDto bookDetail = new BookDetailResponseDto(userbook.getBook());
+//            result.add(bookDetail);
+//        }
 
-        Optional<List<UserBook>> userBookList = userBookRepository.findByUser(user);
-        List<BookDetailResponseDto> result = new ArrayList<>();
-        if(userBookList.isEmpty()) return result;
-        for(UserBook userbook : userBookList.get()){
-            BookDetailResponseDto bookDetail = new BookDetailResponseDto(userbook.getBook());
-            result.add(bookDetail);
-        }
 
-
-        return result;
+        return null;
     }
 
 

@@ -2,7 +2,6 @@ package com.ssafy.libro.domain.userbook.entity;
 
 import com.ssafy.libro.domain.book.entity.Book;
 import com.ssafy.libro.domain.user.entity.User;
-import com.ssafy.libro.domain.userbookcomment.entity.UserBookComment;
 import com.ssafy.libro.domain.userbookhistory.entity.UserBookHistory;
 import jakarta.persistence.*;
 import lombok.*;
@@ -42,11 +41,7 @@ public class UserBook {
     @JoinColumn(name = "book_id")
     private Book book;
 
-    @OneToMany(mappedBy = "userBook", fetch = FetchType.LAZY )
-    private List<UserBookHistory> userBookHistoryList;
 
-    @OneToMany(mappedBy = "userBook", fetch = FetchType.LAZY)
-    private List<UserBookComment> userBookCommentList;
 
     private void updateUser(User user){
         this.user = user;
