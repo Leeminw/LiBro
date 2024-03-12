@@ -4,7 +4,9 @@ import { IoMdHome } from "react-icons/io";
 import { IoPeople } from "react-icons/io5";
 import { IoLibrary } from "react-icons/io5";
 import { FaUser } from "react-icons/fa";
+
 const BottomNavigation = () => {
+
   return (
     <div className="w-full h-16 flex justify-between fixed max-w-md bottom-0">
       <div className="grid grid-cols-5 w-[100%] gap-2 bg-black">
