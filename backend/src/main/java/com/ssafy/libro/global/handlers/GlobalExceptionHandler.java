@@ -14,19 +14,22 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<?> handleIllegalArgumentException(IllegalArgumentException e) {
         log.error("GlobalExceptionHandler: " + e.getMessage());
-        return new ResponseEntity<>(ResponseData.failure(e.getMessage()), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(ResponseData.error(), HttpStatus.BAD_REQUEST);
+        // return new ResponseEntity<>(ResponseData.error(e.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(NullPointerException.class)
     public ResponseEntity<?> handleNullPointerException(NullPointerException e) {
         log.error("GlobalExceptionHandler: " + e.getMessage());
-        return new ResponseEntity<>(ResponseData.failure(e.getMessage()), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(ResponseData.error(), HttpStatus.BAD_REQUEST);
+        // return new ResponseEntity<>(ResponseData.error(e.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleException(Exception e) {
         log.error("GlobalExceptionHandler: " + e.getMessage());
-        return new ResponseEntity<>(ResponseData.failure(e.getMessage()), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(ResponseData.error(), HttpStatus.BAD_REQUEST);
+        // return new ResponseEntity<>(ResponseData.error(e.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
 }
