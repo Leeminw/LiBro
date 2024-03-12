@@ -9,6 +9,12 @@
 
 // SocialLoginButtons.js
 import React from 'react';
+import {
+    BrowserRouter as Router,
+    Routes,
+    Route,
+    Link
+  } from 'react-router-dom';
 import { GoogleOAuthProvider, useGoogleLogin } from '@react-oauth/google';
 
 const Logo = () => {
@@ -82,7 +88,7 @@ const KakaoLoginButton = () => {
 
 const SocialLoginButtons = () => {
     return (
-        <div>
+        <Router>
           <Logo />
           
           <div className="flex justify-center items-center h-50 flex-col">
@@ -93,10 +99,11 @@ const SocialLoginButtons = () => {
             <NaverLoginButton />
             <KakaoLoginButton />
             <div className="flex text-xs font-bold mt-4">LiBro 아이디가 없으신가요? ⟶
-              <div className="text-[#9268EB]">&nbsp;회원가입</div>
+              <Link to="/signup" className="text-[#9268EB]">&nbsp;회원가입</Link>
+              {/* <div className="text-[#9268EB]">&nbsp;회원가입</div> */}
             </div>
           </div>
-        </div>
+        </Router>
         
     );
 };
