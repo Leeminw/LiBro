@@ -32,7 +32,7 @@ public class BookController {
     @DeleteMapping("/api/v1/book/{id}")
     public ResponseEntity<?> deleteBook(@PathVariable Long id) {
         bookService.deleteBook(id);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ResponseData.success("Delete Success"));
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ResponseData.success(id));
     }
 
     @GetMapping("/api/v1/book/{id}")
