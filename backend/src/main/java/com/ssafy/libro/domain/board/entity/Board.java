@@ -1,6 +1,5 @@
 package com.ssafy.libro.domain.board.entity;
 
-import com.ssafy.libro.domain.article.entity.Article;
 import com.ssafy.libro.domain.club.entity.Club;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -9,10 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
-
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Getter
@@ -38,8 +34,4 @@ public class Board {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="club_id")
     private Club club;
-
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "board")
-    private List<Article> articles = new ArrayList<>();
-
 }

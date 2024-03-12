@@ -18,9 +18,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class BoardController {
     private final BoardService boardService;
-    @GetMapping("/list/{groupId}")
+    @GetMapping("{groupId}")
     public ResponseEntity<Map<String,Object>> getBoardList(@PathVariable Long groupId){
-        System.out.println("list");
         List<BoardResponseDto> list= boardService.getBoardList(groupId);
         Map<String,Object> map = new HashMap<>();
         map.put("data",list);
@@ -33,7 +32,7 @@ public class BoardController {
         return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 
-    @PostMapping("")
+    @PostMapping("/create")
     public ResponseEntity<Map<String,Object>> createBoard(@RequestBody BoardCreateRequestDto dto){
         System.out.println("dto:"+dto.getName()+"clubId:"+dto.getClubId());
         boardService.createBoard(dto);
