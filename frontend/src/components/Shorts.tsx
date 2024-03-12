@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { BsBookmark, BsBookmarkFill } from "react-icons/bs";
 const Shorts: React.FC<ShortsProps> = ({ idx }) => {
-  const URL = "ex0" + idx + ".mp4";
+  const URL = "ex0" + 0 + ".mp4";
   const [bookmark, setBookmark] = useState<boolean>(false);
   return (
     <div
