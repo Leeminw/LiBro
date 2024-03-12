@@ -42,10 +42,10 @@ public class UserBook {
     @JoinColumn(name = "book_id")
     private Book book;
 
-    @OneToMany(mappedBy = "userbook" ,fetch = FetchType.LAZY,targetEntity = UserBookHistory.class)
+    @OneToMany(mappedBy = "userBook", fetch = FetchType.LAZY )
     private List<UserBookHistory> userBookHistoryList;
 
-    @OneToMany(mappedBy = "userbook" , fetch = FetchType.LAZY, targetEntity = UserBookComment.class)
+    @OneToMany(mappedBy = "userBook", fetch = FetchType.LAZY)
     private List<UserBookComment> userBookCommentList;
 
     private void updateUser(User user){
