@@ -4,6 +4,7 @@ import com.ssafy.libro.domain.book.dto.BookCreateRequestDto;
 import com.ssafy.libro.domain.book.dto.BookDetailResponseDto;
 import com.ssafy.libro.domain.book.dto.BookUpdateRequestDto;
 import com.ssafy.libro.domain.book.entity.Book;
+import com.ssafy.libro.domain.book.exception.BookNotFoundException;
 import com.ssafy.libro.domain.book.repository.BookRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,7 +25,7 @@ public class BookServiceImpl implements BookService {
     @Override
     public BookDetailResponseDto updateBook(BookUpdateRequestDto requestDto) {
         Book book = bookRepository.findById(requestDto.getId()).orElseThrow(
-                () -> new IllegalArgumentException("해당 책이 존재하지 않습니다."));
+                () -> new BookNotFoundException(requestDto.getId()));
         book = bookRepository.save(book.update(requestDto));
         return new BookDetailResponseDto(book);
     }
@@ -37,7 +38,7 @@ public class BookServiceImpl implements BookService {
     @Override
     public BookDetailResponseDto getBook(Long id) {
         Book book = bookRepository.findById(id).orElseThrow(
-                () -> new IllegalArgumentException("해당 책이 존재하지 않습니다."));
+                () -> new BookNotFoundException(id));
         return new BookDetailResponseDto(book);
     }
 
