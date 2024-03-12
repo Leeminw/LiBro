@@ -1,10 +1,8 @@
 package com.ssafy.libro.domain.book.entity;
 
 import com.ssafy.libro.domain.book.dto.BookUpdateRequestDto;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.ssafy.libro.domain.userbook.entity.UserBook;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,6 +11,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter
@@ -44,6 +43,10 @@ public class Book {
     private LocalDateTime createdDate;
     @UpdateTimestamp
     private LocalDateTime updatedDate;
+
+    //join
+    @OneToMany(mappedBy = "book", fetch = FetchType.LAZY, targetEntity = UserBook.class)
+    private List<UserBook> userBookList;
 
     public Book update(BookUpdateRequestDto requestDto) {
         this.isbn = requestDto.getIsbn();
