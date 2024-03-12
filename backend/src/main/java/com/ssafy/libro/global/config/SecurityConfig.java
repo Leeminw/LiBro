@@ -38,7 +38,7 @@ public class SecurityConfig {
                             .hasRole("GUEST")
 
                             .requestMatchers("/api/**")
-                            .hasRole("USER")
+                            .anonymous()
 
 
                             .requestMatchers("/api/admin/**")
