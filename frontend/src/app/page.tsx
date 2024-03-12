@@ -1,5 +1,7 @@
 "use client";
 import Shorts from "@/components/shorts/Shorts";
+import { Button } from "@/components/ui/button";
+import { AiOutlineSearch } from "react-icons/ai";
 import { useEffect, useRef, useState } from "react";
 
 export default function Home() {
@@ -29,8 +31,16 @@ export default function Home() {
 
   return (
     <>
-      <div className="bg-white border-b border-gray-300 max-w-md w-full z-50 absolute h-16">
-        Header
+      <div className="bg-white border-b border-gray-300 max-w-md w-full z-50 absolute h-24 flex-col">
+        <div className="flex h-1/2 items-center border-b border-gray-300">
+          <div className="w-full pl-12 flex justify-center">Header</div>
+          <Button variant="outline" size="icon" className="aspect-square mr-4">
+            <AiOutlineSearch size={"1.2rem"} className="justify-items-end" />
+          </Button>
+        </div>
+        <div className="w-full flex h-1/2 items-center pl-2 text-md font-semibold">
+          오늘의 도서 추천
+        </div>
       </div>
       <div
         ref={carouselRef}
