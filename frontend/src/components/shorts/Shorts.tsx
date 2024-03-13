@@ -33,8 +33,8 @@ const Shorts = ({ idx }: { idx: number }) => {
             src="https://shopping-phinf.pstatic.net/main_3245593/32455932298.20230313183629.jpg"
             alt=""
             width={100}
-            height={200}
-            className="px-3 pt-7 pb-5 select-none"
+            height={100}
+            className="px-3 pt-10 pb-4 select-none"
           />
           <div className="text-white text-sm font-normal h-full w-full flex items-start flex-col select-none pt-14 pb-4 pr-2 justify-end">
             <div className="mb-2">

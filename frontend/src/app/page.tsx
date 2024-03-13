@@ -31,19 +31,8 @@ export default function Home() {
 
   return (
     <>
-      <div className="bg-white border-b border-gray-300 max-w-md w-full z-50 absolute h-24 flex-col">
-        <div className="flex h-1/2 items-center ">
-          <div className="w-full pl-4 flex font-bold text-xl">Libro</div>
-          <Button variant={"outline"} size="icon" className="aspect-square mr-1">
-            <AiOutlineSearch size={"1.2rem"} className="justify-items-end" />
-          </Button>
-          <Button className="aspect-square mr-1 w-24 bg-[#9268EB] hover:bg-[#684ba6]">
-            로그인
-          </Button>
-        </div>
-        <div className="w-full flex h-1/2 items-center pl-4 text-md font-semibold text-[#333333]">
-          오늘의 도서 추천
-        </div>
+      <div className="border-b border-gray-200 bg-white w-full max-w-md flex h-14 items-center mt-14 pl-4 text-md font-semibold text-[#333333] fixed z-10">
+        오늘의 도서 추천
       </div>
       <div
         ref={carouselRef}
