@@ -38,7 +38,7 @@ const Shorts = ({ idx }: { idx: number }) => {
           />
           <div className="text-white text-sm font-normal h-full w-full flex items-start flex-col select-none pt-14 pb-4 pr-2 justify-end">
             <div className="mb-2">
-              <div className="text-md font-semibold overflow-ellipsis break-words line-clamp-2 pb-1">
+              <div className="text-md font-semibold overflow-ellipsis break-words line-clamp-2 mb-1">
                 우린 한낮에도 프리랜서를 꿈꾸지 {idx}편
               </div>
               <div className="text-xs text-[#CCCCCC] self-start break-words overflow-ellipsis">
@@ -56,7 +56,7 @@ const Shorts = ({ idx }: { idx: number }) => {
           playsInline
           className="absolute w-full h-full rounded-lg object-cover"
         >
-          {/* <source src={URL} type="video/mp4" /> */}
+          <source src={URL} type="video/mp4" />
         </video>
       </div>
     </div>
