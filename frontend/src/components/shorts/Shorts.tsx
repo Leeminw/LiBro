@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import { BsBookmark, BsBookmarkFill } from "react-icons/bs";
-const Shorts = ({ idx }:{idx:number}) => {
+const Shorts = ({ idx }: { idx: number }) => {
   const URL = "ex0" + 0 + ".mp4";
   const [bookmark, setBookmark] = useState<boolean>(false);
   return (
@@ -30,18 +30,25 @@ const Shorts = ({ idx }:{idx:number}) => {
         {/* 도서 정보 */}
         <div className="absolute w-full h-1/3 z-10 bottom-0 rounded-b-lg bg-gradient-to-t from-black/80 flex">
           <Image
-            src="https://shopping-phinf.pstatic.net/main_3681879/36818792620.20230829091541.jpg"
+            src="https://shopping-phinf.pstatic.net/main_3245593/32455932298.20230313183629.jpg"
             alt=""
             width={100}
-            height={100}
-            className="px-3 py-5 select-none"
+            height={200}
+            className="px-3 pt-7 pb-5 select-none"
           />
-          <div className="text-white text-sm h-full w-full flex items-center flex-col justify-center select-none">
-            <div>{idx}번 쇼츠</div>
-            <div>어쩌구저쩌구</div>
-            <div>자세히보기</div>
+          <div className="text-white text-sm font-normal h-full w-full flex items-start flex-col select-none pt-14 pb-4 pr-2 justify-end">
+            <div className="mb-2">
+              <div className="text-md font-semibold overflow-ellipsis break-words line-clamp-2 pb-1">
+                우린 한낮에도 프리랜서를 꿈꾸지 {idx}편
+              </div>
+              <div className="text-xs text-[#CCCCCC] self-start break-words overflow-ellipsis">
+                저자 박현아 | 출판사 세나북스
+              </div>
+            </div>
+            <div className="text-xs self-end">자세히 보기 &gt;</div>
           </div>
         </div>
+        {/* 숏츠 */}
         <video
           autoPlay
           loop
@@ -49,7 +56,7 @@ const Shorts = ({ idx }:{idx:number}) => {
           playsInline
           className="absolute w-full h-full rounded-lg object-cover"
         >
-          <source src={URL} type="video/mp4" />
+          {/* <source src={URL} type="video/mp4" /> */}
         </video>
       </div>
     </div>
