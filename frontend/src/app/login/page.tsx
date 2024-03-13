@@ -16,6 +16,7 @@ import {
     Link
   } from 'react-router-dom';
 import { GoogleOAuthProvider, useGoogleLogin } from '@react-oauth/google';
+import Signup from '../signup/page';
 
 const Logo = () => {
     return (
@@ -89,22 +90,29 @@ const KakaoLoginButton = () => {
 const SocialLoginButtons = () => {
     return (
         <Router>
-          <Logo />
-          
-          <div className="flex justify-center items-center h-50 flex-col">
-            <div className='mb-3 font-bold text-sm'>소셜 로그인으로 간편하게 가입하세요!</div>
-            <GoogleOAuthProvider clientId="YOUR_CLIENT_ID_HERE">
-              <GoogleLoginButton />
-            </GoogleOAuthProvider>
-            <NaverLoginButton />
-            <KakaoLoginButton />
-            <div className="flex text-xs font-bold mt-4">LiBro 아이디가 없으신가요? ⟶
-              <Link to="/signup" className="text-[#9268EB]">&nbsp;회원가입</Link>
-              {/* <div className="text-[#9268EB]">&nbsp;회원가입</div> */}
-            </div>
-          </div>
+
+            <Routes>
+              <Route path="/login" element={
+                <>
+                    <Logo />
+                    <div className="flex justify-center items-center h-50 flex-col">
+                        <div className='mb-3 font-bold text-sm'>소셜 로그인으로 간편하게 가입하세요!</div>
+                        <GoogleOAuthProvider clientId="YOUR_CLIENT_ID_HERE">
+                        <GoogleLoginButton />
+                        </GoogleOAuthProvider>
+                        <NaverLoginButton />
+                        <KakaoLoginButton />
+                        <div className="flex text-xs font-bold mt-4">LiBro 아이디가 없으신가요? ⟶
+                        <Link to="/signup" className="text-[#9268EB]">&nbsp;회원가입</Link>
+                        </div>
+                    </div>
+                </>
+              } />
+              <Route path="/signup" element={<Signup/>}/>
+              
+            </Routes>
+
         </Router>
-        
     );
 };
 
