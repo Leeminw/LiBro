@@ -2,6 +2,7 @@ package com.ssafy.libro.domain.userbook.entity;
 
 import com.ssafy.libro.domain.book.entity.Book;
 import com.ssafy.libro.domain.user.entity.User;
+import com.ssafy.libro.domain.userbook.dto.UserBookUpdateRequestDto;
 import com.ssafy.libro.domain.userbookcomment.entity.UserBookComment;
 import com.ssafy.libro.domain.userbookhistory.entity.UserBookHistory;
 import jakarta.persistence.*;
@@ -48,11 +49,19 @@ public class UserBook {
     @OneToMany(mappedBy = "userBook", fetch = FetchType.LAZY)
     private List<UserBookComment> userBookCommentList;
 
-    private void updateUser(User user){
+    public void updateUser(User user){
         this.user = user;
     }
-    private void updateBook(Book book){
+    public void updateBook(Book book){
         this.book = book;
+    }
+
+    public void update(UserBookUpdateRequestDto requestDto){
+        this.type = requestDto.getType();
+        this.isComplete = requestDto.getIsComplete();
+        this.rating = requestDto.getRating();
+        this.ratingComment = requestDto.getRatingComment();
+        this.ratingSpoiler = requestDto.getRatingSpoiler();
     }
 
 }
