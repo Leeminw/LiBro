@@ -1,6 +1,9 @@
 package com.ssafy.libro.domain.userbook.controller;
 
 import com.ssafy.libro.domain.book.dto.BookDetailResponseDto;
+import com.ssafy.libro.domain.userbook.dto.UserBookDetailResponseDto;
+import com.ssafy.libro.domain.userbook.dto.UserBookMappingRequestDto;
+import com.ssafy.libro.domain.userbook.dto.UserBookUpdateRequestDto;
 import com.ssafy.libro.domain.userbook.service.UserBookService;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.annotations.Parameter;
@@ -12,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("api/vi/userbook")
+@RequestMapping("api/v1/userbook")
 @RequiredArgsConstructor
 public class UserBookController {
 //    등록 도서 검색 조회
@@ -20,36 +23,41 @@ public class UserBookController {
 
 
     @GetMapping("/search")
-    public ResponseEntity<?> getUserBooksUsingKeyWord (@RequestParam Map<Object,Object> keyword) {
+    public ResponseEntity<?> getUserBooksUsingKeyWord (@RequestParam Map<String,String> keyword) {
         return ResponseEntity.ok("data");
     }
+
 //    등록 도서 목록 조회
     @GetMapping("")
-    public ResponseEntity<?> getUserBooks (){
+    public ResponseEntity<?> getUserBookList (){
         List<BookDetailResponseDto> result = userBookService.getUserBookList();
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 //    등록 도서 상세 조회
-    @GetMapping("/detail/{bookId}")
-    public ResponseEntity<?> getUserBookDetail(@PathVariable Long bookId){
-
-        return ResponseEntity.ok("");
+    @GetMapping("/detail/{userBookId}")
+    public ResponseEntity<?> getUserBookDetail(@PathVariable Long userBookId){
+        UserBookDetailResponseDto userBookDetailResponseDto = userBookService.getUserBook(userBookId);
+        return ResponseEntity.status(HttpStatus.OK).body(userBookDetailResponseDto);
     }
 //    등록 도서 추가 기능
-    @PostMapping("/{bookId}")
-    public ResponseEntity<?> postUserBook(@PathVariable Long bookId){
-       return ResponseEntity.ok("");
+    @PostMapping("")
+    public ResponseEntity<?> postUserBook(@RequestBody UserBookMappingRequestDto requestDto){
+        UserBookDetailResponseDto userBookDetailResponseDto = userBookService.mappingUserBook(requestDto);
+       return ResponseEntity.status(HttpStatus.CREATED).body(userBookDetailResponseDto);
     }
 //    등록 도서 수정 기능
-    @PutMapping("/{bookId}")
-    public ResponseEntity<?> updateUserBook (){
-        return ResponseEntity.ok("");
+    @PutMapping("")
+    public ResponseEntity<?> updateUserBook (@RequestBody UserBookUpdateRequestDto requestDto){
+        UserBookDetailResponseDto userBookDetailResponseDto = userBookService.updateUserBook(requestDto);
+        return ResponseEntity.status(HttpStatus.OK).body(userBookDetailResponseDto);
     }
 //    등록 도서 삭제 기능
-    @DeleteMapping("/{bookdId}")
-    public ResponseEntity<?> deleteUserBook () {
-        return ResponseEntity.ok("");
+    @DeleteMapping("/{userBookId}")
+    public ResponseEntity<?> deleteUserBook (@PathVariable Long userBookId) {
+        userBookService.deleteUserBook(userBookId);
+        return ResponseEntity.status(HttpStatus.OK).body("deleted user-book mapping");
     }
+
 //    전체 등록 도서 완독률
 //    @GetMapping("/")
 //    특정 등록 도서 완독률

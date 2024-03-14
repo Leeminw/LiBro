@@ -1,7 +1,5 @@
 package com.ssafy.libro.domain.userbookhistory.service;
 
-import com.ssafy.libro.domain.user.entity.User;
-import com.ssafy.libro.domain.userbook.dto.UserBookResponseDto;
 import com.ssafy.libro.domain.userbook.entity.UserBook;
 import com.ssafy.libro.domain.userbook.repository.UserBookRepository;
 import com.ssafy.libro.domain.userbookhistory.dto.UserBookHistoryCreateRequestDto;
@@ -12,9 +10,7 @@ import com.ssafy.libro.domain.userbookhistory.repository.UserBookHistoryReposito
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
