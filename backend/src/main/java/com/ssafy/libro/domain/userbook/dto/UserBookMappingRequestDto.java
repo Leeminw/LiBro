@@ -2,7 +2,7 @@ package com.ssafy.libro.domain.userbook.dto;
 import com.ssafy.libro.domain.userbook.entity.UserBook;
 import java.time.LocalDateTime;
 
-public class UserBookRequestDto {
+public class UserBookMappingRequestDto {
     private Long userId;
     private Long bookId;
     private String type;
