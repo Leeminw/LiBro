@@ -32,24 +32,34 @@ public class UserBookCommentsServiceImpl implements UserBookCommentService{
     }
 
     @Override
-    public UserBookCommentDetailResponseDto updateUserBookComment(UserBookCommentUpdateRequestDto requestDto) {
-
+    public UserBookCommentDetailResponseDto updateUserBookComment(UserBookCommentUpdateRequestDto requestDto) throws Exception {
+        UserBookComment userBookComment = userBookCommentRepository.findById(requestDto.getId())
+                .orElseThrow(() -> new Exception());
+        userBookComment.update(requestDto);
 
         return null;
     }
 
     @Override
-    public void deleteUserBookComment(Long id) {
+    public void deleteUserBookComment(Long id) throws Exception {
+        UserBookComment userBookComment = userBookCommentRepository.findById(id)
+                .orElseThrow(() -> new Exception());
 
+        userBookCommentRepository.delete(userBookComment);
     }
 
     @Override
     public UserBookCommentDetailResponseDto getUserBookComment(Long id) throws Exception {
-        return null;
+        UserBookComment userBookComment = userBookCommentRepository.findById(id)
+                .orElseThrow(() -> new Exception());
+
+
+        return new UserBookCommentDetailResponseDto(userBookComment);
     }
 
     @Override
     public List<UserBookCommentDetailResponseDto> getUserBookCommentList() {
+
         return null;
     }
 }

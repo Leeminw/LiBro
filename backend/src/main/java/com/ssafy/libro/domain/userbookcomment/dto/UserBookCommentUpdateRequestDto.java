@@ -1,5 +1,6 @@
 package com.ssafy.libro.domain.userbookcomment.dto;
 
+import com.ssafy.libro.domain.userbookcomment.entity.UserBookComment;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,6 +17,5 @@ public class UserBookCommentUpdateRequestDto {
     private String content;
     private LocalDateTime createdDate;
     private LocalDateTime updatedDate;
-
 
 }
