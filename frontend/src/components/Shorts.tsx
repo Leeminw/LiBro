@@ -1,9 +1,11 @@
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { BsBookmark, BsBookmarkFill } from "react-icons/bs";
 const Shorts = ({ idx }: { idx: number }) => {
   const URL = "ex0" + 0 + ".mp4";
   const [bookmark, setBookmark] = useState<boolean>(false);
+  const router = useRouter();
   return (
     <div
       className={`snap-always snap-center shrink-0 w-full h-full min-h-40 flex items-center justify-center text-4xl font-bold text-white drop-shadow-lg`}
@@ -28,7 +30,10 @@ const Shorts = ({ idx }: { idx: number }) => {
           </div>
         </div>
         {/* 도서 정보 */}
-        <div className="absolute w-full h-1/3 z-10 bottom-0 rounded-b-lg bg-gradient-to-t from-black/80 flex">
+        <div
+          className="absolute w-full h-1/3 z-10 bottom-0 cursor-pointer rounded-b-lg bg-gradient-to-t from-black/80 flex"
+          onClick={() => {router.push(`/detail?isbn=${idx}`)}}
+        >
           <Image
             src="https://shopping-phinf.pstatic.net/main_3245593/32455932298.20230313183629.jpg"
             alt=""

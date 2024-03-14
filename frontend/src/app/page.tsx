@@ -1,8 +1,9 @@
 "use client";
-import Shorts from "@/components/shorts/Shorts";
+import Shorts from "@/components/Shorts";
 import { Button } from "@/components/ui/button";
 import { AiOutlineSearch } from "react-icons/ai";
 import { useEffect, useRef, useState } from "react";
+import SubHeader from "@/components/SubHeader";
 
 export default function Home() {
   const [currentIndex, setCurrentIndex] = useState<number>(0);
@@ -31,9 +32,7 @@ export default function Home() {
 
   return (
     <>
-      <div className="border-b border-gray-200 bg-white w-full max-w-md flex h-14 items-center mt-14 pl-4 text-md font-semibold text-[#333333] fixed z-10">
-        오늘의 도서 추천
-      </div>
+      <SubHeader title="오늘의 도서 추천" backArrow={false}/>
       <div
         ref={carouselRef}
         className="flex overflow-y-auto snap-y snap-mandatory scrollbar-hide"

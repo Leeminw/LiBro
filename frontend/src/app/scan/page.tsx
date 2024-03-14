@@ -1,14 +1,15 @@
 "use client";
 import BarcodeScannerComponent from "@/components/BarcodeScanner";
+import SubHeader from "@/components/SubHeader";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const ScanPage = () => {
   const router = useRouter();
+
   return (
     <>
-      <div className="border-b border-gray-200 bg-white w-full max-w-md flex h-14 items-center mt-14 pl-4 text-md font-semibold text-[#333333] fixed z-10">
-        도서 검색
-      </div>
+      <SubHeader title="도서 검색" backArrow={true} />
       <div className="flex items-center min-h-screen justify-center">
         <div className="relative bg-slate-500 w-full flex items-center justify-center h-80">
           <div className="absolute w-2/3 h-2/3 border-4 border-white"></div>
@@ -21,7 +22,7 @@ const ScanPage = () => {
             onUpdate={(err, result) => {
               if (result) {
                 const isbn = result.getText();
-                router.push(`/search/${isbn}`);
+                router.push(`/detail?isbn=${isbn}`);
               }
             }}
           />
