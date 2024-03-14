@@ -8,11 +8,11 @@ import java.util.List;
 
 public interface UserBookCommentService {
 
-    UserBookCommentDetailResponseDto createUserBookComment(UserBookCommentCreateRequestDto requestDto) throws Exception;
-    UserBookCommentDetailResponseDto updateUserBookComment(UserBookCommentUpdateRequestDto requestDto) throws Exception;
-    void deleteUserBookComment(Long id) throws Exception;
-    UserBookCommentDetailResponseDto getUserBookComment(Long id)throws Exception;
-    List<UserBookCommentDetailResponseDto> getUserBookCommentList();
+    UserBookCommentDetailResponseDto createUserBookComment(UserBookCommentCreateRequestDto requestDto) ;
+    UserBookCommentDetailResponseDto updateUserBookComment(UserBookCommentUpdateRequestDto requestDto) ;
+    void deleteUserBookComment(Long id) ;
+    UserBookCommentDetailResponseDto getUserBookComment(Long id);
+    List<UserBookCommentDetailResponseDto> getUserBookCommentList(Long userBookId);
 
     // 등록도서 검색
     // 등록도서 목록조회
