@@ -1,5 +1,6 @@
 'use client'
 
+import React, { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { AvatarImage, AvatarFallback, Avatar } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -17,23 +18,44 @@ interface User {
     nickName: string,
     name: string,
     birth: string
+    readRate: number,
+    bookRate: number,
 }
 
 const Mypage = (props: User) => {
 
-  const {profileUrl, nickName, id, name, birth} = props
+  const {profileUrl, nickName, id, name, birth} = props // user
+  const [readRate, setReadRate] = useState(0) // 완독수
+  const [bookRate, setBookRate] = useState(0) // 책 평점
+  
+  // 완독한 책의 수와 총 책의 수 예시
+  const finishedBooks = 10; // 완독한 책의 수
+  const totalBooks = 20; // 총 책의 수
+
+  useEffect(() => {
+    // 완독율 계산 후 상태 업데이트
+    const newReadRate = (finishedBooks / totalBooks) * 100;
+    setReadRate(newReadRate);
+  }, [finishedBooks, totalBooks]); // finishedBooks 또는 totalBooks가 변경될 때마다 실행
 
   return (
     <div className="bg-white h-full">
       <div className="p-4">
-        <div className="text-xl font-bold mb-2">마이페이지</div>
-        <Tabs defaultValue="account" className="w-[400px]">
-        <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="account">내 정보</TabsTrigger>
-            <TabsTrigger value="password">나의 독서기록</TabsTrigger>
-        </TabsList>
-        </Tabs>
-        <div className="mt-4 flex w-full">
+
+        <div className="mb-2 pb-2 border-b border-gray-300">
+            <div className="text-xl font-bold ml-2 ">마이페이지</div>
+        </div>
+
+        <div className="">
+            <Tabs defaultValue="account" className="w-[400px]">
+            <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="account">내 정보</TabsTrigger>
+                <TabsTrigger value="password">나의 독서기록</TabsTrigger>
+            </TabsList>
+            </Tabs>
+        </div>
+
+        <div className="mt-4 pb-3 flex w-full border-b border-gray-300">
             <div className="w-1/3 flex justify-center items-center">
                 <div>
                     <Avatar className="h-24 w-24">
@@ -46,86 +68,103 @@ const Mypage = (props: User) => {
                 </div>
             </div>
             <div className="w-2/3 justify-center mt-2">
-                <div className="flex mb-6 ">
-                    <div className="text-sm text-gray-500 font-bold">계정</div>
-                    <div className="text-sm text-gray-500">{id}11</div>
+                <div className="mb-6 grid grid-cols-12 gap-4 pl-2">
+                    <div className="text-sm text-gray-500 font-bold col-span-4 ">계정</div>
+                    <div className="text-sm text-gray-500 col-span-8">{id}11</div>
                 </div>
-                <div className="flex mb-6">
-                    <div className="text-sm text-gray-500 font-bold">닉네임</div>
-                    <div className="text-sm text-gray-500">{nickName}22</div>
+                <div className="mb-6 grid grid-cols-12 gap-4 pl-2">
+                    <div className="text-sm text-gray-500 font-bold col-span-4">닉네임</div>
+                    <div className="text-sm text-gray-500 col-span-8">{nickName}22</div>
                 </div>
-                <div className="flex mb-6">
-                    <div className="text-sm text-gray-500 font-bold">이름</div>
-                    <div className="text-sm text-gray-500">{name}33</div>
+                <div className="mb-6 grid grid-cols-12 gap-4 pl-2" >
+                    <div className="text-sm text-gray-500 font-bold col-span-4">이름</div>
+                    <div className="text-sm text-gray-500 col-span-8">{name}33</div>
                 </div>
-                <div className="flex mb-1">
-                    <div className="text-sm text-gray-500 font-bold">생년월일</div>
-                    <div className="text-sm text-gray-500">{birth}44</div>
+                <div className="mb-1 grid grid-cols-12 gap-4 pl-2">
+                    <div className="text-sm text-gray-500 font-bold col-span-4">생년월일</div>
+                    <div className="text-sm text-gray-500 col-span-8">{birth}44</div>
                 </div>
             </div>
         </div>
-        <div className="mt-8 flex justify-around">
-          <div className="text-center">
-            <div className="text-2xl font-bold">231</div>
-            <div className="text-sm">보유 쿠폰</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold">115</div>
-            <div className="text-sm">완독 수</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold">115</div>
-            <div className="text-sm">기록한 글귀 수</div>
-          </div>
+
+        <div className="flex flex-col">
+            <div className="mt-4">
+                <div className="text-xl font-bold ml-2 mr-2">분석</div>
+            </div>
+            
+            <div className="grid grid-cols-3 gap-4 items-center mt-3 mb-3 pb-3 pt-3 border-b border-t border-gray-300">
+                <div className="flex flex-row items-center justify-center space-x-2 col-span-1">
+                    <div className="text-sm font-bold">담은 책 수</div>
+                    <div className="text-xs">231</div>
+                </div>
+                <div className="flex flex-row items-center justify-center space-x-2 col-span-1 border-l border-r border-gray-300">
+                    <div className="text-sm font-bold">책 완독 수</div>
+                    <div className="text-xs">231</div>
+                </div>
+                <div className="flex flex-row items-center justify-center space-x-2 col-span-1">
+                    <div className="text-sm font-bold">기록 글귀 수</div>
+                    <div className="text-xs">231</div>
+                </div>
+            </div>
         </div>
-        <div className="mt-8">
+
+        <div className="ml-2 mr-2">
           <div className="flex items-center justify-between">
-            <div className="text-lg font-bold">완독률</div>
-            <div className="text-lg font-bold text-gray-500">50%</div>
+            <div className="text-sm font-bold">완독율</div>
+            <div className="text-sm font-bold text-gray-500">{readRate}%</div>
           </div>
-          <Progress className="w-full mt-2" value={50} />
+          <Progress className="w-full h-2 bg-[#9268EB] rounded" value={readRate} />
         </div>
-        <div className="mt-8">
+
+        <div className="ml-2 mr-2 mt-4">
           <div className="flex items-center justify-between">
-            <div className="text-lg font-bold">나의 평점 평균</div>
+            <div className="text-sm font-bold">나의 평균 평점</div>
             <div className="flex items-center">
-              <StarIcon className="text-yellow-400 " />
-              <StarIcon className="text-yellow-400" />
-              <StarIcon className="text-yellow-400" />
-              <StarIcon className="text-yellow-400" />
-              <StarIcon className="text-gray-300" />
-              <div className="ml-2 text-lg font-bold">4.7</div>
+              <div className="mr-2 text-m font-bold">4.7</div>
+              <StarFillIcon className="text-[#FFCA28] w-8 h-8" />
+              <StarFillIcon className="text-[#FFCA28] w-8 h-8" />
+              <StarFillIcon className="text-[#FFCA28] w-8 h-8" />
+              <StarFillIcon className="text-[#FFCA28] w-8 h-8" />
+              <StarEmptyIcon className="text-[#E5E7EB] w-8 h-8" />
+              
+            </div>
+            <div className="flex">
+                <Button variant="ghost">남긴 리뷰 수</Button>
             </div>
           </div>
-          <div className="mt-4">
-            <div className="flex items-center justify-between">
-              <div className="text-base">5 별점</div>
-              <Progress className="w-3/4 h-1 bg-yellow-400" value={65} />
-              <div className="text-base">65%</div>
+          <div className="mt-3">
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-base">5</div>
+              <StarFillIcon className="text-[#FFCA28] w-4 h-4" />
+              <Progress className="w-5/6 h-1.5 bg-[#FFCA28] rounded" value={65} />
+              <div className="text-sm">65%</div>
             </div>
-            <div className="mt-2 flex items-center justify-between">
-              <div className="text-base">4 별점</div>
-              <Progress className="w-3/4 h-1 bg-yellow-400" value={10} />
-              <div className="text-base">10%</div>
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-base">4</div>
+              <StarFillIcon className="text-[#FFCA28] w-4 h-4" />
+              <Progress className="w-5/6 h-1.5 bg-[#FFCA28] rounded" value={65} />
+              <div className="text-sm">65%</div>
             </div>
-            <div className="mt-2 flex items-center justify-between">
-              <div className="text-base">3 별점</div>
-              <Progress className="w-3/4 h-1 bg-yellow-400" value={25} />
-              <div className="text-base">25%</div>
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-base">3</div>
+              <StarFillIcon className="text-[#FFCA28] w-4 h-4" />
+              <Progress className="w-5/6 h-1.5 bg-[#FFCA28] rounded" value={65} />
+              <div className="text-sm">65%</div>
             </div>
-            <div className="mt-2 flex items-center justify-between">
-              <div className="text-base">2 별점</div>
-              <Progress className="w-3/4 h-1 bg-yellow-400" value={0} />
-              <div className="text-base">0%</div>
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-base">2</div>
+              <StarFillIcon className="text-[#FFCA28] w-4 h-4" />
+              <Progress className="w-5/6 h-1.5 bg-[#FFCA28] rounded" value={65} />
+              <div className="text-sm">65%</div>
             </div>
-            <div className="mt-2 flex items-center justify-between">
-              <div className="text-base">1 별점</div>
-              <Progress className="w-3/4 h-1 bg-yellow-400" value={0} />
-              <div className="text-base">0%</div>
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-base">1</div>
+              <StarFillIcon className="text-[#FFCA28] w-4 h-4" />
+              <Progress className="w-5/6 h-1.5 bg-[#FFCA28] rounded" value={65} />
+              <div className="text-sm">65%</div>
             </div>
-          </div>
-          <div className="mt-4 flex justify-between">
-            <Button variant="ghost">리뷰 쓰기</Button>
+
+          
             <ChevronRightIcon className="text-gray-400" />
           </div>
         </div>
@@ -158,7 +197,7 @@ function ChevronRightIcon(props : any) {
   )
 }
 
-function StarIcon(props : any) {
+function StarFillIcon(props : any) {
   return (
     <svg
       {...props}
@@ -166,7 +205,7 @@ function StarIcon(props : any) {
       width="24"
       height="24"
       viewBox="0 0 24 24"
-      fill="yellow"
+      fill="#FFCA28"
       stroke="currentColor"
       strokeWidth="2"
       strokeLinecap="round"
@@ -176,3 +215,22 @@ function StarIcon(props : any) {
     </svg>
   )
 }
+
+function StarEmptyIcon(props : any) {
+    return (
+      <svg
+        {...props}
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="#E5E7EB"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+      </svg>
+    )
+  }
