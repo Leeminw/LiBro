@@ -5,20 +5,15 @@ import { Button } from "@/components/ui/button";
 import { FileEditIcon, TrashIcon, CheckIcon, XIcon } from "lucide-react";
 import {ScrollArea} from "@/components/ui/scroll-area";
 
-interface Todo {
-    id: number;
-    title: string;
-}
-
 interface CategoryItemProps {
-    todo: Todo;
+    category: Category;
     onEditStart: (id: number, newTitle: string) => void;
     onDelete: (id: number) => void;
 }
 
-function CategoryItem({ todo, onEditStart, onDelete }: CategoryItemProps) {
+function CategoryItem({ category, onEditStart, onDelete }: CategoryItemProps) {
     const [editing, setEditing] = useState(false);
-    const [inputValue, setInputValue] = useState(todo.title);
+    const [inputValue, setInputValue] = useState(category.title);
 
     const handleEditStart = () => {
         setEditing(true);
@@ -26,12 +21,12 @@ function CategoryItem({ todo, onEditStart, onDelete }: CategoryItemProps) {
 
     const handleEditFinish = () => {
         setEditing(false);
-        onEditStart(todo.id, inputValue);
+        onEditStart(category.id, inputValue);
     };
 
     const handleEditCancel = () => {
         setEditing(false);
-        setInputValue(todo.title);
+        setInputValue(category.title);
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -56,10 +51,10 @@ function CategoryItem({ todo, onEditStart, onDelete }: CategoryItemProps) {
                 </>
             ) : (
                 <>
-                    <h2 className="text-lg cursor-pointer" onClick={handleEditStart}>{todo.title}</h2>
+                    <h2 className="text-lg cursor-pointer" onClick={handleEditStart}>{category.title}</h2>
                     <div className="flex items-center space-x-2">
                         <FileEditIcon className="text-gray-600 cursor-pointer" onClick={handleEditStart} />
-                        <TrashIcon className="text-gray-600 cursor-pointer" onClick={() => onDelete(todo.id)} />
+                        <TrashIcon className="text-gray-600 cursor-pointer" onClick={() => onDelete(category.id)} />
                     </div>
                 </>
             )}
@@ -68,7 +63,7 @@ function CategoryItem({ todo, onEditStart, onDelete }: CategoryItemProps) {
 }
 
 interface CategoryListProps {
-    props: Todo[];
+    props: Category[];
 }
 
 export default function CategoryList({ props }: CategoryListProps) {
@@ -124,7 +119,7 @@ export default function CategoryList({ props }: CategoryListProps) {
                     todos.map(todo => (
                         <CategoryItem
                             key={todo.id}
-                            todo={todo}
+                            category={todo}
                             onEditStart={handleEditStart}
                             onDelete={handleDeleteTodo}
                         />

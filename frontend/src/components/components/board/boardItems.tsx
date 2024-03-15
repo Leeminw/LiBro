@@ -1,18 +1,9 @@
 import React from 'react';
 import { Card, CardHeader, CardFooter} from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
-import Link from "next/link";
 
-interface BoardItemProps {
-    userName: string;
-    profileUrl: string;
-    title: string;
-    commentCount: number;
-    created_date: string;
-}
-
-export default function BoardItem (props : BoardItemProps) {
-    const { userName, title , created_date , commentCount, profileUrl} = props
+export default function BoardItem (props : PostItem) {
+    const { userName, title , created_date , commentCount, profileUrl, id} = props
 
     return (
         <div className="grid gap-4">

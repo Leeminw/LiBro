@@ -6,21 +6,18 @@ import Comments from "@/components/components/comments";
 import {ScrollArea} from "@/components/ui/scroll-area";
 
 // 예시용 게시글 정보
-const examplePost = {
+const examplePost: PostDetail = {
     title: "을왕리 독서 커뮤니티",
     date: "2024-03-01",
-    content: "",
-    author: {
-        nickName: "제네시스",
-        profileUrl: null
-    },
+    content: "여러분의 소중한 책 읽기 경험을 공유해주세요!",
+    nickName: "제네시스",
+    profileUrl: null,
     comments: [
         {
             nickName: "김삿갓",
             registeredAt: "2024-01-01",
             contents: "반갑습니다.",
             profileUrl: null
-
         },
         {
             nickName: "김삿갓",
@@ -37,6 +34,7 @@ const examplePost = {
     ]
 };
 
+
 export default function CommunityPostPage() {
     const post = examplePost
 
@@ -44,7 +42,7 @@ export default function CommunityPostPage() {
         <>
             {post && (
                 <>
-                    <Writter nickName={post.author.nickName} profileUrl={post.author.profileUrl}/>
+                    <Writter nickName={post.nickName} profileUrl={post.profileUrl}/>
 
                     <ScrollArea className="flex flex-col max-w-md mx-auto bg-white h-[calc(90vh-120px)]">
                         <Card>

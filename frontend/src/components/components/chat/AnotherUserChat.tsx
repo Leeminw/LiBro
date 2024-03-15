@@ -1,14 +1,7 @@
 import React from 'react';
 import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
 
-interface ChatMessageProps {
-    profileImageUrl: string;
-    userName: string;
-    message: string;
-    regitseredTime: string;
-}
-
-export default function AnotherUserChat (props: ChatMessageProps) {
+export default function AnotherUserChat (props: ChatMessage) {
     const {profileImageUrl, userName, message, regitseredTime} = props
     return (
             <div className="flex items-end space-x-2">

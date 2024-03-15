@@ -23,17 +23,7 @@ import CommunityInformCard from "@/components/components/board/communityCard";
 import {ScrollArea} from "@/components/ui/scroll-area";
 import BoardItemProvider from "@/components/components/board/BoardItemProvider";
 
-interface BoardItemProps {
-    userName: string;
-    profileUrl: string;
-    title: string;
-    commentCount: number;
-    created_date: string;
-    id : number
-}
-
-
-const dummyData = [
+const dummyData : PostItem[] = [
     {
         userName: "김개똥",
         profileUrl: "https://randomuser.me/api/portraits/women/48.jpg",
@@ -81,7 +71,7 @@ export default function CommunityPostPage() {
 
     return (
         <>
-            <CommunityInformCard title={"을왕리"} date={"2024-12-12"} memberType={"MEMBER"} memberCount={3}/>
+            <CommunityInformCard clubName={"을왕리"} registeredTime={"2024-12-12"} memberType={"MEMBER"} memberCount={3}/>
 
             <div className="flex justify-between">
                 <Button className=" ">글쓰기</Button>

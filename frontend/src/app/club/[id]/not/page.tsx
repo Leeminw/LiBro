@@ -31,7 +31,7 @@ export default function CommunityPostPage() {
         <>
             {post && (
                 <>
-                    <CommunityInformCard title={"을왕리"} date={"2024-12-12"} memberType={"MEMBER"} memberCount={3}/>
+                    <CommunityInformCard clubName={"을왕리"} registeredTime={"2024-12-12"} memberType={"MEMBER"} memberCount={3}/>
                     <GroupOwner nickName={post.author.nickName} profileUrl={post.author.profileUrl}/>
                     <ScrollArea
                         className="flex flex-col max-w-md mx-auto bg-white h-[calc(70vh-100px)] rounded-lg border">
