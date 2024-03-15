@@ -22,9 +22,9 @@ public class UserBookCommentController {
         return ResponseEntity.status(HttpStatus.CREATED).body("");
     }
 
-    @GetMapping("/{userBookId}")
-    public ResponseEntity<?> getUserBookComment(@PathVariable Long userBookId){
-        List<UserBookCommentDetailResponseDto> result = userBookCommentService.getUserBookCommentList(userBookId);
+    @GetMapping("/{userBookCommentId}")
+    public ResponseEntity<?> getUserBookComment(@PathVariable Long userBookCommentId){
+        UserBookCommentDetailResponseDto result = userBookCommentService.getUserBookComment(userBookCommentId);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
