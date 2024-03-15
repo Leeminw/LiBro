@@ -17,13 +17,9 @@ import java.time.LocalDateTime;
 public class UserBookCommentCreateRequestDto {
     private Long userBookId;
     private String content;
-    private LocalDateTime createdDate;
-    private LocalDateTime updatedDate;
 
     public UserBookComment toEntity() {
         return UserBookComment.builder()
-                .createdDate(this.createdDate)
-                .updatedDate(this.updatedDate)
                 .content(this.content)
                 .build();
     }
