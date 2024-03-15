@@ -17,3 +17,7 @@ COPY . .
 
 # React 애플리케이션 빌드
 RUN npm run build
+
+EXPOSE 3000
+
+CMD ["npm", "start"]

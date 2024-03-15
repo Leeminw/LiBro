@@ -1,5 +1,6 @@
 package com.ssafy.libro.domain.user.entity;
 
+import com.ssafy.libro.domain.article.entity.Article;
 import com.ssafy.libro.domain.userbook.entity.UserBook;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -7,6 +8,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -33,6 +35,9 @@ public class User {
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY,targetEntity = UserBook.class)
     private List<UserBook> userBookList;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private List<Article> articles = new ArrayList<>();
 
 
     @Builder
