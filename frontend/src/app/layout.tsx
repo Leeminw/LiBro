@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import BottomNavigation from "@/components/BottomNavigation";
-import {Toaster} from "@/components/ui/toaster";
+import Header from "@/components/Header";
+import { Toaster } from "@/components/ui/toaster";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -17,12 +18,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-      <html lang="ko">
-      <body className="App min-h-screen max-w-md relative bg-gray-100 mx-auto overscroll-y-none touch-none">
+    <html lang="ko">
+      <body className={inter.className}>
+        <div className="App min-h-screen max-w-md relative bg-gray-100 mx-auto overscroll-y-none touch-none">
+          <Header />
           {children}
-          <BottomNavigation/>
-            <Toaster/>
+          <BottomNavigation />
+          <Toaster/>
+        </div>
       </body>
-      </html>
+    </html>
   );
 }
+
