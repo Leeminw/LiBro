@@ -275,7 +275,7 @@ const UserInfo = () => {
               styles={colourStyles}
               minMenuHeight={130}
               onChange={() => {
-                handleChange;
+                handleChange
               }}
             />
           </div>
