@@ -229,8 +229,7 @@ const UserInfo = () => {
                     isMulti={true}
                     options={colourOptions}
                     styles={colourStyles}
-                    MenuHeight={130}
-                    onChange={handleChange}
+                    onChange={()=>{handleChange}}
                     />
                 </div>
                 <Button 
