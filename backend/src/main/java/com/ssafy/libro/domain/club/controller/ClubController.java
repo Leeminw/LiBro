@@ -10,8 +10,5 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping("/api/club")
 public class ClubController {
-    ResponseEntity<?> createClub(ClubCreateRequestDto dto){
 
-
-    }
 }
