@@ -1,15 +1,25 @@
 package com.ssafy.libro.domain.userbook.dto;
 import com.ssafy.libro.domain.userbook.entity.UserBook;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.springframework.stereotype.Service;
+
 import java.time.LocalDateTime;
 
-public class UserBookRequestDto {
+
+@Getter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class UserBookMappingRequestDto {
     private Long userId;
     private Long bookId;
     private String type;
     private Float rating;
     private String ratingComment;
     private Boolean ratingSpoiler;
-    private LocalDateTime updatedDate;
 
 
     public UserBook toEntity() {
@@ -18,7 +28,6 @@ public class UserBookRequestDto {
                 .rating(this.rating)
                 .ratingSpoiler(this.ratingSpoiler)
                 .ratingComment(this.ratingComment)
-                .updatedDate(this.updatedDate)
                 .build();
     }
 

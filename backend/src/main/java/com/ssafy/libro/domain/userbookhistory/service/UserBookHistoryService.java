@@ -1,10 +1,8 @@
 package com.ssafy.libro.domain.userbookhistory.service;
 
-import com.ssafy.libro.domain.userbook.dto.UserBookResponseDto;
 import com.ssafy.libro.domain.userbookhistory.dto.UserBookHistoryCreateRequestDto;
 import com.ssafy.libro.domain.userbookhistory.dto.UserBookHistoryDetailResponseDto;
 import com.ssafy.libro.domain.userbookhistory.dto.UserBookHistoryUpdateRequestDto;
-import com.ssafy.libro.domain.userbookhistory.entity.UserBookHistory;
 
 import java.util.List;
 

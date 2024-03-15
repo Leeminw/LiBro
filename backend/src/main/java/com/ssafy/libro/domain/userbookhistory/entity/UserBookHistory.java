@@ -24,10 +24,10 @@ public class UserBookHistory {
 
     @ManyToOne(fetch = FetchType.LAZY,targetEntity = UserBook.class)
     @JoinColumn(name = "userbook_id")
-    private UserBook userbook;
+    private UserBook userBook;
 
     public void updateUserBook(UserBook userbook){
-        this.userbook = userbook;
+        this.userBook = userbook;
     }
     public void update(UserBookHistoryUpdateRequestDto requestDto){
         this.startDate = requestDto.getStartDate();
