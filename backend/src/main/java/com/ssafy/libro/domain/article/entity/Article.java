@@ -5,6 +5,7 @@ import com.ssafy.libro.domain.board.entity.Board;
 import com.ssafy.libro.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
@@ -16,6 +17,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
+@Builder
 public class Article {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

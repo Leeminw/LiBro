@@ -22,6 +22,12 @@ public class Club {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column
+    private String name;
+
+    @Column(columnDefinition = "LONGTEXT")
+    private String description;
+
     @Column(columnDefinition = "TINYINT(1)")
     @ColumnDefault("false")
     private Boolean isDeleted;
