@@ -20,7 +20,7 @@ export default function RootLayout({
       <body className={inter.className}>
       <div className= "App min-h-screen max-w-md relative bg-gray-100 mx-auto overscroll-y-none touch-none">
           {children}
-
+          <BottomNavigation/>
       </div>
       </body>
     </html>
