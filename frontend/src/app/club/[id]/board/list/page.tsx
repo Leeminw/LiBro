@@ -73,10 +73,10 @@ const dummyData = [
 export default function CommunityPostPage() {
     const [searchTerm, setSearchTerm] = useState('');
 
-    const handleSearchChange = (event) => {
-        console.log(event.target.value)
-        setSearchTerm(event.target.value);
-    };
+    // const handleSearchChange = (event) => {
+    //     console.log(event.target.value)
+    //     setSearchTerm(event.target.value);
+    // };
 
 
     return (
