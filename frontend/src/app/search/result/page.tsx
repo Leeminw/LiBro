@@ -19,36 +19,61 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 const ResultPage = () => {
-  const [bookList, setBookList] = useState<book[]>([]);
   const params = useSearchParams();
   const query = params.get("query");
-  const start = Number(params.get("start"));
-  const [curpage, setCurpage] = useState(start / 10 + 1);
+  const [bookList, setBookList] = useState<book[]>([]);
+  const [start, setStart] = useState(Number(params.get("start")));
+  const [curpage, setCurpage] = useState(Math.floor(start / 10) + 1);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
-  useEffect(() => {
+  const scrollTop = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = 0;
+    }
+  };
+
+  const updateBookList = (input: number, isNext: boolean) => {
     if (query) {
-      SearchApi.searchBooks(query, start)
+      SearchApi.searchBooks(query, input)
         .then((data) => {
           console.log("응답 값", data);
           setBookList(data.items);
+          setStart(input);
+          if (isNext) {
+            setCurpage(Math.floor(input / 10) + 1);
+          } else {
+            setCurpage(Math.floor(input / 10) + 5);
+          }
         })
         .catch((err) => console.log(err));
     }
+  };
+
+  useEffect(() => {
+    updateBookList(start, true);
   }, []);
 
   return (
     <>
       <SubHeader title="도서 검색 결과" backArrow={true} />
-      <div className="py-24 flex h-full max-h-screen justify-center flex-wrap overflow-y-scroll relative">
+      <div
+        ref={scrollRef}
+        className="py-24 flex h-full max-h-screen justify-center flex-wrap overflow-y-scroll relative"
+      >
         {bookList.length > 0
           ? bookList.map((book, index) => (
               <div
                 key={book.isbn}
-                className="bg-white w-full h-56 mx-4 my-2 rounded-lg drop-shadow-md flex cursor-pointer"
+                className={`bg-white w-full h-56 mx-4 my-2 rounded-lg drop-shadow-md cursor-pointer ${
+                  (curpage - 1) % 5 === Math.floor(index / 10)
+                    ? "flex"
+                    : "hidden"
+                }`}
               >
                 <Image
                   src={book.image}
@@ -74,28 +99,59 @@ const ResultPage = () => {
             <PaginationContent>
               {start != 1 ? (
                 <PaginationItem>
-                  <PaginationPrevious />
+                  <PaginationPrevious
+                    className="rounded-full"
+                    onClick={() => {
+                      scrollTop();
+                      router.push(
+                        `/search/result?query=${query}&start=${start - 50}`
+                      );
+                      updateBookList(start - 50, false);
+                    }}
+                  />
                 </PaginationItem>
               ) : null}
-              {Array.from({ length: bookList.length / 10 }, (_, index) => (
-                <div key={index}>
-                  <PaginationItem
-                  className={index===curpage?'':''}
-                  >
-                    <PaginationLink
-                      onClick={() => {
-                        setCurpage((index + 1) % 5);
-                      }}
-                      isActive={index === curpage}
-                    >
-                      {index + 1}
-                    </PaginationLink>
-                  </PaginationItem>
-                </div>
-              ))}
+              {Array.from(
+                {
+                  length:
+                    Math.ceil(bookList.length / 10) === 6
+                      ? 5
+                      : Math.ceil(bookList.length / 10),
+                },
+                (_, index) => (
+                  <div key={index}>
+                    <PaginationItem>
+                      <PaginationLink
+                        className={
+                          index === (curpage - 1) % 5
+                            ? "cursor-default bg-[#9268EB] hover:bg-[#684ba6] text-white rounded-full"
+                            : "cursor-pointer rounded-full"
+                        }
+                        onClick={() => {
+                          scrollTop();
+                          setCurpage(index + 1 + Math.round(start / 10));
+                          console.log(index + 1 + Math.round(start / 10));
+                        }}
+                        isActive={index === (curpage - 1) % 5}
+                      >
+                        {index + 1 + Math.round(start / 10)}
+                      </PaginationLink>
+                    </PaginationItem>
+                  </div>
+                )
+              )}
               {bookList.length == 51 ? (
                 <PaginationItem>
-                  <PaginationNext />
+                  <PaginationNext
+                    className="rounded-full"
+                    onClick={() => {
+                      scrollTop();
+                      router.push(
+                        `/search/result?query=${query}&start=${start + 50}`
+                      );
+                      updateBookList(start + 50, true);
+                    }}
+                  />
                 </PaginationItem>
               ) : null}
             </PaginationContent>

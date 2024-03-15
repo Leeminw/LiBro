@@ -33,7 +33,7 @@ const Header = () => {
           ref={searchRef}
           placeholder="키워드를 입력하여 도서 검색"
           className="transition duration-200 w-full m-1 text-xs"
-          onClick={() => {
+          onMouseDown={() => {
             handleSearchPage();
           }}
           onKeyDown={(e) => {
@@ -43,7 +43,6 @@ const Header = () => {
           }}
         />
         <Button
-          type="submit"
           variant={"outline"}
           size="icon"
           className="aspect-square mr-1"
