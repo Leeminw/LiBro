@@ -12,16 +12,21 @@ import {
   } from "@/components/ui/tabs"
 
 interface User {
-    profileUrl: string | null,
-    id: string,
-    nickName: string,
-    name: string,
-    birth: string
+    profileUrl: string;
+    id: string;
+    nickName: string;
+    name: string;
+    birth: string;
 }
 
-const Mypage = (props: User) => {
+const Mypage = () => {
 
-  const {profileUrl, nickName, id, name, birth} = props
+  // const {profileUrl, nickName, id, name, birth} = user;
+  const profileUrl = "";
+  const nickName = "";
+  const id = "";
+  const name = "";
+  const birth = "";
 
   return (
     <div className="bg-white h-full">

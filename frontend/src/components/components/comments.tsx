@@ -33,7 +33,7 @@ export default function Comments(props : ReplyUser) {
                     </div>
                 </div>
                 <div>
-                    <Select className="w-6 h-6 text-gray-500 dark:text-gray-200">
+                    <Select>
                         <SelectTrigger aria-label="Options">
                             <svg
                                 className=" w-6 h-6 text-gray-500 dark:text-gray-200"
