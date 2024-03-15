@@ -1,6 +1,6 @@
-package com.ssafy.libro.global.config;
+package com.ssafy.libro.global.auth.config;
 
-import com.ssafy.libro.global.service.CustomOAuth2UserService;
+import com.ssafy.libro.global.oauth.service.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

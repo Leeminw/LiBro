@@ -1,4 +1,4 @@
-package com.ssafy.libro.global.config;
+package com.ssafy.libro.global.auth.config;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
