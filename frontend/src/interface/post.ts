@@ -5,6 +5,7 @@ interface Post {
     commentCount: number;
     created_date: string;
     id: number;
+    category: string;
 }
 interface Comment {
     nickName: string;
@@ -20,4 +21,5 @@ interface PostDetail {
     nickName: string;
     profileUrl: string | null;
     comments: Array<Comment>;
+    category: string;
 }

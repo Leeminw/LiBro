@@ -16,19 +16,19 @@ export default function CommentList(props: CommentListProps) {
 
     const handleAddComment = () => {
         if (newComment.trim() !== "") {
+            const newComments : Comment = {
+                nickName: "사용자", // 임의의 사용자 이름
+                registeredAt: new Date().toISOString(), // 현재 시간으로 설정
+                contents: newComment,
+                profileUrl: null,
+            };
             const updatedComments : Comment[] = [
                 ...comments,
-                {
-                    nickName: "사용자", // 임의의 사용자 이름
-                    registeredAt: new Date().toISOString(), // 현재 시간으로 설정
-                    contents: newComment,
-                    profileUrl: null,
-                },
+                newComments,
             ];
 
             // 댓글 추가 후 입력란 초기화
             setNewComment("");
-            // 수정된 댓글 상태 반영
             setComments(updatedComments); // 수정된 부분
         }
     };

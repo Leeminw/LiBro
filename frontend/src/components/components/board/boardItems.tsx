@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardHeader, CardFooter} from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 
-export default function BoardItem (props : PostItem) {
+export default function BoardItem (props : Post) {
     const { userName, title , created_date , commentCount, profileUrl, id} = props
 
     return (

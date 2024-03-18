@@ -1,7 +1,7 @@
 import BoardItem from "@/components/components/board/boardItems";
 
 interface BoardItemListProps {
-    boardList: PostItem[];
+    boardList: Post[];
 }
 
 export default function BoardItemProvider (props : BoardItemListProps){
