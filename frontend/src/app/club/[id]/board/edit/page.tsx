@@ -99,9 +99,9 @@ export default function InputForm() {
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
-                                        {Object.entries(categories).map(([key, value]) => (
+                                        {/* {Object.entries(categories).map(([key, value]) => (
                                             <SelectItem value={key}>{value}</SelectItem>
-                                        ))}
+                                        ))} */}
                                     </SelectContent>
                                 </Select>
                                 <FormMessage/>
