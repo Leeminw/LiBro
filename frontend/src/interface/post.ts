@@ -1,4 +1,4 @@
-interface PostItem {
+interface Post {
     userName: string;
     profileUrl: string;
     title: string;

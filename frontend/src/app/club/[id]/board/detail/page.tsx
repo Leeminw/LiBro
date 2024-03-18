@@ -1,12 +1,11 @@
-import DOMPurify from 'dompurify';
-import { JSDOM } from 'jsdom';
-import {Card, CardContent,} from "@/components/ui/card";
+import React, { useState } from 'react';
+import { Card, CardContent } from "@/components/ui/card";
 import Writter from "@/components/components/team-members";
-import Comments from "@/components/components/comments";
-import {ScrollArea} from "@/components/ui/scroll-area";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import CommentList from "@/components/components/board/commentList";
 
 // 예시용 게시글 정보
-const examplePost: PostDetail = {
+const examplePost : PostDetail = {
     title: "을왕리 독서 커뮤니티",
     date: "2024-03-01",
     content: "여러분의 소중한 책 읽기 경험을 공유해주세요!",
@@ -34,9 +33,8 @@ const examplePost: PostDetail = {
     ]
 };
 
-
 export default function CommunityPostPage() {
-    const post = examplePost
+    const post = examplePost;
 
     return (
         <>
@@ -49,7 +47,7 @@ export default function CommunityPostPage() {
                             <CardContent>
                                 <div
                                     dangerouslySetInnerHTML={{
-                                        __html: DOMPurify(new JSDOM('<!DOCTYPE html>').window).sanitize(post.content),
+                                        __html: post.content
                                     }}
                                     style={{
                                         marginTop: '10px',
@@ -60,15 +58,7 @@ export default function CommunityPostPage() {
                             </CardContent>
                         </Card>
 
-                        <div>
-                            {`댓글: ${post.comments.length}`}
-                        </div>
-                        <div className="mb-24">
-                            {post.comments.map((comment, index) => (
-                                <Comments key={index} profileUrl={comment.profileUrl} nickName={comment.nickName}
-                                          registeredAt={comment.registeredAt} contents={comment.contents}/>
-                            ))}
-                        </div>
+                        <CommentList comments={post.comments} />
                     </ScrollArea>
                 </>
             )}
