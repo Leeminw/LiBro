@@ -9,6 +9,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import BoardItemProvider from "@/components/components/board/boardItemProvider";
 import { useEffect, useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
+import BoardItem from "@/components/components/board/boardItems";
+import {useInView} from "react-intersection-observer";
 
 interface BoardListProps {
     categoryList: Category[];
@@ -22,12 +24,13 @@ export default function BoardList(props: BoardListProps) {
     const [searchTerm, setSearchTerm] = useState('');
     const [sortOrder, setSortOrder] = useState('latest'); // 초기 정렬 순서를 설정합니다. 여기서는 최신순으로 초기화합니다.
     const [selectedCategory, setSelectedCategory] = useState('');
+    const [boards, setBoards] = useState(boardList)
 
     useEffect(() => {
         toast(
             {
                 title: "검색하였습니다..",
-                description: `카테고리: ${selectedCategory}, 정렬순서: ${sortOrder} title: ${searchTerm}}`
+                description: `카테고리: ${selectedCategory}, 정렬순서: ${sortOrder} title: ${searchTerm}`
             }
         )
     }, [selectedCategory, sortOrder, searchTerm]); // searchTerm도 추가합니다.
@@ -45,6 +48,18 @@ export default function BoardList(props: BoardListProps) {
     const handleCategoryChange = (event) => {
         setSelectedCategory(event); // 선택된 카테고리로 설정합니다.
     };
+
+    const { ref, inView } = useInView();
+
+    useEffect(() => {
+        if (inView) {
+            toast({
+                title : "h",
+                description : ""
+            })
+
+        }
+    }, [inView]);
 
     return (
         <>
@@ -92,7 +107,15 @@ export default function BoardList(props: BoardListProps) {
 
                 <ScrollArea className="flex flex-col max-w-md mx-auto bg-white h-[calc(90vh-120px)]">
                     <CardContent className="p-0">
-                        <BoardItemProvider boardList={boardList} />
+                        {
+                            boards.map(board => (
+                                <BoardItem key={board.id} id={board.id} userName={board.userName}
+                                           profileUrl={board.profileUrl}
+                                           title={board.title} commentCount={board.commentCount}
+                                           created_date={board.created_date} category={board.category}/>
+                            ))
+                        }
+                        <div ref={ref}></div>
                     </CardContent>
                 </ScrollArea>
             </Card>

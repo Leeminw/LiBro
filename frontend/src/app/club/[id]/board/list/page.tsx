@@ -87,53 +87,6 @@ export default function CommunityPostPage() {
 
             <BoardList boardList={dummyData} categoryList={dummyCategory} />
 
-            {/*<div className="flex justify-between">*/}
-            {/*    <Button className=" " children="글쓰기" />*/}
-            {/*    <div className="w-2/3">*/}
-            {/*        <div className="relative ">*/}
-            {/*            <Search className="absolute left-2 top-3 h-4 w-4 text-muted-foreground"/>*/}
-            {/*            <Input placeholder="Search" defaultValue={searchTerm} className="pl-8" onKeyDown={handleSearchChange}/>*/}
-            {/*        </div>*/}
-            {/*    </div>*/}
-            {/*</div>*/}
-
-            {/*<Card className="">*/}
-            {/*    <CardHeader className="p-3 border-b">*/}
-            {/*        <div className="flex items-center justify-between">*/}
-            {/*            <Select>*/}
-            {/*                <SelectTrigger className="w-[180px]">*/}
-            {/*                    <SelectValue placeholder="정렬기준"/>*/}
-            {/*                </SelectTrigger>*/}
-            {/*                <SelectContent>*/}
-            {/*                    <SelectGroup>*/}
-            {/*                        <SelectItem value="apple">최신</SelectItem>*/}
-            {/*                        <SelectItem value="banana">가장 오래된</SelectItem>*/}
-            {/*                    </SelectGroup>*/}
-            {/*                </SelectContent>*/}
-            {/*            </Select>*/}
-
-            {/*            <Select>*/}
-            {/*                <SelectTrigger className="w-[180px]">*/}
-            {/*                    <SelectValue placeholder="게시판"/>*/}
-            {/*                </SelectTrigger>*/}
-            {/*                <SelectContent>*/}
-            {/*                    <SelectGroup>*/}
-            {/*                        {dummyCategory.map((category) => (*/}
-            {/*                            <SelectItem key={category.id} value={category.title}>{category.title}</SelectItem>*/}
-            {/*                        ))}*/}
-            {/*                    </SelectGroup>*/}
-            {/*                </SelectContent>*/}
-            {/*            </Select>*/}
-            {/*        </div>*/}
-            {/*    </CardHeader>*/}
-
-            {/*    <ScrollArea className="flex flex-col max-w-md mx-auto bg-white h-[calc(90vh-120px)]">*/}
-            {/*        <CardContent className="p-0">*/}
-            {/*            <BoardItemProvider boardList={dummyData}/>*/}
-            {/*        </CardContent>*/}
-            {/*    </ScrollArea>*/}
-            {/*</Card>*/}
-
             <div className="mb-4"></div>
 
             <div className="sticky bottom-24 right-4 flex justify-end">
