@@ -16,7 +16,6 @@ public class UserBookHistoryUpdateRequestDto {
     private Long userBookId;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
-
     private UserBook userbook;
 
     public UserBookHistory toEntity(){
