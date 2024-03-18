@@ -3,6 +3,7 @@ package com.ssafy.libro.domain.book.service;
 import com.ssafy.libro.domain.book.dto.BookCreateRequestDto;
 import com.ssafy.libro.domain.book.dto.BookDetailResponseDto;
 import com.ssafy.libro.domain.book.dto.BookUpdateRequestDto;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -13,8 +14,10 @@ public interface BookService {
      BookDetailResponseDto getBook(Long id);
      List<BookDetailResponseDto> getBooks();
 
-    // List<BookCreateResponseDto> getBooksByTitle(String title);
-    // List<BookCreateResponseDto> getBooksByAuthor(String author);
+     List<BookDetailResponseDto> getBooksByTitle(String title, Pageable pageable);
+     List<BookDetailResponseDto> getBooksByAuthor(String author, Pageable pageable);
+     List<BookDetailResponseDto> getBooksByIsbn(String isbn);
+
     // List<BookCreateResponseDto> getBooksByPublisher(String publisher);
     // List<BookCreateResponseDto> getBooksByIsbn(String isbn);
     // List<BookCreateResponseDto> getBooksByRating(Double rating);
