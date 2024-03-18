@@ -2,6 +2,7 @@ package com.ssafy.libro.domain.userbook.controller;
 
 import com.ssafy.libro.domain.book.dto.BookDetailResponseDto;
 import com.ssafy.libro.domain.userbook.dto.UserBookDetailResponseDto;
+import com.ssafy.libro.domain.userbook.dto.UserBookListResponseDto;
 import com.ssafy.libro.domain.userbook.dto.UserBookMappingRequestDto;
 import com.ssafy.libro.domain.userbook.dto.UserBookUpdateRequestDto;
 import com.ssafy.libro.domain.userbook.service.UserBookService;
@@ -19,19 +20,19 @@ import java.util.Map;
 @RequestMapping("api/v1/userbook")
 @RequiredArgsConstructor
 public class UserBookController {
-//    등록 도서 검색 조회
     private final UserBookService userBookService;
 
 
+//    등록 도서 검색 조회
     @GetMapping("/search")
     public ResponseEntity<?> getUserBooksUsingKeyWord (@RequestParam Map<String,String> keyword) {
         return ResponseEntity.ok("data");
     }
 
 //    등록 도서 목록 조회
-    @GetMapping("")
-    public ResponseEntity<?> getUserBookList (){
-        List<BookDetailResponseDto> responseDtoList = userBookService.getUserBookList();
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<?> getUserBookList (@PathVariable Long userId){
+        List<UserBookListResponseDto> responseDtoList = userBookService.getUserBookList(userId);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(responseDtoList));
     }
 //    등록 도서 상세 조회

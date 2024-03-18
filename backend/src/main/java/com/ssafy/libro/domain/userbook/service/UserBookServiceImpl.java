@@ -5,7 +5,10 @@ import com.ssafy.libro.domain.book.entity.Book;
 import com.ssafy.libro.domain.book.exception.BookNotFoundException;
 import com.ssafy.libro.domain.book.repository.BookRepository;
 import com.ssafy.libro.domain.user.entity.User;
+import com.ssafy.libro.domain.user.exception.UserNotFoundException;
+import com.ssafy.libro.domain.user.repository.UserRepository;
 import com.ssafy.libro.domain.userbook.dto.UserBookDetailResponseDto;
+import com.ssafy.libro.domain.userbook.dto.UserBookListResponseDto;
 import com.ssafy.libro.domain.userbook.dto.UserBookMappingRequestDto;
 import com.ssafy.libro.domain.userbook.dto.UserBookUpdateRequestDto;
 import com.ssafy.libro.domain.userbook.entity.UserBook;
@@ -34,15 +37,27 @@ public class UserBookServiceImpl implements UserBookService{
     private final BookRepository bookRepository;
     private final UserBookHistoryRepository userBookHistoryRepository;
     private final UserBookCommentRepository userBookCommentRepository;
-    public List<BookDetailResponseDto> getUserBookList(){
-        User user = User.builder().build();
+    private final UserRepository userRepository;
+    public List<UserBookListResponseDto> getUserBookList(Long userId){
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+        List<UserBook> userBookList = userBookRepository.findUserBookByUser(user)
+                .orElseThrow(() -> new UserBookNotFoundException("user : " + userId));
 
-        Optional<List<UserBook>> userBookList = userBookRepository.findByUser(user);
-        List<BookDetailResponseDto> result = new ArrayList<>();
-        if(userBookList.isEmpty()) return result;
-        for(UserBook userbook : userBookList.get()){
-            BookDetailResponseDto bookDetail = new BookDetailResponseDto(userbook.getBook());
-            result.add(bookDetail);
+        List<UserBookListResponseDto> result = new ArrayList<>();
+        for(UserBook userbook : userBookList){
+            UserBookListResponseDto responseDto = UserBookListResponseDto.builder()
+                    .userBookId(userbook.getId())
+                    .type(userbook.getType())
+                    .createdTime(userbook.getCreatedDate())
+                    .updatedTime(userbook.getUpdatedDate())
+                    .ratingSpoiler(userbook.getRatingSpoiler())
+                    .rating(userbook.getRating())
+                    .ratingComment(userbook.getRatingComment())
+                    .bookDetailResponseDto(new BookDetailResponseDto(userbook.getBook()))
+                    .build();
+
+            result.add(responseDto);
         }
 
 
