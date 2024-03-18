@@ -1,5 +1,6 @@
 package com.ssafy.libro.domain.userbookhistory.service;
 
+import com.ssafy.libro.domain.userbook.entity.UserBook;
 import com.ssafy.libro.domain.userbookhistory.dto.UserBookHistoryCreateRequestDto;
 import com.ssafy.libro.domain.userbookhistory.dto.UserBookHistoryDetailResponseDto;
 import com.ssafy.libro.domain.userbookhistory.dto.UserBookHistoryUpdateRequestDto;
@@ -12,5 +13,5 @@ public interface UserBookHistoryService {
     UserBookHistoryDetailResponseDto updateUserBookHistory(UserBookHistoryUpdateRequestDto userBookHistory) throws Exception;
     void deleteUserBookHistory(Long id);
     UserBookHistoryDetailResponseDto getUserBookHistory(Long id) throws Exception;
-    List<UserBookHistoryDetailResponseDto> getUserBookHistoryList();
+    List<UserBookHistoryDetailResponseDto> getUserBookHistoryList(Long userBookId);
 }

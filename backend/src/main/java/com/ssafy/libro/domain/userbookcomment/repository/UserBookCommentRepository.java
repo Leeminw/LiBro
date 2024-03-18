@@ -9,4 +9,6 @@ import java.util.Optional;
 
 public interface UserBookCommentRepository extends JpaRepository<UserBookComment, Long> {
     Optional<List<UserBookComment>> findByUserBook(UserBook userBook);
+    // 회원별 완독한 책들을 캘린더 형식으로 월별로 보여주는 기능?
+    //
 }
