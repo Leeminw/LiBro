@@ -25,6 +25,6 @@ RUN npm run build
 
 # Nginx를 사용하여 빌드된 애플리케이션 서비스
 FROM nginx:stable-alpine as production-stage
-COPY --from=build-stage /home/app/build /var/www/html
+COPY --from=build-stage /home/app/.next/server/app /var/www/html
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
