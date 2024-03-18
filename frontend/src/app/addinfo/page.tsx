@@ -15,7 +15,7 @@ import {
 import makeAnimated from "react-select/animated";
 import { ColourOption, colourOptions } from "./data";
 import chroma from "chroma-js";
-import SelectMenu from "react-select";
+import SelectMenu, { ActionMeta, MultiValue } from "react-select";
 import { StylesConfig } from "react-select";
 
 const Header = () => {
@@ -52,10 +52,10 @@ const UserInfo = () => {
 
   const [selectedValues, setSelectedValues] = useState<string[]>([]);
 
-  const handleChange = (selected: ColourOption[] | null) => {
-    if (selected) {
+  const handleChange = (newValue: MultiValue<ColourOption>, actionMeta: ActionMeta<ColourOption>) => {
+    if (newValue) {
       // 선택된 항목들에서 value만 추출하여 저장합니다.
-      const values = selected.map((option) => option.value);
+      const values = newValue.map((option) => option.value);
       setSelectedValues(values);
     } else {
       setSelectedValues([]);
@@ -274,9 +274,7 @@ const UserInfo = () => {
               options={colourOptions}
               styles={colourStyles}
               minMenuHeight={130}
-              onChange={() => {
-                handleChange
-              }}
+              onChange={handleChange}
             />
           </div>
           <Button className="mb-6 bg-[#9268EB] text-white px-6 py-2 rounded w-full">
