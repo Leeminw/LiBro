@@ -7,10 +7,15 @@ import com.ssafy.libro.domain.book.entity.Book;
 import com.ssafy.libro.domain.book.exception.BookNotFoundException;
 import com.ssafy.libro.domain.book.repository.BookRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class BookServiceImpl implements BookService {
@@ -46,5 +51,40 @@ public class BookServiceImpl implements BookService {
     public List<BookDetailResponseDto> getBooks() {
         List<Book> books = bookRepository.findAll();
         return books.stream().map(BookDetailResponseDto::new).toList();
+    }
+
+    @Override
+    public List<BookDetailResponseDto> getBooksByTitle(String title, Pageable pageable) {
+        log.debug("service page : {} , size : {}", pageable.getPageNumber(), pageable.getPageSize());
+        Page<Book> bookList = bookRepository.findBookByTitleContaining(title, pageable);
+        List<BookDetailResponseDto> responseDto = new ArrayList<>();
+        for(Book book : bookList.getContent()){
+            log.debug("requested data : {}", book);
+
+            responseDto.add(new BookDetailResponseDto(book));
+        }
+
+        return responseDto;
+    }
+
+    @Override
+    public List<BookDetailResponseDto> getBooksByAuthor(String author, Pageable pageable) {
+        Page<Book> bookList = bookRepository.findBookByAuthorContaining(author,pageable);
+        List<BookDetailResponseDto> responseDto = new ArrayList<>();
+        for(Book book : bookList){
+            responseDto.add(new BookDetailResponseDto(book));
+        }
+        return responseDto;
+    }
+
+    @Override
+    public List<BookDetailResponseDto> getBooksByIsbn(String isbn) {
+        List<Book> bookList = bookRepository.findBookByIsbn(isbn)
+                .orElseThrow(() -> new BookNotFoundException(isbn));
+        List<BookDetailResponseDto> responseDto = new ArrayList<>();
+        for(Book book : bookList){
+            responseDto.add(new BookDetailResponseDto(book));
+        }
+        return responseDto;
     }
 }
