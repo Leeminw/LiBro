@@ -7,10 +7,7 @@ import com.ssafy.libro.domain.book.repository.BookRepository;
 import com.ssafy.libro.domain.user.entity.User;
 import com.ssafy.libro.domain.user.exception.UserNotFoundException;
 import com.ssafy.libro.domain.user.repository.UserRepository;
-import com.ssafy.libro.domain.userbook.dto.UserBookDetailResponseDto;
-import com.ssafy.libro.domain.userbook.dto.UserBookListResponseDto;
-import com.ssafy.libro.domain.userbook.dto.UserBookMappingRequestDto;
-import com.ssafy.libro.domain.userbook.dto.UserBookUpdateRequestDto;
+import com.ssafy.libro.domain.userbook.dto.*;
 import com.ssafy.libro.domain.userbook.entity.UserBook;
 import com.ssafy.libro.domain.userbook.exception.UserBookNotFoundException;
 import com.ssafy.libro.domain.userbook.repository.UserBookRepository;
@@ -20,10 +17,14 @@ import com.ssafy.libro.domain.userbookcomment.repository.UserBookCommentReposito
 import com.ssafy.libro.domain.userbookhistory.dto.UserBookHistoryDetailResponseDto;
 import com.ssafy.libro.domain.userbookhistory.entity.UserBookHistory;
 import com.ssafy.libro.domain.userbookhistory.repository.UserBookHistoryRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.Month;
+import java.time.Year;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -97,6 +98,7 @@ public class UserBookServiceImpl implements UserBookService{
     }
 
     @Override
+    @Transactional
     public UserBookDetailResponseDto mappingUserBook(UserBookMappingRequestDto requestDto) {
         User user = User.builder().build();
         Book book = bookRepository.findById(requestDto.getBookId())
@@ -112,6 +114,7 @@ public class UserBookServiceImpl implements UserBookService{
     }
 
     @Override
+    @Transactional
     public UserBookDetailResponseDto updateUserBook(UserBookUpdateRequestDto requestDto) {
         UserBook userBook = userBookRepository.findById(requestDto.getId())
                 .orElseThrow(() -> new UserBookNotFoundException(requestDto.getId()));
@@ -124,6 +127,37 @@ public class UserBookServiceImpl implements UserBookService{
     @Override
     public void deleteUserBook(Long id) {
         userBookRepository.findById(id);
+    }
+
+    @Override
+    public List<UserBookListByDateResponseDto> getBookListByDate(Long userId, Integer year, Integer month) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
+        // date parsing
+        LocalDateTime startDateTime = LocalDateTime.of(year, month, 1, 0, 0);
+        int lastDayOfMonth = Month.of(month).length(Year.isLeap(year));
+        LocalDateTime endDateTime = LocalDateTime.of(year, month, lastDayOfMonth, 23, 59, 59);
+
+        log.debug("service layer : startDate = {} , endDate = {}",startDateTime, endDateTime);
+
+        List<UserBook> result = userBookRepository.findUserBookByUserAndDate(user,startDateTime,endDateTime)
+                .orElseThrow(()-> new UserBookNotFoundException("userid : " + userId));
+        List<UserBookListByDateResponseDto> responseDtoList = new ArrayList<>();
+        log.debug("service layer : result size = {}", result.size());
+
+        for(UserBook userBook : result){
+            List<UserBookHistoryDetailResponseDto> historyList = new ArrayList<>();
+            for(UserBookHistory history : userBook.getUserBookHistoryList()){
+                historyList.add(new UserBookHistoryDetailResponseDto(history));
+            }
+            UserBookListByDateResponseDto responseDto = UserBookListByDateResponseDto.builder()
+                    .userBookId(userBook.getId())
+                    .bookDetailResponseDto(new BookDetailResponseDto(userBook.getBook()))
+                    .bookHistoryDetailResponseDto(historyList)
+                    .build();
+            responseDtoList.add(responseDto);
+        }
+
+        return responseDtoList;
     }
 
 

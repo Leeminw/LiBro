@@ -1,10 +1,7 @@
 package com.ssafy.libro.domain.userbook.service;
 
 import com.ssafy.libro.domain.book.dto.BookDetailResponseDto;
-import com.ssafy.libro.domain.userbook.dto.UserBookDetailResponseDto;
-import com.ssafy.libro.domain.userbook.dto.UserBookListResponseDto;
-import com.ssafy.libro.domain.userbook.dto.UserBookMappingRequestDto;
-import com.ssafy.libro.domain.userbook.dto.UserBookUpdateRequestDto;
+import com.ssafy.libro.domain.userbook.dto.*;
 
 import java.util.List;
 
@@ -23,6 +20,9 @@ public interface UserBookService {
 
     // 등록도서 삭제
     void deleteUserBook(Long id);
+
+    // 회원별 월별 도서 기록
+    List<UserBookListByDateResponseDto> getBookListByDate(Long userId, Integer year, Integer month);
 
 
 

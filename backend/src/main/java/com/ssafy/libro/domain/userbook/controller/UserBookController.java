@@ -1,13 +1,11 @@
 package com.ssafy.libro.domain.userbook.controller;
 
 import com.ssafy.libro.domain.book.dto.BookDetailResponseDto;
-import com.ssafy.libro.domain.userbook.dto.UserBookDetailResponseDto;
-import com.ssafy.libro.domain.userbook.dto.UserBookListResponseDto;
-import com.ssafy.libro.domain.userbook.dto.UserBookMappingRequestDto;
-import com.ssafy.libro.domain.userbook.dto.UserBookUpdateRequestDto;
+import com.ssafy.libro.domain.userbook.dto.*;
 import com.ssafy.libro.domain.userbook.service.UserBookService;
 import com.ssafy.libro.global.common.ResponseData;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.Parameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
-
+@Slf4j
 @RestController
 @RequestMapping("api/v1/userbook")
 @RequiredArgsConstructor
@@ -67,7 +65,13 @@ public class UserBookController {
 
 //    특정 등록 도서 메모 기능
 //    독서 기록
-//    독서 기록 조회
+//    독서 기록 조회( 회원별 완독한 도서를 월별로 조회하는기능)
+    @GetMapping("/date/{userId}")
+    public ResponseEntity<?> getBookListByDate
+            (@PathVariable Long userId, @RequestParam Integer year, @RequestParam Integer month){
+        List<UserBookListByDateResponseDto> responseDtoList = userBookService.getBookListByDate(userId,year,month);
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(responseDtoList));
+    }
 //    독서 기록 분석 ?
 
 }

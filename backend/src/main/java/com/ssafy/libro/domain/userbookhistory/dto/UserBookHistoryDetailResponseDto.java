@@ -24,6 +24,6 @@ public class UserBookHistoryDetailResponseDto {
         this.userBookId = userBookHistory.getId();
         this.startDate = userBookHistory.getStartDate();
         this.endDate = userBookHistory.getEndDate();
-        this.userbook = userBookHistory.getUserBook();
+//        this.userbook = userBookHistory.getUserBook();
     }
 }
