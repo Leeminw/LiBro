@@ -52,9 +52,9 @@ public class UserBookHistoryServiceImpl implements UserBookHistoryService{
     }
 
     @Override
-    public UserBookHistoryDetailResponseDto getUserBookHistory(Long id)  {
-        UserBookHistory userbookHistory = userBookHistoryRepository.findById(id)
-                .orElseThrow(() -> new UserBookHistoryNotFoundException(id) );
+    public UserBookHistoryDetailResponseDto getUserBookHistory(Long userBookHistoryId)  {
+        UserBookHistory userbookHistory = userBookHistoryRepository.findById(userBookHistoryId)
+                .orElseThrow(() -> new UserBookHistoryNotFoundException(userBookHistoryId) );
 
         return new UserBookHistoryDetailResponseDto(userbookHistory);
     }
@@ -63,13 +63,16 @@ public class UserBookHistoryServiceImpl implements UserBookHistoryService{
     public List<UserBookHistoryDetailResponseDto> getUserBookHistoryList(Long userBookId) {
         UserBook userBook = userBookRepository.findById(userBookId)
                 .orElseThrow(() -> new UserBookNotFoundException(userBookId));
+
+        List<UserBookHistory> userBookHistoryList = userBookHistoryRepository.findByUserBook(userBook)
+                .orElseThrow(() -> new UserBookHistoryNotFoundException(userBookId));
+
         List<UserBookHistoryDetailResponseDto> responseDtoList = new ArrayList<>();
-        Optional<List<UserBookHistory>> userBookHistoryList = userBookHistoryRepository.findByUserBook(userBook);
-        if(userBookHistoryList.isPresent() && !userBookHistoryList.get().isEmpty()){
-            for(UserBookHistory history : userBookHistoryList.get()){
-                responseDtoList.add(new UserBookHistoryDetailResponseDto(history));
-            }
+
+        for(UserBookHistory history : userBookHistoryList){
+            responseDtoList.add(new UserBookHistoryDetailResponseDto(history));
         }
+
         return responseDtoList;
     }
 }

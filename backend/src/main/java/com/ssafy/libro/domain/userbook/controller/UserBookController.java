@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 @Slf4j
 @RestController
-@RequestMapping("api/v1/userbook")
+@RequestMapping("/api/v1/userbook")
 @RequiredArgsConstructor
 public class UserBookController {
     private final UserBookService userBookService;
