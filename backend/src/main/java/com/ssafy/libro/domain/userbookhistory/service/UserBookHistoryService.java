@@ -9,9 +9,9 @@ import java.util.List;
 
 public interface UserBookHistoryService {
     // create, update, delete, get,
-    UserBookHistoryDetailResponseDto createUserBookHistory(UserBookHistoryCreateRequestDto userBookHistory) throws Exception;
-    UserBookHistoryDetailResponseDto updateUserBookHistory(UserBookHistoryUpdateRequestDto userBookHistory) throws Exception;
+    UserBookHistoryDetailResponseDto createUserBookHistory(UserBookHistoryCreateRequestDto requestDto);
+    UserBookHistoryDetailResponseDto updateUserBookHistory(UserBookHistoryUpdateRequestDto requestDto);
     void deleteUserBookHistory(Long id);
-    UserBookHistoryDetailResponseDto getUserBookHistory(Long id) throws Exception;
+    UserBookHistoryDetailResponseDto getUserBookHistory(Long id);
     List<UserBookHistoryDetailResponseDto> getUserBookHistoryList(Long userBookId);
 }
