@@ -39,8 +39,6 @@ public class UserBookComment {
 
     public UserBookComment update (UserBookCommentUpdateRequestDto requestDto){
         this.content = requestDto.getContent();
-        this.createdDate = requestDto.getCreatedDate();
-        this.updatedDate = requestDto.getUpdatedDate();
         return this;
     }
 

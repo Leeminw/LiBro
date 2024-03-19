@@ -9,12 +9,12 @@ import com.ssafy.libro.domain.userbookcomment.dto.UserBookCommentUpdateRequestDt
 import com.ssafy.libro.domain.userbookcomment.entity.UserBookComment;
 import com.ssafy.libro.domain.userbookcomment.exception.UserBookCommentNotFoundException;
 import com.ssafy.libro.domain.userbookcomment.repository.UserBookCommentRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +23,7 @@ public class UserBookCommentsServiceImpl implements UserBookCommentService{
     private final UserBookCommentRepository userBookCommentRepository;
 
     @Override
+    @Transactional
     public UserBookCommentDetailResponseDto createUserBookComment(UserBookCommentCreateRequestDto requestDto) {
         UserBookComment userBookComment = requestDto.toEntity();
         UserBook userBook = userBookRepository.findById(requestDto.getUserBookId())
@@ -31,14 +32,14 @@ public class UserBookCommentsServiceImpl implements UserBookCommentService{
         userBookComment.updateUserBook(userBook);
         userBookCommentRepository.save(userBookComment);
 
-
         return new UserBookCommentDetailResponseDto(userBookComment);
     }
 
     @Override
     public UserBookCommentDetailResponseDto updateUserBookComment(UserBookCommentUpdateRequestDto requestDto) {
-        UserBookComment userBookComment = userBookCommentRepository.findById(requestDto.getId())
-                .orElseThrow(() -> new UserBookNotFoundException(requestDto.getId()));
+        UserBookComment userBookComment = userBookCommentRepository.findById(requestDto.getUserBookCommentId())
+                .orElseThrow(() -> new UserBookNotFoundException(requestDto.getUserBookCommentId()));
+
         userBookComment.update(requestDto);
 
         return new UserBookCommentDetailResponseDto(userBookComment);

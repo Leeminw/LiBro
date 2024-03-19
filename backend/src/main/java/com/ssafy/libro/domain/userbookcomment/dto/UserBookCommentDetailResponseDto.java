@@ -13,13 +13,13 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserBookCommentDetailResponseDto {
-    private Long id;
+    private Long userBookCommentId;
     private String content;
     private LocalDateTime createdDate;
     private LocalDateTime updatedDate;
 
     public UserBookCommentDetailResponseDto (UserBookComment userBookComment){
-        this.id = userBookComment.getId();
+        this.userBookCommentId = userBookComment.getId();
         this.content = userBookComment.getContent();
         this.createdDate = userBookComment.getCreatedDate();
         this.updatedDate = userBookComment.getUpdatedDate();

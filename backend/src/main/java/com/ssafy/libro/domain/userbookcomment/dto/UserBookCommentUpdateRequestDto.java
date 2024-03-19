@@ -13,9 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserBookCommentUpdateRequestDto {
-    private Long id;
+    private Long userBookCommentId;
     private String content;
-    private LocalDateTime createdDate;
-    private LocalDateTime updatedDate;
 
 }
