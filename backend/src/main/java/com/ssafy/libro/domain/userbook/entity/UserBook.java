@@ -33,7 +33,8 @@ public class UserBook {
     private LocalDateTime createdDate;
     @UpdateTimestamp
     private LocalDateTime updatedDate;
-
+    @Column(columnDefinition = "TINYINT(1)")
+    private Boolean isDeleted;
     // Join
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -62,6 +63,10 @@ public class UserBook {
         this.rating = requestDto.getRating();
         this.ratingComment = requestDto.getRatingComment();
         this.ratingSpoiler = requestDto.getRatingSpoiler();
+    }
+
+    public void updateDelete(){
+        this.isDeleted = true;
     }
 
 }

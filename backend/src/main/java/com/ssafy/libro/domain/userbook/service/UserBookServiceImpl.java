@@ -125,8 +125,13 @@ public class UserBookServiceImpl implements UserBookService{
     }
 
     @Override
-    public void deleteUserBook(Long id) {
-        userBookRepository.findById(id);
+    public void deleteUserBook(Long userBookId) {
+        UserBook userBook = userBookRepository.findById(userBookId)
+                .orElseThrow(() -> new UserBookNotFoundException(userBookId));
+
+        userBook.updateDelete();
+        userBookRepository.save(userBook);
+        
     }
 
     @Override
