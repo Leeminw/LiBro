@@ -1,8 +1,4 @@
 import axios from "axios";
-
-const createProxyMiddleware = require('http-proxy-middleware');
-
-
 const apiClient = axios.create({
   headers: {
     "X-Naver-Client-Id": "1BtBosOmbcBO2P6B8RU5",
@@ -13,7 +9,7 @@ const SearchApi = {
   searchBooks: async (query: string, start: number) => {
     try {
       const response = await apiClient.get(
-        "/api/v1/search/book.json",
+        "/naverapi/v1/search/book.json",
         {
           params:{
             query: query,

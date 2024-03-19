@@ -27,7 +27,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         User user = ((OAuth2UserImpl)authentication.getPrincipal()).getUser();
         System.out.println(user);
         if(user.getRole().equals(Role.GUEST)){
-            String redirectURL = UriComponentsBuilder.fromUriString("http://localhost:8080/api/user/join")
+            String redirectURL = UriComponentsBuilder.fromUriString("http://localhost:3000/")
                     .build()
                     .encode(StandardCharsets.UTF_8)
                     .toUriString();

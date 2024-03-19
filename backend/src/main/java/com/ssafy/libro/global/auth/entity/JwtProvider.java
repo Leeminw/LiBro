@@ -37,6 +37,7 @@ public class JwtProvider {
                 .setExpiration(new Date(System.currentTimeMillis() + refreshExpTime))
                 .signWith(SECRET_KEY)
                 .compact();
+        System.out.println("accessToken"+accessToken);
         return accessToken;
     }
 
