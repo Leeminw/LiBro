@@ -46,15 +46,15 @@ export default function InputForm() {
         defaultValues: {
             title: "11111",
         },
-    })
+    });
 
     const handleContentChange = (content: string) => {
         setContents(content); // content가 변경될 때마다 상태를 업데이트
     };
 
     function onSubmit(data: z.infer<typeof FormSchema>) {
-        const results : Object = {
-            contents:  contents,
+        const results: Object = {
+            contents: contents,
             ...data
         }
 
@@ -65,45 +65,52 @@ export default function InputForm() {
                     <code className="text-white">{JSON.stringify(results, null, 2)}</code>
                 </pre>
             ),
-        })
+        });
     }
 
+    const handleDelete = (data: z.infer<typeof FormSchema>) => {
+        toast({
+            title: "삭제 당했어용",
+            description: "",
+        });
+    };
+
     return (
-            <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                    <div className="flex justify-end">
-                        <Button type="submit">Submit</Button>
-                    </div>
+        <Form {...form}>
+            <form className="space-y-6">
+                <div className="flex justify-end">
+                    <Button onClick={form.handleSubmit(handleDelete)}>Delete</Button>
+                    <Button onClick={form.handleSubmit(onSubmit)}>Submit</Button>
+                </div>
 
+                <FormField
+                    control={form.control}
+                    name="title"
+                    render={({field}) => (
+                        <FormItem className="w-2/3">
+                            <FormLabel>커뮤니티명</FormLabel>
+                            <FormControl>
+                                <Input placeholder="커뮤니티의 이름을 입력해주세요." {...field} />
+                            </FormControl>
+                            <FormMessage/>
+                        </FormItem>
+                    )}
+                />
 
-                    <FormField
-                        control={form.control}
-                        name="title"
-                        render={({field}) => (
-                            <FormItem className="w-2/3">
-                                <FormLabel>커뮤니티명</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="커뮤니티의 이름을 입력해주세요." {...field} />
-                                </FormControl>
-                                <FormMessage/>
-                            </FormItem>
-                        )}
-                    />
-
-                    <FormField
-                        control={form.control}
-                        name="contents"
-                        render={({field}) => (
-                            <FormItem className="w-2/3">
-                                <FormLabel>커뮤니티 설명</FormLabel>
-                                <FormControl>
-                                    <Editor contents={contents} onChange={handleContentChange}/>
-                                </FormControl>
-                                <FormMessage/>
-                            </FormItem>
-                        )}
-                    />
-                </form>
-            </Form>
+                <FormField
+                    control={form.control}
+                    name="contents"
+                    render={({field}) => (
+                        <FormItem>
+                            <FormLabel>커뮤니티 설명</FormLabel>
+                            <FormControl>
+                                <Editor contents={contents} onChange={handleContentChange}/>
+                            </FormControl>
+                            <FormMessage/>
+                        </FormItem>
+                    )}
+                />
+            </form>
+        </Form>
     );
 }
