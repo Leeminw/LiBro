@@ -1,8 +1,7 @@
 package com.ssafy.libro.domain.book.service;
 
-import com.ssafy.libro.domain.book.dto.BookCreateRequestDto;
-import com.ssafy.libro.domain.book.dto.BookDetailResponseDto;
-import com.ssafy.libro.domain.book.dto.BookUpdateRequestDto;
+import com.nimbusds.jose.shaded.gson.Gson;
+import com.ssafy.libro.domain.book.dto.*;
 import com.ssafy.libro.domain.book.entity.Book;
 import com.ssafy.libro.domain.book.exception.BookNotFoundException;
 import com.ssafy.libro.domain.book.repository.BookRepository;
@@ -19,6 +18,10 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -95,5 +98,64 @@ public class BookServiceImpl implements BookService {
         return responseDto;
     }
 
+    @Override
+    public void updateBooksByApi(String query) throws IOException {
+        String display = "100", sort = "sim";
+        String encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8);
+        String encodedDisplay = URLEncoder.encode(display, StandardCharsets.UTF_8);
+        String encodedSort = URLEncoder.encode(sort, StandardCharsets.UTF_8);
+        for (int i = 1; i <= 100; i++) {
+            String encodedStart = URLEncoder.encode(String.valueOf(i), StandardCharsets.UTF_8);
+            String urlString = String.format("https://openapi.naver.com/v1/search/book.json?query=%s&display=%s&start=%s&sort=%s",
+                    encodedQuery, encodedDisplay, encodedStart, encodedSort);
+
+            URL url = new URL(urlString);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("Accept", "application/json");
+            conn.setRequestProperty("X-Naver-Client-Id", "id-key");
+            conn.setRequestProperty("X-Naver-Client-Secret", "secret-key");
+
+            if (conn.getResponseCode() != 200) {
+                throw new RuntimeException("Failed : HTTP error code : " + conn.getResponseCode());
+            }
+
+            // 응답 받기
+            BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8));
+            StringBuilder response = new StringBuilder();
+            String line;
+            while ((line = br.readLine()) != null) {
+                response.append(line);
+            }
+            br.close();
+            conn.disconnect();
+
+            // 응답 파싱 및 데이터베이스 저장 로직 추가
+            Gson gson = new Gson();
+            ApiResponseList responseList = gson.fromJson(response.toString(), ApiResponseList.class);
+            for (ApiResponseItem item : responseList.getItems()) {
+                BookCreateRequestDto requestDto = BookCreateRequestDto.builder()
+                        .isbn(item.getIsbn())
+                        .title(item.getTitle())
+                        .summary(item.getDescription())
+
+                        .price(Integer.parseInt(item.getDiscount()))
+
+                        .author(item.getAuthor())
+                        .thumbnail(item.getImage())
+                        .publisher(item.getPublisher())
+                        .pubDate(convertStringToLocalDateTime(item.getPubdate()))
+                        .build();
+
+                bookRepository.save(requestDto.toEntity());
+            }
+        }
+    }
+
+    private LocalDateTime convertStringToLocalDateTime(String dateString) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+        LocalDate date = LocalDate.parse(dateString, formatter);
+        return date.atStartOfDay();
+    }
 
 }
