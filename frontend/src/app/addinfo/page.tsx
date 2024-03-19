@@ -15,7 +15,7 @@ import {
 import makeAnimated from "react-select/animated";
 import { ColourOption, colourOptions } from "./data";
 import chroma from "chroma-js";
-import SelectMenu from "react-select";
+import SelectMenu, { ActionMeta, MultiValue } from "react-select";
 import { StylesConfig } from "react-select";
 
 const Header = () => {
