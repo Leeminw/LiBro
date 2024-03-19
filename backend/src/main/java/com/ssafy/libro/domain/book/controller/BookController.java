@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 @Slf4j
@@ -76,5 +77,9 @@ public class BookController {
         return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(responseDto));
     }
 
-
+    @GetMapping("/api/naver/book/update")
+    public ResponseEntity<?> updateBookByApi(@RequestParam String query) throws IOException {
+        bookService.updateBooksByApi(query);
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(null));
+    }
 }
