@@ -114,7 +114,7 @@ const UserInfo = () => {
       };
 
     return (
-        <div className={`flex flex-col p-4 min-h-screen transition-all duration-500`}>
+        <div className='flex flex-col p-4 min-h-screen transition-all duration-500'>
             {stage === 1 && (
                 <div>
                     <h1 className="text-lg font-bold mb-6">{headerText}</h1>
@@ -222,7 +222,7 @@ const UserInfo = () => {
                         </Select>
                     </div>
                 </div>
-                <div className="flex w-full flex-col gap-5 mb-6 bg-white "  onFocus={() => setHeaderText('관심분야를 선택하세요.')}>
+                <div className="flex w-full flex-col gap-5 mb-6 bg-white" onFocus={() => setHeaderText('관심분야를 선택하세요.')}>
                 <SelectMenu
                     closeMenuOnSelect={false}
                     placeholder='관심분야 선택'
