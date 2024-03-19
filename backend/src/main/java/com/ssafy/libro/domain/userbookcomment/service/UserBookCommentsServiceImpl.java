@@ -45,17 +45,17 @@ public class UserBookCommentsServiceImpl implements UserBookCommentService{
     }
 
     @Override
-    public void deleteUserBookComment(Long id)  {
-        UserBookComment userBookComment = userBookCommentRepository.findById(id)
-                .orElseThrow(() -> new UserBookCommentNotFoundException(id));
+    public void deleteUserBookComment(Long userBookCommentId)  {
+        UserBookComment userBookComment = userBookCommentRepository.findById(userBookCommentId)
+                .orElseThrow(() -> new UserBookCommentNotFoundException(userBookCommentId));
 
         userBookCommentRepository.delete(userBookComment);
     }
 
     @Override
-    public UserBookCommentDetailResponseDto getUserBookComment(Long id) {
-        UserBookComment userBookComment = userBookCommentRepository.findById(id)
-                .orElseThrow(() -> new UserBookCommentNotFoundException(id));
+    public UserBookCommentDetailResponseDto getUserBookComment(Long userBookCommentId) {
+        UserBookComment userBookComment = userBookCommentRepository.findById(userBookCommentId)
+                .orElseThrow(() -> new UserBookCommentNotFoundException(userBookCommentId));
         return new UserBookCommentDetailResponseDto(userBookComment);
     }
 
@@ -63,13 +63,13 @@ public class UserBookCommentsServiceImpl implements UserBookCommentService{
     public List<UserBookCommentDetailResponseDto> getUserBookCommentList(Long userBookId) {
         UserBook userBook = userBookRepository.findById(userBookId)
                 .orElseThrow(() -> new UserBookNotFoundException(userBookId));
-        Optional<List<UserBookComment>> userBookCommentList = userBookCommentRepository.findByUserBook(userBook);
-        List<UserBookCommentDetailResponseDto> result = new ArrayList<>();
-        if(userBookCommentList.isPresent() && !userBookCommentList.get().isEmpty()){
-            for(UserBookComment comment : userBookCommentList.get()){
-                result.add(new UserBookCommentDetailResponseDto(comment));
-            }
+        List<UserBookComment> userBookCommentList = userBookCommentRepository.findByUserBook(userBook)
+                .orElseThrow(() -> new UserBookCommentNotFoundException("userBookId: " + userBookId));
+
+        List<UserBookCommentDetailResponseDto> responseDtoList = new ArrayList<>();
+        for(UserBookComment comment : userBookCommentList){
+            responseDtoList.add(new UserBookCommentDetailResponseDto(comment));
         }
-        return result;
+        return responseDtoList;
     }
 }
