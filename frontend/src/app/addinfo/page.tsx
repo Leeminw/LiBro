@@ -383,7 +383,6 @@ const UserInfo = () => {
           </Button>
         </div>
       )}
-    </div>
   );
 };
 
