@@ -18,7 +18,7 @@ public class UserBookListResponseDto {
     private BookDetailResponseDto bookDetailResponseDto;
     private LocalDateTime createdTime;
     private LocalDateTime updatedTime;
-    private Float rating;
+    private Double rating;
     private String ratingComment;
     private Boolean ratingSpoiler;
 }
