@@ -35,16 +35,6 @@ public class SecurityConfig {
     }
 
     @Bean
-    public CorsFilter corsFilter() {
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        CorsConfiguration config = new CorsConfiguration();
-        config.addAllowedOrigin("*");
-        config.addAllowedMethod("*");
-        config.addAllowedHeader("*");
-        source.registerCorsConfiguration("/**", config);
-        return new CorsFilter(source);
-    }
-    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
@@ -57,14 +47,10 @@ public class SecurityConfig {
                     authorizeRequests
                             .requestMatchers("/api/user/join")
                             .hasRole("GUEST")
-
-                            .requestMatchers("/api/**")
-                            .anonymous()
-
-
+//                            .requestMatchers("/api/**")
+//                            .anonymous()
                             .requestMatchers("/api/admin/**")
                             .hasRole("ADMIN")
-
                             .anyRequest().permitAll();
                 })
                 .oauth2Login(httpSecurityOAuth2LoginConfigurer -> httpSecurityOAuth2LoginConfigurer

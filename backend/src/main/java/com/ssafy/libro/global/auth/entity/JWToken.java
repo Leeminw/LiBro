@@ -7,7 +7,7 @@ import lombok.Data;
 @Builder
 @Data
 @AllArgsConstructor
-public class JWToken {
+public class Jwtoken {
     private String grantType; // "Bearer " prefix
     private String accessToken;
     private String refreshToken;

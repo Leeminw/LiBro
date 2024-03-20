@@ -32,6 +32,7 @@ public class UserController {
             Object principal = authentication.getPrincipal();
             if (principal instanceof User) {
                 User user = (User) principal;
+                System.out.println(user.toString());
                 SecurityUserDto dto = new SecurityUserDto(
                         user.getId(),
                         user.getEmail(),
@@ -42,7 +43,7 @@ public class UserController {
                 return ResponseEntity.status(HttpStatus.CREATED).body(ResponseData.success("로그인 성공", dto));
             }
         }
-        return ResponseEntity.status(HttpStatus.CREATED).body(ResponseData.success("암거나"));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ResponseData.failure("로그인 실패"));
     }
 
     @PostMapping("/load")

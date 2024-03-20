@@ -3,16 +3,13 @@ package com.ssafy.libro.global.auth.entity;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @Component
 
@@ -29,11 +26,11 @@ public class JwtProvider {
 
     private final SecretKey SECRET_KEY;
 
-    public JwtProvider( @Value("${jwt.secret}")String key) {
-
+    public JwtProvider(@Value("${jwt.secret}")String key) {
         this.SECRET_KEY = new SecretKeySpec(key.getBytes(), SignatureAlgorithm.HS512.getJcaName());
     }
 
+    // 액세스 토큰 생성
     public String createAccessToken(String id, List<String> role) {
         String accessToken = Jwts.builder()
                 .claim("id",id)
@@ -46,6 +43,7 @@ public class JwtProvider {
         return accessToken;
     }
 
+    //
     public String reCreateAccessToken(String refreshToken) {
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(SECRET_KEY)
