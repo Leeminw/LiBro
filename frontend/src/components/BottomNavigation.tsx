@@ -52,7 +52,7 @@ const BottomNavigation = () => {
         <div className="flex flex-col items-center justify-center dark:text-gray-400">
           <button
             type="button"
-            className="inline-flex flex-col items-center mt-[-2rem] mb-[0.3rem] aspect-square justify-center w-14 h-14 font-medium bg-[#9268EB] rounded-full hover:bg-[#684ba6] group text-white transition duration-300"
+            className="inline-flex flex-col items-center mt-[-2rem] mb-[0.3rem] aspect-square justify-center w-14 h-14 font-medium bg-[#9268EB] rounded-full hover:bg-[#bfa1ff] group text-white transition duration-300"
           >
             <Link
               href={{

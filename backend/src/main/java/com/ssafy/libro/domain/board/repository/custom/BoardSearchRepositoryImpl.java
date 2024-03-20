@@ -11,7 +11,7 @@ import static com.ssafy.libro.domain.board.entity.QBoard.board;
 
 @Repository
 @RequiredArgsConstructor
-public class UserSearchRepositoryImpl implements UserSearchRepository{
+public class BoardSearchRepositoryImpl implements BoardSearchRepository {
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override

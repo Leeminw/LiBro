@@ -68,6 +68,11 @@ const ResultPage = () => {
         {bookList.length > 0
           ? bookList.map((book, index) => (
               <div
+                onClick={() => {
+                  router.push(
+                    `/detail?isbn=${book.isbn}`
+                  );
+                }}
                 key={book.isbn}
                 className={`bg-white w-full h-56 mx-4 my-2 rounded-lg drop-shadow-md cursor-pointer ${
                   (curpage - 1) % 5 === Math.floor(index / 10)

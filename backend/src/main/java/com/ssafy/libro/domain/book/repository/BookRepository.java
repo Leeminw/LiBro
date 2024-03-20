@@ -17,4 +17,6 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     Optional<List<Book>> findBookByIsbn(String Isbn);
     //제목 검색
     Page<Book> findBookByTitleContaining(String title, Pageable pageable);
+
+    Boolean existsByIsbn(String isbn);
 }

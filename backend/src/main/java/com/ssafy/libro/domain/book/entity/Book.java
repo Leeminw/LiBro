@@ -24,8 +24,9 @@ public class Book {
     private Long id;
     private String isbn;
     private String title;
-    private String summary;
 
+    @Column(columnDefinition = "LONGTEXT")
+    private String summary;
     private Integer price;
     private Double rating;
     private Integer ratingCount;
