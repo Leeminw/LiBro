@@ -23,9 +23,10 @@ public class UserBookDetailResponseDto {
     private Long userId;
     private Long bookId;
     private String type;
-    private Float rating;
+    private Double rating;
     private String ratingComment;
     private Boolean ratingSpoiler;
+    private Boolean isCompleted;
     private LocalDateTime createdDate;
     private LocalDateTime updatedDate;
 
@@ -44,6 +45,7 @@ public class UserBookDetailResponseDto {
         this.ratingSpoiler = userBook.getRatingSpoiler();
         this.createdDate = userBook.getCreatedDate();
         this.updatedDate = userBook.getUpdatedDate();
+        this.isCompleted = userBook.getIsComplete();
     }
 
     public void updateCommentList(List<UserBookCommentDetailResponseDto> commentList){
