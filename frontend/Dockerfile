@@ -18,6 +18,9 @@ COPY . .
 # React 애플리케이션 빌드
 RUN npm run build
 
+# .next 폴더와 그 안의 모든 파일에 대한 권한 설정
+RUN chmod -R 755 /home/app/.next
+
 # React 애플리케이션 실행
 CMD ["npm", "start"]
 
