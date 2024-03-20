@@ -14,14 +14,14 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserBookHistoryDetailResponseDto {
-    private Long userBookId;
+    private Long userBookHistoryId;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
 
-    private UserBook userbook;
+//    private UserBook userbook;
 
     public UserBookHistoryDetailResponseDto(UserBookHistory userBookHistory){
-        this.userBookId = userBookHistory.getId();
+        this.userBookHistoryId = userBookHistory.getId();
         this.startDate = userBookHistory.getStartDate();
         this.endDate = userBookHistory.getEndDate();
 //        this.userbook = userBookHistory.getUserBook();
