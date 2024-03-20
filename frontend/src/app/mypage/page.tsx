@@ -354,7 +354,7 @@ const Mypage = () => {
     <div className="bg-white h-full pt-12 overflow-auto">
       <div className="p-4">
 
-        <div className="mb-2 pb-2 border-b border-gray-300">
+        <div className="mb-2 pb-2 ">
             <div className="text-xl font-bold ml-2 ">마이페이지</div>
         </div>
 
