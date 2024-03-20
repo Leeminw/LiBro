@@ -64,22 +64,26 @@ public class UserBookCustomRepositoryImpl implements UserBookCustomRepository{
                 .from(userBook)
                 .leftJoin(userBook.userBookHistoryList, userBookHistory)
                 .leftJoin(userBook.book,book).fetchJoin()
-                .where(userBook.in(
-                        JPAExpressions
-                                .select(userBook)
-                                .from(userBookHistory)
-                                .where(userBookHistory.userBook.eq(userBook))
-                                .orderBy(userBookHistory.startDate.desc())
-                                .limit(1)
-                                .where(userBookHistory.endDate.isNull())
-                )).fetch();
+                .where(userBook.isOnRead.eq(true)
+                        .and(userBook.isDeleted.eq(false))
+                ).fetch();
 
         return Optional.of(userBookList);
     }
 
     @Override
     public Optional<List<UserBook>> findUserBookReadComplete(User user) {
-        return Optional.empty();
+        List<UserBook> userBookList = jpaQueryFactory
+                .select(userBook)
+                .from(userBook)
+                .leftJoin(userBook.user, QUser.user)
+                .leftJoin(userBook.book, QBook.book).fetchJoin()
+                .where(userBook.user.eq(user)
+                        .and(userBook.isDeleted.eq(false))
+                        .and(userBook.isComplete.eq(true))
+                )
+                .fetch();
+        return Optional.of(userBookList);
     }
 
     @Override

@@ -92,7 +92,16 @@ public class UserBookController {
         return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(responseDto));
     }
 //    @GetMapping("/")
-
+    @GetMapping("/complete/{userId}")
+    public ResponseEntity<?> getUserBookReadComplete(@PathVariable Long userId){
+        List<UserBookListResponseDto> responseDtoList = userBookService.getUserBookReadComplete(userId);
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(responseDtoList));
+    }
+    @GetMapping("/on-read/{userId}")
+    public ResponseEntity<?> getUserBookOnRead(@PathVariable Long userId){
+        List<UserBookListResponseDto> responseDtoList = userBookService.getUserBookOnReading(userId);
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(responseDtoList));
+    }
 //    독서 기록 분석 ?
 
 }

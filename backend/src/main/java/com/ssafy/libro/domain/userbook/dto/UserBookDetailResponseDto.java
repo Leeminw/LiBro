@@ -19,7 +19,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserBookDetailResponseDto {
-    private long id;
+    private long userBookId;
     private Long userId;
     private Long bookId;
     private String type;
@@ -36,7 +36,7 @@ public class UserBookDetailResponseDto {
     private List<UserBookHistoryDetailResponseDto> historyList;
 
     public UserBookDetailResponseDto(UserBook userBook){
-        this.id = userBook.getId();
+        this.userBookId = userBook.getId();
         this.userId = userBook.getUser().getId();
         this.bookId = userBook.getBook().getId();
         this.type = userBook.getType();

@@ -46,24 +46,7 @@ public class UserBookServiceImpl implements UserBookService{
         List<UserBook> userBookList = userBookRepository.findUserBookByUser(user)
                 .orElseThrow(() -> new UserBookNotFoundException("user : " + userId));
 
-        List<UserBookListResponseDto> result = new ArrayList<>();
-        for(UserBook userbook : userBookList){
-            UserBookListResponseDto responseDto = UserBookListResponseDto.builder()
-                    .userBookId(userbook.getId())
-                    .type(userbook.getType())
-                    .createdTime(userbook.getCreatedDate())
-                    .updatedTime(userbook.getUpdatedDate())
-                    .ratingSpoiler(userbook.getRatingSpoiler())
-                    .rating(userbook.getRating())
-                    .ratingComment(userbook.getRatingComment())
-                    .bookDetailResponseDto(new BookDetailResponseDto(userbook.getBook()))
-                    .build();
-
-            result.add(responseDto);
-        }
-
-
-        return result;
+        return getUserBookListResponseDtos(userBookList);
     }
 
     @Override
@@ -257,6 +240,48 @@ public class UserBookServiceImpl implements UserBookService{
                 .readSize(read)
                 .build();
 
+    }
+
+    @Override
+    public List<UserBookListResponseDto> getUserBookOnReading(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+
+        List<UserBook> userBookList = userBookRepository.findUserBookOnReading(user)
+                .orElseThrow(() -> new UserBookNotFoundException("no data"));
+        return getUserBookListResponseDtos(userBookList);
+    }
+
+    @Override
+    public List<UserBookListResponseDto> getUserBookReadComplete(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+
+        List<UserBook> userBookList = userBookRepository.findUserBookReadComplete(user)
+                .orElseThrow(() -> new UserBookNotFoundException("no data"));
+        return getUserBookListResponseDtos(userBookList);
+    }
+
+    private List<UserBookListResponseDto> getUserBookListResponseDtos(List<UserBook> userBookList) {
+        List<UserBookListResponseDto> responseDtoList = new ArrayList<>();
+        for(UserBook userBook : userBookList){
+            UserBookListResponseDto responseDto = UserBookListResponseDto.builder()
+                    .userBookId(userBook.getId())
+                    .type(userBook.getType())
+                    .createdTime(userBook.getCreatedDate())
+                    .updatedTime(userBook.getUpdatedDate())
+                    .ratingSpoiler(userBook.getRatingSpoiler())
+                    .rating(userBook.getRating())
+                    .ratingComment(userBook.getRatingComment())
+                    .isComplete(userBook.getIsComplete())
+                    .isDeleted(userBook.getIsDeleted())
+                    .bookDetailResponseDto(new BookDetailResponseDto(userBook.getBook()))
+                    .build();
+
+            responseDtoList.add(responseDto);
+        }
+
+        return responseDtoList;
     }
 
 

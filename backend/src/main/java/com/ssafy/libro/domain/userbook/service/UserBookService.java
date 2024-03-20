@@ -30,6 +30,9 @@ public interface UserBookService {
     UserBookRatioResponseDto getUserReadRatio(Long userId);
     UserBookRatioResponseDto getBookReadRatio(Long bookId);
 
+    List<UserBookListResponseDto> getUserBookOnReading(Long userId);
+    List<UserBookListResponseDto> getUserBookReadComplete(Long userId);
+
 
 
 

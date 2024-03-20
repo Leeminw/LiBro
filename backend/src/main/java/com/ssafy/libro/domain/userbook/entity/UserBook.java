@@ -39,6 +39,9 @@ public class UserBook {
     @Column(columnDefinition = "TINYINT(1)")
     @ColumnDefault("false")
     private Boolean isDeleted;
+    @Column(columnDefinition = "TINYINT(1)")
+    @ColumnDefault("false")
+    private Boolean isOnRead;
     // Join
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -77,5 +80,8 @@ public class UserBook {
     }
     public void updateComplete() {
         this.isComplete = true;
+    }
+    public void updateIsOnRead(Boolean isOnRead){
+        this.isOnRead = isOnRead;
     }
 }

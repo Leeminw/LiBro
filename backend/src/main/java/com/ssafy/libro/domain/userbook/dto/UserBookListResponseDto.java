@@ -19,6 +19,8 @@ public class UserBookListResponseDto {
     private LocalDateTime createdTime;
     private LocalDateTime updatedTime;
     private Double rating;
+    private Boolean isComplete;
+    private Boolean isDeleted;
     private String ratingComment;
     private Boolean ratingSpoiler;
 }

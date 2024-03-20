@@ -26,6 +26,7 @@ public class UserBookHistoryServiceImpl implements UserBookHistoryService{
     private final UserBookHistoryRepository userBookHistoryRepository;
 
     @Override
+    @Transactional
     public UserBookHistoryDetailResponseDto createUserBookHistory(UserBookHistoryCreateRequestDto requestDto) {
         UserBookHistory userBookHistory = requestDto.toEntity();
         Long userBookId = requestDto.getUserBookId();
@@ -33,7 +34,9 @@ public class UserBookHistoryServiceImpl implements UserBookHistoryService{
                 .orElseThrow(() -> new UserBookNotFoundException(userBookId));
 
         userBookHistory.updateUserBook(userBook);
+        userBook.updateIsOnRead(true);
         userBookHistoryRepository.save(userBookHistory);
+        userBookRepository.save(userBook);
 
         return new UserBookHistoryDetailResponseDto(userBookHistory);
     }
@@ -98,6 +101,7 @@ public class UserBookHistoryServiceImpl implements UserBookHistoryService{
         userBookHistoryRepository.save(bookHistory);
         UserBook userBook = bookHistory.getUserBook();
         userBook.updateComplete();
+        userBook.updateIsOnRead(false);
         userBookRepository.save(userBook);
 
         return new UserBookDetailResponseDto(userBook);
