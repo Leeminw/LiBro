@@ -9,6 +9,7 @@ import com.ssafy.libro.domain.user.exception.UserNotFoundException;
 import com.ssafy.libro.domain.user.repository.UserRepository;
 import com.ssafy.libro.domain.userbook.dto.*;
 import com.ssafy.libro.domain.userbook.entity.UserBook;
+import com.ssafy.libro.domain.userbook.exception.NotReadBookException;
 import com.ssafy.libro.domain.userbook.exception.UserBookNotFoundException;
 import com.ssafy.libro.domain.userbook.repository.UserBookRepository;
 import com.ssafy.libro.domain.userbookcomment.dto.UserBookCommentDetailResponseDto;
@@ -125,6 +126,7 @@ public class UserBookServiceImpl implements UserBookService{
     }
 
     @Override
+    @Transactional
     public void deleteUserBook(Long userBookId) {
         UserBook userBook = userBookRepository.findById(userBookId)
                 .orElseThrow(() -> new UserBookNotFoundException(userBookId));
@@ -165,6 +167,46 @@ public class UserBookServiceImpl implements UserBookService{
         return responseDtoList;
     }
 
+    @Transactional
+    public UserBookDetailResponseDto updateRating(UserBookRatingRequestDto requestDto){
+        UserBook userBook = userBookRepository.findById(requestDto.getUserBookId())
+                .orElseThrow(() -> new UserBookNotFoundException(requestDto.getUserBookId()));
+        // 다 못읽은 경우 에러처리
 
+        if(!userBook.getIsComplete()){
+            throw new NotReadBookException(requestDto.getUserBookId());
+        }
+        // 이미 한 기록을 수정하는지 여부 검사
+        boolean isModify = false;
+        double curRating = 0;
+
+        if (userBook.getRating() != null){
+            isModify = true;
+            curRating = userBook.getRating();
+        }
+
+        userBook.updateRating(requestDto);
+
+        userBookRepository.save(userBook);
+        // book 정보 갱신
+        Book book = userBook.getBook();
+
+        double rating = book.getRating();
+        int count = book.getRatingCount();
+
+        double updateRating;
+        if(isModify){
+            updateRating = (rating*count - curRating + requestDto.getRating())/count;
+        }
+        else{
+            count ++;
+            updateRating = (rating*(count) + requestDto.getRating())/count;
+        }
+        book.updateRating(updateRating, count);
+
+        bookRepository.save(book);
+
+        return new UserBookDetailResponseDto(userBook);
+    }
 
 }

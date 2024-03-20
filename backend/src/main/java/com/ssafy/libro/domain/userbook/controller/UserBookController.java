@@ -55,16 +55,15 @@ public class UserBookController {
     @DeleteMapping("/{userBookId}")
     public ResponseEntity<?> deleteUserBook (@PathVariable Long userBookId) {
         userBookService.deleteUserBook(userBookId);
-        return ResponseEntity.status(HttpStatus.OK).body("deleted user-book mapping");
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success("deleted user-book mapping"));
     }
 
-//    전체 등록 도서 완독률
-//    @GetMapping("/")
-//    특정 등록 도서 완독률
 //    특정 등록 도서 평점 기능
-
-//    특정 등록 도서 메모 기능
-//    독서 기록
+    @PostMapping("/rating")
+    public ResponseEntity<?> updateUserBookRating(@RequestBody UserBookRatingRequestDto requestDto){
+        UserBookDetailResponseDto responseDto = userBookService.updateRating(requestDto);
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(responseDto));
+    }
 //    독서 기록 조회( 회원별 완독한 도서를 월별로 조회하는기능)
     @GetMapping("/date/{userId}")
     public ResponseEntity<?> getBookListByDate
@@ -72,6 +71,21 @@ public class UserBookController {
         List<UserBookListByDateResponseDto> responseDtoList = userBookService.getBookListByDate(userId,year,month);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(responseDtoList));
     }
+
+//    전체 등록 도서 완독
+    @GetMapping("/read-ratio/user/{userId}")
+    public ResponseEntity<?> getUserReadRatio(@PathVariable Long userId){
+
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(""));
+    }
+    @GetMapping("/read-ratio/book/{bookId}")
+    public ResponseEntity<?> getBookReadRatio(@PathVariable Long bookId){
+
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(""));
+    }
+//    @GetMapping("/")
+//    특정 등록 도서 완독률
+
 //    독서 기록 분석 ?
 
 }

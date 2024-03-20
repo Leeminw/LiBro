@@ -23,7 +23,7 @@ public interface UserBookService {
 
     // 회원별 월별 도서 기록
     List<UserBookListByDateResponseDto> getBookListByDate(Long userId, Integer year, Integer month);
-
+    UserBookDetailResponseDto updateRating(UserBookRatingRequestDto requestDto);
 
 
 
