@@ -1,8 +1,11 @@
 package com.ssafy.libro.domain.userbookhistory.controller;
 
+import com.ssafy.libro.domain.userbook.dto.UserBookDetailResponseDto;
+import com.ssafy.libro.domain.userbook.entity.UserBook;
 import com.ssafy.libro.domain.userbookhistory.dto.UserBookHistoryCreateRequestDto;
 import com.ssafy.libro.domain.userbookhistory.dto.UserBookHistoryDetailResponseDto;
 import com.ssafy.libro.domain.userbookhistory.dto.UserBookHistoryUpdateRequestDto;
+import com.ssafy.libro.domain.userbookhistory.entity.UserBookHistory;
 import com.ssafy.libro.domain.userbookhistory.service.UserBookHistoryService;
 import com.ssafy.libro.global.common.ResponseData;
 import lombok.RequiredArgsConstructor;
@@ -50,4 +53,15 @@ public class UserBookHistoryController {
         return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(responseDtoList));
     }
 
+    @GetMapping("/recent/{userBookId}")
+    public ResponseEntity<?> getRecentUserBookHistory(@PathVariable Long userBookId){
+        UserBookHistoryDetailResponseDto responseDto = userBookHistoryService.getRecentBookHistory(userBookId);
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(responseDto));
+    }
+
+    @GetMapping("/complete/{historyId}")
+    public ResponseEntity<?> updateUserBookComplete(@PathVariable Long historyId){
+        UserBookDetailResponseDto responseDto = userBookHistoryService.updateCompleteUserBook(historyId);
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(responseDto));
+    }
 }

@@ -10,4 +10,5 @@ import java.util.Optional;
 
 public interface UserBookHistoryRepository extends JpaRepository<UserBookHistory, Long> {
     Optional<List<UserBookHistory>> findByUserBook(UserBook userBook);
+    Optional<UserBookHistory> findFirstByUserBookOrderByStartDate(UserBook userBook);
 }

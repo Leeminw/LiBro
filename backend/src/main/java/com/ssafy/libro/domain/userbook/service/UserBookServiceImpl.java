@@ -9,6 +9,7 @@ import com.ssafy.libro.domain.user.exception.UserNotFoundException;
 import com.ssafy.libro.domain.user.repository.UserRepository;
 import com.ssafy.libro.domain.userbook.dto.*;
 import com.ssafy.libro.domain.userbook.entity.UserBook;
+import com.ssafy.libro.domain.userbook.exception.NotReadBookException;
 import com.ssafy.libro.domain.userbook.exception.UserBookNotFoundException;
 import com.ssafy.libro.domain.userbook.repository.UserBookRepository;
 import com.ssafy.libro.domain.userbookcomment.dto.UserBookCommentDetailResponseDto;
@@ -45,24 +46,7 @@ public class UserBookServiceImpl implements UserBookService{
         List<UserBook> userBookList = userBookRepository.findUserBookByUser(user)
                 .orElseThrow(() -> new UserBookNotFoundException("user : " + userId));
 
-        List<UserBookListResponseDto> result = new ArrayList<>();
-        for(UserBook userbook : userBookList){
-            UserBookListResponseDto responseDto = UserBookListResponseDto.builder()
-                    .userBookId(userbook.getId())
-                    .type(userbook.getType())
-                    .createdTime(userbook.getCreatedDate())
-                    .updatedTime(userbook.getUpdatedDate())
-                    .ratingSpoiler(userbook.getRatingSpoiler())
-                    .rating(userbook.getRating())
-                    .ratingComment(userbook.getRatingComment())
-                    .bookDetailResponseDto(new BookDetailResponseDto(userbook.getBook()))
-                    .build();
-
-            result.add(responseDto);
-        }
-
-
-        return result;
+        return getUserBookListResponseDtos(userBookList);
     }
 
     @Override
@@ -100,7 +84,8 @@ public class UserBookServiceImpl implements UserBookService{
     @Override
     @Transactional
     public UserBookDetailResponseDto mappingUserBook(UserBookMappingRequestDto requestDto) {
-        User user = User.builder().build();
+        User user = userRepository.findById(requestDto.getUserId())
+                .orElseThrow(() -> new UserNotFoundException(requestDto.getUserId()));
         Book book = bookRepository.findById(requestDto.getBookId())
                 .orElseThrow(() -> new BookNotFoundException(requestDto.getBookId()));
         UserBook userBook = requestDto.toEntity();
@@ -125,8 +110,14 @@ public class UserBookServiceImpl implements UserBookService{
     }
 
     @Override
-    public void deleteUserBook(Long id) {
-        userBookRepository.findById(id);
+    @Transactional
+    public void deleteUserBook(Long userBookId) {
+        UserBook userBook = userBookRepository.findById(userBookId)
+                .orElseThrow(() -> new UserBookNotFoundException(userBookId));
+
+        userBook.updateDelete();
+        userBookRepository.save(userBook);
+        
     }
 
     @Override
@@ -154,6 +145,139 @@ public class UserBookServiceImpl implements UserBookService{
                     .bookDetailResponseDto(new BookDetailResponseDto(userBook.getBook()))
                     .bookHistoryDetailResponseDto(historyList)
                     .build();
+            responseDtoList.add(responseDto);
+        }
+
+        return responseDtoList;
+    }
+    @Override
+    @Transactional
+    public UserBookDetailResponseDto updateRating(UserBookRatingRequestDto requestDto){
+        UserBook userBook = userBookRepository.findById(requestDto.getUserBookId())
+                .orElseThrow(() -> new UserBookNotFoundException(requestDto.getUserBookId()));
+        // 다 못읽은 경우 에러처리
+
+        if(!userBook.getIsComplete()){
+            throw new NotReadBookException(requestDto.getUserBookId());
+        }
+        // 이미 한 기록을 수정하는지 여부 검사
+        boolean isModify = false;
+        double curRating = 0;
+
+        if (userBook.getRating() != null){
+            isModify = true;
+            curRating = userBook.getRating();
+        }
+
+        userBook.updateRating(requestDto);
+
+        userBookRepository.save(userBook);
+        // book 정보 갱신
+        Book book = userBook.getBook();
+
+        double rating = book.getRating();
+        int count = book.getRatingCount();
+
+        double updateRating;
+        if(isModify){
+            updateRating = (rating*count - curRating + requestDto.getRating())/count;
+        }
+        else{
+            count ++;
+            updateRating = (rating*(count) + requestDto.getRating())/count;
+        }
+        book.updateRating(updateRating, count);
+
+        bookRepository.save(book);
+
+        return new UserBookDetailResponseDto(userBook);
+    }
+
+    @Override
+    @Transactional
+    public UserBookDetailResponseDto updateType(UserBookTypeUpdateRequestDto requestDto) {
+        UserBook userBook = userBookRepository.findById(requestDto.getUserBookId())
+                .orElseThrow(() -> new UserBookNotFoundException(requestDto.getUserBookId()));
+
+        userBook.updateType(requestDto.getType());
+        userBookRepository.save(userBook);
+        return new UserBookDetailResponseDto(userBook);
+    }
+
+    @Override
+    public UserBookRatioResponseDto getUserReadRatio(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+
+        long total = userBookRepository.countUserBookByUser(user)
+                .orElseThrow(() -> new UserBookNotFoundException("no data"));
+        long read = userBookRepository.countUserBookByUserReadComplete(user)
+                .orElse(0L);
+
+        return UserBookRatioResponseDto.builder()
+                .type("user")
+                .ratio(1.0*read/total)
+                .totalSize(total)
+                .readSize(read)
+                .build();
+
+    }
+
+    @Override
+    public UserBookRatioResponseDto getBookReadRatio(Long bookId) {
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new BookNotFoundException(bookId));
+
+        long total = userBookRepository.countUserBookByBook(book)
+                .orElseThrow(() -> new UserBookNotFoundException("no data"));
+        long read  = userBookRepository.countUserBookByBookReadComplete(book)
+                .orElse(0L);
+
+        return UserBookRatioResponseDto.builder()
+                .type("book")
+                .ratio(1.0*read/total)
+                .totalSize(total)
+                .readSize(read)
+                .build();
+
+    }
+
+    @Override
+    public List<UserBookListResponseDto> getUserBookOnReading(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+
+        List<UserBook> userBookList = userBookRepository.findUserBookOnReading(user)
+                .orElseThrow(() -> new UserBookNotFoundException("no data"));
+        return getUserBookListResponseDtos(userBookList);
+    }
+
+    @Override
+    public List<UserBookListResponseDto> getUserBookReadComplete(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+
+        List<UserBook> userBookList = userBookRepository.findUserBookReadComplete(user)
+                .orElseThrow(() -> new UserBookNotFoundException("no data"));
+        return getUserBookListResponseDtos(userBookList);
+    }
+
+    private List<UserBookListResponseDto> getUserBookListResponseDtos(List<UserBook> userBookList) {
+        List<UserBookListResponseDto> responseDtoList = new ArrayList<>();
+        for(UserBook userBook : userBookList){
+            UserBookListResponseDto responseDto = UserBookListResponseDto.builder()
+                    .userBookId(userBook.getId())
+                    .type(userBook.getType())
+                    .createdTime(userBook.getCreatedDate())
+                    .updatedTime(userBook.getUpdatedDate())
+                    .ratingSpoiler(userBook.getRatingSpoiler())
+                    .rating(userBook.getRating())
+                    .ratingComment(userBook.getRatingComment())
+                    .isComplete(userBook.getIsComplete())
+                    .isDeleted(userBook.getIsDeleted())
+                    .bookDetailResponseDto(new BookDetailResponseDto(userBook.getBook()))
+                    .build();
+
             responseDtoList.add(responseDto);
         }
 
