@@ -32,6 +32,10 @@ public class UserBookHistory {
     public void update(UserBookHistoryUpdateRequestDto requestDto){
         this.startDate = requestDto.getStartDate();
         this.endDate = requestDto.getEndDate();
-
     }
+
+    public void updateEndDate(LocalDateTime localDateTime){
+        this.endDate = localDateTime;
+    }
+
 }

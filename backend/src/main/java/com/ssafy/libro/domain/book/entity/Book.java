@@ -62,8 +62,9 @@ public class Book {
         return this;
     }
 
-    public Book updateRating(Double rating) {
+    public Book updateRating(Double rating, Integer ratingCount) {
         this.rating = rating;
+        this.ratingCount = ratingCount;
         return this;
     }
 

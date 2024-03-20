@@ -1,5 +1,6 @@
 package com.ssafy.libro.domain.userbookhistory.service;
 
+import com.ssafy.libro.domain.userbook.dto.UserBookDetailResponseDto;
 import com.ssafy.libro.domain.userbook.entity.UserBook;
 import com.ssafy.libro.domain.userbook.exception.UserBookNotFoundException;
 import com.ssafy.libro.domain.userbook.repository.UserBookRepository;
@@ -9,9 +10,11 @@ import com.ssafy.libro.domain.userbookhistory.dto.UserBookHistoryUpdateRequestDt
 import com.ssafy.libro.domain.userbookhistory.entity.UserBookHistory;
 import com.ssafy.libro.domain.userbookhistory.exception.UserBookHistoryNotFoundException;
 import com.ssafy.libro.domain.userbookhistory.repository.UserBookHistoryRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -23,6 +26,7 @@ public class UserBookHistoryServiceImpl implements UserBookHistoryService{
     private final UserBookHistoryRepository userBookHistoryRepository;
 
     @Override
+    @Transactional
     public UserBookHistoryDetailResponseDto createUserBookHistory(UserBookHistoryCreateRequestDto requestDto) {
         UserBookHistory userBookHistory = requestDto.toEntity();
         Long userBookId = requestDto.getUserBookId();
@@ -30,7 +34,9 @@ public class UserBookHistoryServiceImpl implements UserBookHistoryService{
                 .orElseThrow(() -> new UserBookNotFoundException(userBookId));
 
         userBookHistory.updateUserBook(userBook);
+        userBook.updateIsOnRead(true);
         userBookHistoryRepository.save(userBookHistory);
+        userBookRepository.save(userBook);
 
         return new UserBookHistoryDetailResponseDto(userBookHistory);
     }
@@ -75,4 +81,31 @@ public class UserBookHistoryServiceImpl implements UserBookHistoryService{
 
         return responseDtoList;
     }
+
+    @Override
+    public UserBookHistoryDetailResponseDto getRecentBookHistory(Long userBookId) {
+        UserBook userBook = userBookRepository.findById(userBookId)
+                .orElseThrow(() -> new UserBookNotFoundException(userBookId));
+        UserBookHistory userBookHistory = userBookHistoryRepository.findFirstByUserBookOrderByStartDate(userBook)
+                .orElseThrow(() -> new UserBookHistoryNotFoundException("no data"));
+        return new UserBookHistoryDetailResponseDto(userBookHistory);
+    }
+
+    @Override
+    @Transactional
+    public UserBookDetailResponseDto updateCompleteUserBook(Long historyId) {
+        UserBookHistory bookHistory = userBookHistoryRepository.findById(historyId)
+                .orElseThrow(() -> new UserBookHistoryNotFoundException(historyId));
+        bookHistory.updateEndDate(LocalDateTime.now());
+
+        userBookHistoryRepository.save(bookHistory);
+        UserBook userBook = bookHistory.getUserBook();
+        userBook.updateComplete();
+        userBook.updateIsOnRead(false);
+        userBookRepository.save(userBook);
+
+        return new UserBookDetailResponseDto(userBook);
+    }
+
+
 }

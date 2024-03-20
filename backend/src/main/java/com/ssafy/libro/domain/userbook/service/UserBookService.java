@@ -1,6 +1,8 @@
 package com.ssafy.libro.domain.userbook.service;
 
 import com.ssafy.libro.domain.book.dto.BookDetailResponseDto;
+import com.ssafy.libro.domain.book.entity.Book;
+import com.ssafy.libro.domain.user.entity.User;
 import com.ssafy.libro.domain.userbook.dto.*;
 
 import java.util.List;
@@ -23,6 +25,13 @@ public interface UserBookService {
 
     // 회원별 월별 도서 기록
     List<UserBookListByDateResponseDto> getBookListByDate(Long userId, Integer year, Integer month);
+    UserBookDetailResponseDto updateRating(UserBookRatingRequestDto requestDto);
+    UserBookDetailResponseDto updateType(UserBookTypeUpdateRequestDto requestDto);
+    UserBookRatioResponseDto getUserReadRatio(Long userId);
+    UserBookRatioResponseDto getBookReadRatio(Long bookId);
+
+    List<UserBookListResponseDto> getUserBookOnReading(Long userId);
+    List<UserBookListResponseDto> getUserBookReadComplete(Long userId);
 
 
 
