@@ -60,10 +60,6 @@ public class UserBook {
 
     public void update(UserBookUpdateRequestDto requestDto){
         this.type = requestDto.getType();
-        this.rating = requestDto.getRating();
-        this.ratingComment = requestDto.getRatingComment();
-        this.ratingSpoiler = requestDto.getRatingSpoiler();
-
     }
     public void updateType(String type){
         this.type = type;

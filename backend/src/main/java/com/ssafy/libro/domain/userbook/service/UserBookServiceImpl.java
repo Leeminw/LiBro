@@ -101,7 +101,8 @@ public class UserBookServiceImpl implements UserBookService{
     @Override
     @Transactional
     public UserBookDetailResponseDto mappingUserBook(UserBookMappingRequestDto requestDto) {
-        User user = User.builder().build();
+        User user = userRepository.findById(requestDto.getUserId())
+                .orElseThrow(() -> new UserNotFoundException(requestDto.getUserId()));
         Book book = bookRepository.findById(requestDto.getBookId())
                 .orElseThrow(() -> new BookNotFoundException(requestDto.getBookId()));
         UserBook userBook = requestDto.toEntity();
@@ -166,7 +167,7 @@ public class UserBookServiceImpl implements UserBookService{
 
         return responseDtoList;
     }
-
+    @Override
     @Transactional
     public UserBookDetailResponseDto updateRating(UserBookRatingRequestDto requestDto){
         UserBook userBook = userBookRepository.findById(requestDto.getUserBookId())
@@ -206,6 +207,17 @@ public class UserBookServiceImpl implements UserBookService{
 
         bookRepository.save(book);
 
+        return new UserBookDetailResponseDto(userBook);
+    }
+
+    @Override
+    @Transactional
+    public UserBookDetailResponseDto updateType(UserBookTypeUpdateRequestDto requestDto) {
+        UserBook userBook = userBookRepository.findById(requestDto.getUserBookId())
+                .orElseThrow(() -> new UserBookNotFoundException(requestDto.getUserBookId()));
+
+        userBook.updateType(requestDto.getType());
+        userBookRepository.save(userBook);
         return new UserBookDetailResponseDto(userBook);
     }
 

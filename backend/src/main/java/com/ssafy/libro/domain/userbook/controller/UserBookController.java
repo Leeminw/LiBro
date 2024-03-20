@@ -51,6 +51,12 @@ public class UserBookController {
         UserBookDetailResponseDto responseDto = userBookService.updateUserBook(requestDto);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(responseDto));
     }
+//    관리타입 수정
+    @PostMapping
+    public ResponseEntity<?> updateUserBookType(@RequestBody UserBookTypeUpdateRequestDto requestDto){
+        UserBookDetailResponseDto responseDto = userBookService.updateType(requestDto);
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(responseDto));
+    }
 //    등록 도서 삭제 기능
     @DeleteMapping("/{userBookId}")
     public ResponseEntity<?> deleteUserBook (@PathVariable Long userBookId) {
