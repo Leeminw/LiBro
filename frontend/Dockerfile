@@ -18,13 +18,13 @@ COPY . .
 # React 애플리케이션 빌드
 RUN npm run build
 
-# EXPOSE 3000
-# CMD ["npm", "start"]
+# React 애플리케이션 실행
+CMD ["npm", "start"]
 
 
 
 # Nginx를 사용하여 빌드된 애플리케이션 서비스
-FROM nginx:stable-alpine as production-stage
-COPY --from=build-stage /home/app/.next/server/app /var/www/html
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+# FROM nginx:stable-alpine as production-stage
+# COPY --from=build-stage /home/app/.next/server/app /var/www/html
+# EXPOSE 80
+# CMD ["nginx", "-g", "daemon off;"]
