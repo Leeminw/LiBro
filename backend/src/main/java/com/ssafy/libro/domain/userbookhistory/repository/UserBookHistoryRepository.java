@@ -9,5 +9,5 @@ import java.util.List;
 import java.util.Optional;
 
 public interface UserBookHistoryRepository extends JpaRepository<UserBookHistory, Long> {
-    Optional<List<UserBookHistory>> findByUserbook(UserBook userbook);
+    Optional<List<UserBookHistory>> findByUserBook(UserBook userBook);
 }

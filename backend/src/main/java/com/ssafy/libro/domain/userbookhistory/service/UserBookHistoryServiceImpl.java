@@ -1,13 +1,13 @@
 package com.ssafy.libro.domain.userbookhistory.service;
 
-import com.ssafy.libro.domain.user.entity.User;
-import com.ssafy.libro.domain.userbook.dto.UserBookResponseDto;
 import com.ssafy.libro.domain.userbook.entity.UserBook;
+import com.ssafy.libro.domain.userbook.exception.UserBookNotFoundException;
 import com.ssafy.libro.domain.userbook.repository.UserBookRepository;
 import com.ssafy.libro.domain.userbookhistory.dto.UserBookHistoryCreateRequestDto;
 import com.ssafy.libro.domain.userbookhistory.dto.UserBookHistoryDetailResponseDto;
 import com.ssafy.libro.domain.userbookhistory.dto.UserBookHistoryUpdateRequestDto;
 import com.ssafy.libro.domain.userbookhistory.entity.UserBookHistory;
+import com.ssafy.libro.domain.userbookhistory.exception.UserBookHistoryNotFoundException;
 import com.ssafy.libro.domain.userbookhistory.repository.UserBookHistoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,10 +23,11 @@ public class UserBookHistoryServiceImpl implements UserBookHistoryService{
     private final UserBookHistoryRepository userBookHistoryRepository;
 
     @Override
-    public UserBookHistoryDetailResponseDto createUserBookHistory(UserBookHistoryCreateRequestDto requestDto) throws Exception {
+    public UserBookHistoryDetailResponseDto createUserBookHistory(UserBookHistoryCreateRequestDto requestDto) {
         UserBookHistory userBookHistory = requestDto.toEntity();
         Long userBookId = requestDto.getUserBookId();
-        UserBook userBook = userBookRepository.findById(userBookId).orElseThrow(() -> new Exception());
+        UserBook userBook = userBookRepository.findById(userBookId)
+                .orElseThrow(() -> new UserBookNotFoundException(userBookId));
 
         userBookHistory.updateUserBook(userBook);
         userBookHistoryRepository.save(userBookHistory);
@@ -36,9 +37,9 @@ public class UserBookHistoryServiceImpl implements UserBookHistoryService{
 
     @Override
     public UserBookHistoryDetailResponseDto updateUserBookHistory
-            (UserBookHistoryUpdateRequestDto requestDto) throws Exception {
+            (UserBookHistoryUpdateRequestDto requestDto) {
         UserBookHistory userBookHistory = userBookHistoryRepository.findById(requestDto.getId())
-                .orElseThrow(() -> new Exception());
+                .orElseThrow(() -> new UserBookHistoryNotFoundException(requestDto.getId()));
         userBookHistory.update(requestDto);
         userBookHistoryRepository.save(userBookHistory);
 
@@ -51,18 +52,27 @@ public class UserBookHistoryServiceImpl implements UserBookHistoryService{
     }
 
     @Override
-    public UserBookHistoryDetailResponseDto getUserBookHistory(Long id) throws Exception {
-        UserBookHistory userbookHistory = userBookHistoryRepository.findById(id)
-                .orElseThrow(() -> new Exception(""));
+    public UserBookHistoryDetailResponseDto getUserBookHistory(Long userBookHistoryId)  {
+        UserBookHistory userbookHistory = userBookHistoryRepository.findById(userBookHistoryId)
+                .orElseThrow(() -> new UserBookHistoryNotFoundException(userBookHistoryId) );
 
         return new UserBookHistoryDetailResponseDto(userbookHistory);
     }
 
     @Override
-    public List<UserBookHistoryDetailResponseDto> getUserBookHistoryList() {
-//        List<UserBookHistoryDetailResponseDto> list = new ArrayList<>();
-//        User user = User.builder().build();
-//
-        return null;
+    public List<UserBookHistoryDetailResponseDto> getUserBookHistoryList(Long userBookId) {
+        UserBook userBook = userBookRepository.findById(userBookId)
+                .orElseThrow(() -> new UserBookNotFoundException(userBookId));
+
+        List<UserBookHistory> userBookHistoryList = userBookHistoryRepository.findByUserBook(userBook)
+                .orElseThrow(() -> new UserBookHistoryNotFoundException(userBookId));
+
+        List<UserBookHistoryDetailResponseDto> responseDtoList = new ArrayList<>();
+
+        for(UserBookHistory history : userBookHistoryList){
+            responseDtoList.add(new UserBookHistoryDetailResponseDto(history));
+        }
+
+        return responseDtoList;
     }
 }

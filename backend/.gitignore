@@ -38,3 +38,5 @@ out/
 
 ### propertie file ###
 *.properties
+application.properties
+application.yml

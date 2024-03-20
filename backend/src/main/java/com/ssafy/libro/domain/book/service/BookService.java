@@ -3,7 +3,9 @@ package com.ssafy.libro.domain.book.service;
 import com.ssafy.libro.domain.book.dto.BookCreateRequestDto;
 import com.ssafy.libro.domain.book.dto.BookDetailResponseDto;
 import com.ssafy.libro.domain.book.dto.BookUpdateRequestDto;
+import org.springframework.data.domain.Pageable;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface BookService {
@@ -12,6 +14,12 @@ public interface BookService {
      void deleteBook(Long id);
      BookDetailResponseDto getBook(Long id);
      List<BookDetailResponseDto> getBooks();
+
+     List<BookDetailResponseDto> getBooksByTitle(String title, Pageable pageable);
+     List<BookDetailResponseDto> getBooksByAuthor(String author, Pageable pageable);
+     List<BookDetailResponseDto> getBooksByIsbn(String isbn);
+
+     void updateBooksByApi(String query) throws IOException;
 
     // List<BookCreateResponseDto> getBooksByTitle(String title);
     // List<BookCreateResponseDto> getBooksByAuthor(String author);

@@ -1,4 +1,18 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {};
+const nextConfig = {
+    images: {
+        domains: ['shopping-phinf.pstatic.net'],
+    },
+    reactStrictMode: true,
+    swcMinify: true,
+    async rewrites() {
+        return [
+            {
+                source: "/api/:path*",
+                destination: "https://openapi.naver.com/:path*",
+            }
+        ]
+    }
+};
 
 export default nextConfig;
