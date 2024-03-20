@@ -3,15 +3,19 @@ package com.ssafy.libro.global.auth.entity;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Component
+
 public class JwtProvider {
 
     @Value("${jwt.accessExpTime}")
@@ -20,7 +24,8 @@ public class JwtProvider {
     @Value("${jwt.refreshExpTime}")
     long refreshExpTime;
 
-    //private final RedisTemplate<String, String> redisTemplate;
+//    @Autowired
+//    private RedisTemplate<String, Object> redisTemplate;
 
     private final SecretKey SECRET_KEY;
 
@@ -29,7 +34,7 @@ public class JwtProvider {
         this.SECRET_KEY = new SecretKeySpec(key.getBytes(), SignatureAlgorithm.HS512.getJcaName());
     }
 
-    public String createAccessToken(int id, List<String> role) {
+    public String createAccessToken(String id, List<String> role) {
         String accessToken = Jwts.builder()
                 .claim("id",id)
                 .claim("type","access")
@@ -37,7 +42,7 @@ public class JwtProvider {
                 .setExpiration(new Date(System.currentTimeMillis() + refreshExpTime))
                 .signWith(SECRET_KEY)
                 .compact();
-        System.out.println("accessToken"+accessToken);
+        System.out.println("accessToken : "+accessToken);
         return accessToken;
     }
 
@@ -48,12 +53,12 @@ public class JwtProvider {
                 .parseClaimsJws(refreshToken)
                 .getBody();
 
-        int id = (int) claims.get("id");
+        String id = (String)claims.get("id");
         List<String> role = (List<String>)claims.get("role");
         return createAccessToken(id, role);
     }
 
-    public String createRefreshToken(int id, List<String> role) {
+    public String createRefreshToken(String id, List<String> role) {
         String refreshToken = Jwts.builder()
                 .claim("id",id)
                 .claim("type","refresh")
@@ -61,18 +66,18 @@ public class JwtProvider {
                 .setExpiration(new Date(System.currentTimeMillis() + refreshExpTime))
                 .signWith(SECRET_KEY)
                 .compact();
-/*        redisTemplate.opsForValue().set(
-                String.valueOf(id), //key
-                refreshToken, //value
-                refreshExpTime,
-                TimeUnit.MILLISECONDS
-        );*/
+//        redisTemplate.opsForValue().set(
+//                id, //key
+//                refreshToken, //value
+//                refreshExpTime,
+//                TimeUnit.MILLISECONDS
+//        );
 
         return refreshToken;
     }
 
     public Boolean validateAccessToken(String accessToken) {
-        System.out.println("access check");
+        System.out.println("access check : "+accessToken);
         accessToken = accessToken.replace("Bearer ","");
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(SECRET_KEY)
@@ -104,14 +109,14 @@ public class JwtProvider {
         return false;
     }
 
-    public int getUserId(String jwt) {
+    public String getUserId(String jwt) {
         jwt = jwt.replace("Bearer ","");
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(SECRET_KEY)
                 .build()
                 .parseClaimsJws(jwt)
                 .getBody();
-        return (int)claims.get("id");
+        return (String)claims.get("id");
     }
 
     public List<String> getUserRole(String jwt) {

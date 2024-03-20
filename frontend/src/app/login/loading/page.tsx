@@ -4,11 +4,16 @@ import { useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { LoginApi } from "@/lib/axios-login";
 const LoginPage = () => {
-  const accessToken = useSearchParams().get("token");
+  const accessToken = useSearchParams().get("accessToken");
+  const refreshToken = useSearchParams().get("refreshToken");
   useEffect(() => {
-    console.log("토큰", accessToken);
+    console.log(accessToken, refreshToken);
     if (accessToken) {
-      
+      LoginApi.loginUser(accessToken)
+        .then((data) => {
+          console.log("응답 값", data);
+        })
+        .catch((err) => console.log(err));
     }
   }, []);
   return (

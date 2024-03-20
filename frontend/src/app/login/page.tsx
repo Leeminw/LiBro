@@ -28,44 +28,31 @@ const Logo = () => {
 const GoogleLoginButton = () => {
   const router = useRouter();
   const { toast } = useToast();
-  const login = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
-      console.log(tokenResponse);
-      LoginApi.loginUser(tokenResponse.access_token)
-        .then((data) => {
-          console.log(data);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-      // router.push(`/login/loading?token=${tokenResponse.access_token}`);
-    },
-    onError: () => {
-      toast({
-        title: "로그인 실패",
-        description: "아이디 및 비밀번호를 확인해주세요.",
-      });
-    },
-  });
+  const login = () => {};
 
   return (
-    <Button
-      onClick={() => login()}
-      className="bg-white text-black font-bold py-2 px-4 rounded flex items-center m-2"
-      style={{ width: "70%", height: "7%", border: "1px solid #D9D9D9" }}
+    <a
+      href="http://localhost:8080/oauth2/authorization/google?redirect_uri=http://localhost:3000/"
+      className="w-full flex justify-center"
     >
-      <div
-        className="flex items-center border-r-2 border-gray-300 pr-3"
-        style={{ height: "40px" }}
+      <Button
+        onClick={() => login()}
+        className="bg-white text-black font-bold py-2 px-4 rounded flex items-center m-2"
+        style={{ width: "70%", height: "7%", border: "1px solid #D9D9D9" }}
       >
-        <img
-          src="/google.svg"
-          alt="Google"
-          className="w-7 h-7 transform scale-140"
-        />
-      </div>
-      <span className="flex-1 text-center">구글 로그인</span>
-    </Button>
+        <div
+          className="flex items-center border-r-2 border-gray-300 pr-3"
+          style={{ height: "40px" }}
+        >
+          <img
+            src="/google.svg"
+            alt="Google"
+            className="w-7 h-7 transform scale-140"
+          />
+        </div>
+        <span className="flex-1 text-center">구글 로그인</span>
+      </Button>
+    </a>
   );
 };
 
@@ -136,9 +123,9 @@ const SocialLoginButtons = () => {
         <div className="mb-3 font-bold text-sm">
           소셜 로그인으로 간편하게 가입하세요!
         </div>
-        <GoogleOAuthProvider clientId="952555940697-s3ve2jpecgvqinmv3po03skgtror1t8g.apps.googleusercontent.com">
-          <GoogleLoginButton />
-        </GoogleOAuthProvider>
+        <GoogleLoginButton />
+        {/* <GoogleOAuthProvider clientId="952555940697-s3ve2jpecgvqinmv3po03skgtror1t8g.apps.googleusercontent.com">
+        </GoogleOAuthProvider> */}
         <NaverLoginButton />
         <KakaoLoginButton />
         {/*NaverLoginButton, KakaoLoginButton 호출 생략*/}

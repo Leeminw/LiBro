@@ -12,21 +12,8 @@ const nextConfig = {
         destination: "https://openapi.naver.com/:path*",
       },
       {
-        source: "/oauth2/:path*",
-        destination: "http://localhost:8080/oauth2/:path*",
-      },
-    ];
-  },
-  async headers() {
-    return [
-      {
-        source: "/oauth2/authorization/google",
-        headers: [
-          {
-            key: "Cross-Origin-Embedder-Policy",
-            value: "unsafe-none",
-          },
-        ],
+        source: "/api/:path*",
+        destination: "http://localhost:8080/api/:path*",
       },
     ];
   },

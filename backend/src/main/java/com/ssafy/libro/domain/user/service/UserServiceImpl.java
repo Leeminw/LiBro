@@ -1,6 +1,8 @@
 package com.ssafy.libro.domain.user.service;
 
 import com.ssafy.libro.domain.user.dto.UserJoinRequestDto;
+import com.ssafy.libro.domain.user.entity.User;
+import com.ssafy.libro.domain.user.repository.UserRepository;
 import com.ssafy.libro.global.util.entity.Response;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
@@ -11,25 +13,22 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
 public class UserServiceImpl implements UserService {
     private final Response response;
-    @Override
-    public ResponseEntity<Map<String, Object>> loginUser(String token) {
-        String endPointUri = "https://www.googleapis.com/oauth2/v2/userinfo";
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.AUTHORIZATION, "Bearer " + token);
-        HttpEntity<String> entity = new HttpEntity<>("", headers);
+    private UserRepository userRepository;
 
-        ResponseEntity<String> uriResponse = restTemplate.exchange(endPointUri, HttpMethod.GET, entity, String.class);
-        String userInfo = uriResponse.getBody();
+    @Override
+    public ResponseEntity<Map<String, Object>> loadUser(String token) {
         try {
-            return response.handleSuccess("회원가입 성공", userInfo);
+            Optional<User> user = userRepository.findById(Long.parseLong(token));
+            return response.handleSuccess("회원 정보 로드 성공", user);
         } catch (Exception e) {
-            return response.handleFail("회원가입 실패.", e);
+            System.out.println(e);
+            return response.handleFail("회원 정보 로드 실패", e);
         }
     }
 

@@ -1,12 +1,14 @@
 import axios from "axios";
 const apiClient = axios.create();
 const LoginApi = {
-  loginUser: async (code: string) => {
+  loginUser: async (token: string) => {
     try {
-      const response = await apiClient.post(
-        "http://localhost:8080/api/user/login",
+      const response = await apiClient.get(
+        "http://localhost:8080/api/user/load",
         {
-          token: code,
+          headers:{
+            Authorization: "Bearer "+token
+          }
         }
       );
       return response.data;
