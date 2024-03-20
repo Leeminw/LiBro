@@ -12,5 +12,9 @@ import java.util.Optional;
 public interface UserBookRepository extends JpaRepository<UserBook,Long> , UserBookCustomRepository {
 //    Optional<List<UserBook>> findByUser (User user);
 //    Optional<List<UserBook>> findByUserAndBook(User user, Book book);
+    Optional<Long> countByUserAndIsDeleted(User user, Boolean isDeleted);
+//    Optional<Long> countByUserAndIsDeleted(User user, Boolean isDeleted);
+
+
 
 }

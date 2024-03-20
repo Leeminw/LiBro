@@ -221,4 +221,43 @@ public class UserBookServiceImpl implements UserBookService{
         return new UserBookDetailResponseDto(userBook);
     }
 
+    @Override
+    public UserBookRatioResponseDto getUserReadRatio(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+
+        long total = userBookRepository.countUserBookByUser(user)
+                .orElseThrow(() -> new UserBookNotFoundException("no data"));
+        long read = userBookRepository.countUserBookByUserReadComplete(user)
+                .orElse(0L);
+
+        return UserBookRatioResponseDto.builder()
+                .type("user")
+                .ratio(1.0*read/total)
+                .totalSize(total)
+                .readSize(read)
+                .build();
+
+    }
+
+    @Override
+    public UserBookRatioResponseDto getBookReadRatio(Long bookId) {
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new BookNotFoundException(bookId));
+
+        long total = userBookRepository.countUserBookByBook(book)
+                .orElseThrow(() -> new UserBookNotFoundException("no data"));
+        long read  = userBookRepository.countUserBookByBookReadComplete(book)
+                .orElse(0L);
+
+        return UserBookRatioResponseDto.builder()
+                .type("book")
+                .ratio(1.0*read/total)
+                .totalSize(total)
+                .readSize(read)
+                .build();
+
+    }
+
+
 }

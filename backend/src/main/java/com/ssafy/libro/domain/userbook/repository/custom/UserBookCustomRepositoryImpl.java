@@ -1,5 +1,6 @@
 package com.ssafy.libro.domain.userbook.repository.custom;
 
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.ssafy.libro.domain.book.entity.Book;
 import com.ssafy.libro.domain.user.entity.QUser;
@@ -47,11 +48,88 @@ public class UserBookCustomRepositoryImpl implements UserBookCustomRepository{
                 .leftJoin(userBook.userBookHistoryList, userBookHistory).fetchJoin()
                 .leftJoin(userBook.book, book).fetchJoin()
                 .where(userBook.user.eq(user)
-                        .and(userBookHistory.startDate.between(startDate,endDate)
-                                .and(userBook.isDeleted.eq(false))))
+                        .and(userBookHistory.startDate.between(startDate,endDate))
+                        .and(userBook.isDeleted.eq(false))
+                )
                 .fetch();
 
 
         return Optional.of(bookList);
+    }
+    // 읽고있는 도서 (유저) 가장 최근 데이터가 null 값인것.
+    @Override
+    public Optional<List<UserBook>> findUserBookOnReading(User user) {
+        List<UserBook> userBookList =
+                jpaQueryFactory.select(userBook)
+                .from(userBook)
+                .leftJoin(userBook.userBookHistoryList, userBookHistory)
+                .leftJoin(userBook.book,book).fetchJoin()
+                .where(userBook.in(
+                        JPAExpressions
+                                .select(userBook)
+                                .from(userBookHistory)
+                                .where(userBookHistory.userBook.eq(userBook))
+                                .orderBy(userBookHistory.startDate.desc())
+                                .limit(1)
+                                .where(userBookHistory.endDate.isNull())
+                )).fetch();
+
+        return Optional.of(userBookList);
+    }
+
+    @Override
+    public Optional<List<UserBook>> findUserBookReadComplete(User user) {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<Long> countUserBookByBook(Book book) {
+        Long result = jpaQueryFactory
+                .select(userBook.count())
+                .from(userBook)
+                .leftJoin(userBook.book, QBook.book)
+                .where(userBook.book.eq(book).and(userBook.isDeleted.eq(false)))
+                .fetchFirst();
+        return Optional.of(result);
+    }
+
+    @Override
+    public Optional<Long> countUserBookByBookReadComplete(Book book) {
+        Long result = jpaQueryFactory
+                .select(userBook.count())
+                .from(userBook)
+                .leftJoin(userBook.book, QBook.book)
+                .where(userBook.book.eq(book)
+                        .and(userBook.isDeleted.eq(false))
+                        .and(userBook.isComplete.eq(true))
+                )
+                .fetchFirst();
+        return Optional.of(result);
+    }
+
+    @Override
+    public Optional<Long> countUserBookByUser(User user) {
+        Long result = jpaQueryFactory
+                .select(userBook.count())
+                .from(userBook)
+                .leftJoin(userBook.user, QUser.user)
+                .where(userBook.user.eq(user)
+                        .and(userBook.isDeleted.eq(false)))
+                .fetchFirst();
+        return Optional.of(result);
+    }
+
+    @Override
+    public Optional<Long> countUserBookByUserReadComplete(User user) {
+        Long result = jpaQueryFactory
+                .select(userBook.count())
+                .from(userBook)
+                .leftJoin(userBook.user, QUser.user)
+                .where(userBook.user.eq(user)
+                        .and(userBook.isDeleted.eq(false))
+                        .and(userBook.isComplete.eq(true))
+                )
+                .fetchFirst();
+        return Optional.of(result);
     }
 }

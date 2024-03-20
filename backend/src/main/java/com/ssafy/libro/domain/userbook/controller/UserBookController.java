@@ -52,7 +52,7 @@ public class UserBookController {
         return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(responseDto));
     }
 //    관리타입 수정
-    @PostMapping
+    @PostMapping("type")
     public ResponseEntity<?> updateUserBookType(@RequestBody UserBookTypeUpdateRequestDto requestDto){
         UserBookDetailResponseDto responseDto = userBookService.updateType(requestDto);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(responseDto));
@@ -78,19 +78,20 @@ public class UserBookController {
         return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(responseDtoList));
     }
 
-//    전체 등록 도서 완독
+//    사용자 등록 도서 완독
     @GetMapping("/read-ratio/user/{userId}")
     public ResponseEntity<?> getUserReadRatio(@PathVariable Long userId){
-
-        return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(""));
+        UserBookRatioResponseDto responseDto = userBookService.getUserReadRatio(userId);
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(responseDto));
     }
+//   특정 등록 도서 완독률
+
     @GetMapping("/read-ratio/book/{bookId}")
     public ResponseEntity<?> getBookReadRatio(@PathVariable Long bookId){
-
-        return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(""));
+        UserBookRatioResponseDto responseDto = userBookService.getBookReadRatio(bookId);
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(responseDto));
     }
 //    @GetMapping("/")
-//    특정 등록 도서 완독률
 
 //    독서 기록 분석 ?
 

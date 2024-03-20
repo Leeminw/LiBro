@@ -8,6 +8,7 @@ import com.ssafy.libro.domain.userbookcomment.entity.UserBookComment;
 import com.ssafy.libro.domain.userbookhistory.entity.UserBookHistory;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -25,6 +26,7 @@ public class UserBook {
     private Long id;
     private String type;
     @Column(columnDefinition = "TINYINT(1)")
+    @ColumnDefault("false")
     private Boolean isComplete;
     private Double rating;
     private String ratingComment;
@@ -35,6 +37,7 @@ public class UserBook {
     @UpdateTimestamp
     private LocalDateTime updatedDate;
     @Column(columnDefinition = "TINYINT(1)")
+    @ColumnDefault("false")
     private Boolean isDeleted;
     // Join
     @ManyToOne(fetch = FetchType.LAZY)
