@@ -31,7 +31,8 @@ public class UserBookCustomRepositoryImpl implements UserBookCustomRepository{
                 .select(userBook)
                 .from(userBook)
                 .leftJoin(userBook.book,book).fetchJoin()
-                .where(userBook.user.eq(user))
+                .where(userBook.user.eq(user)
+                        .and(userBook.isDeleted.eq(false)))
                 .fetch();
 
         return Optional.of(bookList);
@@ -45,7 +46,9 @@ public class UserBookCustomRepositoryImpl implements UserBookCustomRepository{
                 .from(userBook)
                 .leftJoin(userBook.userBookHistoryList, userBookHistory).fetchJoin()
                 .leftJoin(userBook.book, book).fetchJoin()
-                .where(userBook.user.eq(user).and(userBookHistory.startDate.between(startDate,endDate)))
+                .where(userBook.user.eq(user)
+                        .and(userBookHistory.startDate.between(startDate,endDate)
+                                .and(userBook.isDeleted.eq(false))))
                 .fetch();
 
 
