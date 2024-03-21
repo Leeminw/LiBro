@@ -2,11 +2,13 @@ package com.ssafy.libro.domain.userbook.entity;
 
 import com.ssafy.libro.domain.book.entity.Book;
 import com.ssafy.libro.domain.user.entity.User;
+import com.ssafy.libro.domain.userbook.dto.UserBookRatingRequestDto;
 import com.ssafy.libro.domain.userbook.dto.UserBookUpdateRequestDto;
 import com.ssafy.libro.domain.userbookcomment.entity.UserBookComment;
 import com.ssafy.libro.domain.userbookhistory.entity.UserBookHistory;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -24,8 +26,9 @@ public class UserBook {
     private Long id;
     private String type;
     @Column(columnDefinition = "TINYINT(1)")
+    @ColumnDefault("false")
     private Boolean isComplete;
-    private Float rating;
+    private Double rating;
     private String ratingComment;
     @Column(columnDefinition = "TINYINT(1)")
     private Boolean ratingSpoiler;
@@ -33,7 +36,12 @@ public class UserBook {
     private LocalDateTime createdDate;
     @UpdateTimestamp
     private LocalDateTime updatedDate;
-
+    @Column(columnDefinition = "TINYINT(1)")
+    @ColumnDefault("false")
+    private Boolean isDeleted;
+    @Column(columnDefinition = "TINYINT(1)")
+    @ColumnDefault("false")
+    private Boolean isOnRead;
     // Join
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -58,10 +66,22 @@ public class UserBook {
 
     public void update(UserBookUpdateRequestDto requestDto){
         this.type = requestDto.getType();
-        this.isComplete = requestDto.getIsComplete();
+    }
+    public void updateType(String type){
+        this.type = type;
+    }
+    public void updateRating(UserBookRatingRequestDto requestDto){
         this.rating = requestDto.getRating();
         this.ratingComment = requestDto.getRatingComment();
         this.ratingSpoiler = requestDto.getRatingSpoiler();
     }
-
+    public void updateDelete(){
+        this.isDeleted = true;
+    }
+    public void updateComplete() {
+        this.isComplete = true;
+    }
+    public void updateIsOnRead(Boolean isOnRead){
+        this.isOnRead = isOnRead;
+    }
 }

@@ -5,15 +5,11 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Builder
 @Getter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserBookUpdateRequestDto {
-    private Long id;
+public class UserBookTypeUpdateRequestDto {
+    private Long userBookId;
     private String type;
-    private Boolean isComplete;
-    private Double rating;
-    private String ratingComment;
-    private Boolean ratingSpoiler;
 }

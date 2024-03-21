@@ -12,4 +12,14 @@ import java.util.Optional;
 public interface UserBookCustomRepository {
     Optional<List<UserBook>> findUserBookByUser(User user);
     Optional<List<UserBook>> findUserBookByUserAndDate(User user, LocalDateTime startDate, LocalDateTime endDate);
+    // 읽고있는 도서 (유저) 가장 최근 데이터가 null 값인것.
+    Optional<List<UserBook>> findUserBookOnReading(User user);
+    // 완독 도서 (유저)
+    Optional<List<UserBook>> findUserBookReadComplete(User user);
+    //
+    Optional<Long> countUserBookByBook(Book book);
+    Optional<Long> countUserBookByBookReadComplete(Book book);
+    Optional<Long> countUserBookByUser(User user);
+    Optional<Long> countUserBookByUserReadComplete(User user);
+
 }
