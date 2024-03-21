@@ -32,7 +32,6 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
             input.add(user.getRole().getTitle());
             String token = jwtProvider.createAccessToken(user.getAuthId(), input);
             String refreshToken = jwtProvider.createRefreshToken(user.getAuthId(), input);
-
             String redirectURL = UriComponentsBuilder.fromUriString("http://localhost:3000/login/loading")
                     .queryParam("accessToken", token)
                     .queryParam("refreshToken", refreshToken)

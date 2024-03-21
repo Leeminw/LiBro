@@ -3,8 +3,8 @@ package com.ssafy.libro.global.auth.filter;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.ssafy.libro.domain.user.entity.User;
 import com.ssafy.libro.domain.user.repository.UserRepository;
+import com.ssafy.libro.global.auth.entity.JWToken;
 import com.ssafy.libro.global.auth.entity.JwtProvider;
-import com.ssafy.libro.global.auth.entity.Jwtoken;
 import com.ssafy.libro.global.util.entity.Response;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
@@ -65,7 +65,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                 System.out.println("REFRESH TOKEN!!");
                 jwtToken = jwtToken.replace("Bearer ", "");
                 String accessToken = jwtProvider.reCreateAccessToken(jwtToken);
-                Jwtoken token = Jwtoken.builder().grantType("Bearer ").accessToken(accessToken).refreshToken(jwtToken).build();
+                JWToken token = JWToken.builder().grantType("Bearer ").accessToken(accessToken).refreshToken(jwtToken).build();
                 chain.doFilter(request, response);
             }
         } catch (JWTVerificationException e) {
@@ -80,5 +80,10 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     public Authentication getAuthentication(User user) {
         return new UsernamePasswordAuthenticationToken(user, "",
                 List.of(new SimpleGrantedAuthority(user.getRole().getKey())));
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        return request.getRequestURI().contains("token/");
     }
 }

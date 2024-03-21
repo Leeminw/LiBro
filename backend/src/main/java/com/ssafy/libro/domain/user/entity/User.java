@@ -38,10 +38,10 @@ public class User {
     @Column(nullable = false)
     private Role role;
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY,targetEntity = UserBook.class)
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER,targetEntity = UserBook.class)
     private List<UserBook> userBookList;
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
     private List<Article> articles;
 
 

@@ -4,29 +4,40 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { LoginApi } from "@/lib/axios-login";
 import { useToast } from "@/components/ui/use-toast";
+import useUserState from "@/lib/login-state";
 const LoginPage = () => {
   const accessToken = useSearchParams().get("accessToken");
   const refreshToken = useSearchParams().get("refreshToken");
+  const { setUserInfo } = useUserState();
   const { toast } = useToast();
   const router = useRouter();
   useEffect(() => {
     console.log(accessToken, refreshToken);
-    if (accessToken) {
+    if (accessToken && refreshToken) {
+      localStorage.setItem("accessToken", accessToken);
+      localStorage.setItem("refreshToken", refreshToken);
       LoginApi.loginUser(accessToken)
         .then((data) => {
           console.log("응답 값", data);
-          if (data!==undefined && data.status === "success") {
+          if (data !== undefined && data.status === "success") {
+            localStorage.setItem("id", data.data.id);
+            setUserInfo({
+              email: data.data.email,
+              name: data.data.name,
+              profile: data.profile,
+              nickname: data.data.name,
+            });
             toast({
               title: "로그인 성공",
-              description:`${data.data.name}님 반갑습니다.`
-            })
+              description: `${data.data.name}님 반갑습니다.`,
+            });
             router.push("/");
           } else {
             toast({
               title: "로그인 실패",
-              description:"로그인에 실패했습니다.\n잠시 후 다시 시도해주세요."
-            })
-            router.push("/login")
+              description: "로그인에 실패했습니다.\n잠시 후 다시 시도해주세요.",
+            });
+            router.push("/login");
           }
         })
         .catch((err) => console.log(err));

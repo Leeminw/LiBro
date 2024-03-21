@@ -18,7 +18,7 @@ import java.util.Collections;
 
 @RequiredArgsConstructor
 @Service
-public class CustomOAuth2UserService extends DefaultOAuth2UserService  {
+public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     private final UserRepository userRepository;
 
     @Override
@@ -32,14 +32,14 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService  {
         String nameAttributeKey = userRequest.getClientRegistration().getProviderDetails()
                 .getUserInfoEndpoint().getUserNameAttributeName();
         // OAuth2UserService를 사용하여 가져온 OAuth2User정보로 OAuth2Attribute 객체 생성
-        OAuthAttributes attributes = OAuthAttributes.of(registrationId,oAuth2User.getAttributes());
-        User user = userRepository.findUserByAuthTypeAndAuthId(attributes.getAuthType(),attributes.getAuthId())
+        OAuthAttributes attributes = OAuthAttributes.of(registrationId, oAuth2User.getAttributes());
+        User user = userRepository.findUserByAuthTypeAndAuthId(attributes.getAuthType(), attributes.getAuthId())
                 .orElse(attributes.toEntity());
         // 회원가입이 안되어있을 시 DB 저장
-        if(user.getId()==null) {
+        if (user.getId() == null) {
             userRepository.save(user);
         }
         return new OAuth2UserImpl(Collections.singleton(new SimpleGrantedAuthority(user.getRole().getKey())),
-                oAuth2User.getAttributes(), nameAttributeKey , user);
+                oAuth2User.getAttributes(), nameAttributeKey, user);
     }
 }

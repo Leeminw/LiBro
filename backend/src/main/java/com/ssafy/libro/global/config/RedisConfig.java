@@ -9,22 +9,22 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericToStringSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
-//@Configuration
+@Configuration
 public class RedisConfig {
-//    @Value("${spring.data.redis.port}")
-//    private int port;
-//
-//    @Value("${spring.data.redis.host}")
-//    private String host;
-//    public RedisConnectionFactory redisConnectionFactory() {
-//        return new LettuceConnectionFactory(host, port);
-//    }
-//    @Bean
-//    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connecttionFactory) {
-//        RedisTemplate<String, Object> template = new RedisTemplate<>();
-//        template.setKeySerializer(new StringRedisSerializer());
-//        template.setValueSerializer(new GenericToStringSerializer<Object>(Object.class));
-//        template.setConnectionFactory(connecttionFactory);
-//        return template;
-//    }
+    @Value("${spring.data.redis.port}")
+    private int port;
+
+    @Value("${spring.data.redis.host}")
+    private String host;
+    public RedisConnectionFactory redisConnectionFactory() {
+        return new LettuceConnectionFactory(host, port);
+    }
+    @Bean
+    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connecttionFactory) {
+        RedisTemplate<String, Object> template = new RedisTemplate<>();
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(new GenericToStringSerializer<Object>(Object.class));
+        template.setConnectionFactory(connecttionFactory);
+        return template;
+    }
 }
