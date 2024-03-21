@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface TaskRepository extends JpaRepository<Task, Long> {
+public interface TaskJpaRepository extends JpaRepository<Task, Long> {
     Optional<Task> findByIsbn(String isbn);
     Optional<List<Task>> findAllByStatus(Boolean status);
     Optional<List<Task>> findAllByTitleContaining(String title);
