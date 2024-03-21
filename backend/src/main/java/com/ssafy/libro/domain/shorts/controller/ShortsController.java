@@ -42,4 +42,10 @@ public class ShortsController {
         PromptResponseDto responseDto = shortsService.translatePrompt(requestDto);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(responseDto));
     }
+
+    @GetMapping("/api/v1/shorts/create/test")
+    public ResponseEntity<?> createShortsTest() {
+        shortsService.createShorts();
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success("성공."));
+    }
 }
