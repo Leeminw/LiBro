@@ -28,7 +28,7 @@ public class ArticleDetailResponseDto {
         this.createdDate = article.getCreatedDate();
         this.updatedDate = article.getUpdatedDate();
         this.name = article.getUser().getName();
-        this.picture = article.getUser().getPicture();
+        this.picture = article.getUser().getProfile();
         this.boardId = article.getBoard().getId();
     }
 
