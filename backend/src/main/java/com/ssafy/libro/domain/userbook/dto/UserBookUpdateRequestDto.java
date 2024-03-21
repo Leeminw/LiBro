@@ -13,7 +13,7 @@ public class UserBookUpdateRequestDto {
     private Long id;
     private String type;
     private Boolean isComplete;
-    private Float rating;
+    private Double rating;
     private String ratingComment;
     private Boolean ratingSpoiler;
 }

@@ -1,17 +1,8 @@
 package com.ssafy.libro.domain.club.controller;
 
-import com.ssafy.libro.domain.club.dto.*;
-import com.ssafy.libro.domain.club.service.ClubService;
+import com.ssafy.libro.domain.club.dto.ClubCreateRequestDto;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-
-import java.util.Map;
-
-import com.ssafy.libro.global.common.ResponseData;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
