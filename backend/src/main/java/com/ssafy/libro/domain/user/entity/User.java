@@ -39,7 +39,6 @@ public class User {
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<Article> articles = new ArrayList<>();
 
-
     @Builder
     public User(String name, String email, String picture, Role role) {
         this.name = name;
