@@ -1,8 +1,5 @@
 import DOMPurify from 'dompurify';
 import { JSDOM } from 'jsdom';
-import {Card, CardContent,} from "@/components/ui/card";
-import Writter from "@/components/components/team-members";
-import Comments from "@/components/components/comments";
 import {ScrollArea} from "@/components/ui/scroll-area";
 import GroupOwner from "@/components/components/groupOwner";
 import CommunityInformCard from "@/components/components/board/communityCard";
