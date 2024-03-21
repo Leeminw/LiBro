@@ -13,7 +13,7 @@ interface CategoryItemProps {
 
 function CategoryItem({ category, onEditStart, onDelete }: CategoryItemProps) {
     const [editing, setEditing] = useState(false);
-    const [inputValue, setInputValue] = useState(category.title);
+    const [inputValue, setInputValue] = useState(category.name);
 
     const handleEditStart = () => {
         setEditing(true);
@@ -26,7 +26,7 @@ function CategoryItem({ category, onEditStart, onDelete }: CategoryItemProps) {
 
     const handleEditCancel = () => {
         setEditing(false);
-        setInputValue(category.title);
+        setInputValue(category.name);
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -51,7 +51,7 @@ function CategoryItem({ category, onEditStart, onDelete }: CategoryItemProps) {
                 </>
             ) : (
                 <>
-                    <h2 className="text-lg cursor-pointer" onClick={handleEditStart}>{category.title}</h2>
+                    <h2 className="text-lg cursor-pointer" onClick={handleEditStart}>{category.name}</h2>
                     <div className="flex items-center space-x-2">
                         <FileEditIcon className="text-gray-600 cursor-pointer" onClick={handleEditStart} />
                         <TrashIcon className="text-gray-600 cursor-pointer" onClick={() => onDelete(category.id)} />
