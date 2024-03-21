@@ -1,8 +1,5 @@
 import DOMPurify from 'dompurify';
 import { JSDOM } from 'jsdom';
-import {Card, CardContent,} from "@/components/ui/card";
-import Writter from "@/components/components/team-members";
-import Comments from "@/components/components/comments";
 import {ScrollArea} from "@/components/ui/scroll-area";
 import GroupOwner from "@/components/components/groupOwner";
 import CommunityInformCard from "@/components/components/board/communityCard";
@@ -31,7 +28,7 @@ export default function CommunityPostPage() {
         <>
             {post && (
                 <>
-                    <CommunityInformCard title={"을왕리"} date={"2024-12-12"} memberType={"MEMBER"} memberCount={3}/>
+                    <CommunityInformCard clubName={"을왕리"} registeredTime={"2024-12-12"} memberType={"MEMBER"} memberCount={3}/>
                     <GroupOwner nickName={post.author.nickName} profileUrl={post.author.profileUrl}/>
                     <ScrollArea
                         className="flex flex-col max-w-md mx-auto bg-white h-[calc(70vh-100px)] rounded-lg border">

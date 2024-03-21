@@ -17,8 +17,8 @@ public class BoardSearchRepositoryImpl implements BoardSearchRepository {
     @Override
     public List<Board> getBoardListByGroupId(Long groupId) {
         return jpaQueryFactory
-                .select(board)
+                .selectFrom(board)
                 .where(board.club.id.eq(groupId))
-                .stream().toList();
+                .fetch();
     }
 }
