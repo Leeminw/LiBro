@@ -2,6 +2,7 @@ package com.ssafy.libro.domain.article.dto;
 
 import com.ssafy.libro.domain.article.entity.Article;
 import lombok.Getter;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 
@@ -13,6 +14,10 @@ public class ArticleDetailResponseDto {
     private Integer hit;
     private LocalDateTime createdDate;
     private LocalDateTime updatedDate;
+    private String name;
+    private String picture;
+    private Long boardId;
+    private Long commentCount;
 
 
     public ArticleDetailResponseDto(Article article){
@@ -22,6 +27,9 @@ public class ArticleDetailResponseDto {
         this.hit = article.getHit();
         this.createdDate = article.getCreatedDate();
         this.updatedDate = article.getUpdatedDate();
+        this.name = article.getUser().getName();
+        this.picture = article.getUser().getPicture();
+        this.boardId = article.getBoard().getId();
     }
 
 }

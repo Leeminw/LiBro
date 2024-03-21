@@ -1,14 +1,7 @@
 import UserProfile from "@/components/components/admin/UserProfile";
 
-interface UserProfileProps {
-    profileImageUrl: string;
-    userName: string;
-    userNo: number;
-    date: string;
-}
-
 interface MemberAdminProps {
-    userProfiles: UserProfileProps[];
+    userProfiles: UserProfile[];
 }
 
 export default function UserProfileProvider(props : MemberAdminProps) {

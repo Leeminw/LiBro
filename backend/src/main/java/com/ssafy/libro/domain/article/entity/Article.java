@@ -2,6 +2,7 @@ package com.ssafy.libro.domain.article.entity;
 
 import com.ssafy.libro.domain.article.dto.ArticleUpdateRequestDto;
 import com.ssafy.libro.domain.board.entity.Board;
+import com.ssafy.libro.domain.comment.entity.Comment;
 import com.ssafy.libro.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -12,6 +13,8 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @NoArgsConstructor
@@ -47,6 +50,9 @@ public class Article {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "board_id")
     private Board board;
+
+    @OneToMany(mappedBy = "article", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
 
     public Article(ArticleUpdateRequestDto dto){
         this.title = dto.getTitle();

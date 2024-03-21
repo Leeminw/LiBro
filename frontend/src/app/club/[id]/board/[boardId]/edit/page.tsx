@@ -1,9 +1,9 @@
 'use client'
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { useState, useEffect } from "react"; // 추가
+import {zodResolver} from "@hookform/resolvers/zod";
+import {useForm} from "react-hook-form";
+import {z} from "zod";
+import {useState, useEffect} from "react"; // 추가
 
 import {
     Form,
@@ -22,14 +22,22 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 
-import { Input } from "@/components/ui/input";
-import { toast } from "@/components/ui/use-toast";
-import { Button } from "@/components/ui/button";
-import { Editor } from "@/components/ui/quill";
+import {Input} from "@/components/ui/input";
+import {toast} from "@/components/ui/use-toast";
+import {Button} from "@/components/ui/button";
+import {Editor} from "@/components/ui/quill";
 
-import {getCategoryList, writePost} from "@/lib/club";
-import {QueryClient, useMutation, useQuery, useSuspenseQuery} from "@tanstack/react-query";
-import {useParams, useRouter} from "next/navigation";
+import {editPost, getCategoryList, getPostDetail, writePost} from "@/lib/club";
+import {
+    QueryClient,
+    useMutation,
+    useQueries,
+    useQuery,
+    useSuspenseQueries,
+    useSuspenseQuery
+} from "@tanstack/react-query";
+import {useRouter} from "next/navigation";
+import {signOut} from "next-auth/react";
 
 
 const FormSchema = z.object({
@@ -43,32 +51,52 @@ const FormSchema = z.object({
 
 const queryClient = new QueryClient()
 
-export default function InputForm() {
-
+export default function InputForm({params}: { params: { id: number, boardId: number } }) {
+    const {id: clubId, boardId} = params;
     const router = useRouter();
-    const params = useParams()
-    const clubId = params.id;
 
-    const { isLoading, isFetching, data : categories , isError : isFetchingError, error : FetchingError, refetch  } = useSuspenseQuery({
-        queryKey: ['clubCategory', clubId],
-        queryFn: () => getCategoryList(parseInt(clubId))
+    const results = useQueries({
+        queries: [
+            {
+                queryKey: ['clubCategory', clubId],
+                queryFn: () => getCategoryList(clubId)
+            },
+
+            {
+                queryKey: ['boardDetail', boardId],
+                queryFn: () => getPostDetail(boardId)
+            }
+        ]
     });
 
+    const isLoading = results.some((query) => query.isLoading);
+    const hasError = results.some((query) => query.isError);
+    const isSuccess = results.every((query) => query.isSuccess);
+
+    const [categories, post] = results.map(result => result.data)
+    //
+    // const categories = fetchedCategories.data
+    // const post = fetchedPost.data
+
     const {isPending, isError, error, mutate, data} = useMutation({
-        mutationFn: (param) => writePost(param),
+        mutationFn: (param) => editPost(boardId, param),
         onSuccess: (data, variables, context) => {
             toast({
-                title: "데이터를 정상적으로 저장하였습니다.",
+                title: "데이터를 정상적으로 수정 하였습니다.",
+                description : `${JSON.stringify(data, null, 2)}`
             });
+            queryClient.invalidateQueries(['boardDetail', boardId])
             queryClient.invalidateQueries(['articleList']);
-            router.push(`/club/${clubId}/board/${data.data.id}`);
+            router.push(`/club/${clubId}/board/${boardId}`);
         },
-        onError: () => { toast({
-            title: "에러가 발생하여 데이터를 저장할 수 없습니다.",
-        }); },
+        onError: (data, variables, context) => {
+            console.log(data)
+
+            toast({
+                title: "에러가 발생하여 데이터를 저장할 수 없습니다.",
+            });
+        },
     })
-
-
 
     const [contents, setContents] = useState<string>('');
     const [selectedCategory, setSelectedCategory] = useState<string>(""); // 선택된 카테고리를 상태로 관리합니다.
@@ -76,10 +104,10 @@ export default function InputForm() {
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
         defaultValues: {
-            title: "",
-            category: "",
+            title: '',
         },
     });
+
 
     const handleContentChange = (content: string) => {
         setContents(content);
@@ -97,11 +125,23 @@ export default function InputForm() {
 
         toast({
             title: "You submitted the following values:",
+            description : `${JSON.stringify(results, null, 2)}`
         });
     }
 
-    if (isLoading || isFetching) return <>Loading...</>;
-    if (isFetchingError) return <>{FetchingError.message}</>;
+    useEffect(() => {
+        if (isSuccess) {
+            form.setValue("title", post.title);
+            form.setValue("category", post.boardId.toString());
+            setContents(post.content);
+
+            return () => {
+            };
+        }
+    }, [isSuccess]);
+
+    if (isLoading) return <>Loading...</>;
+    if (hasError) return <>Error</>;
 
     return (
 
@@ -114,7 +154,7 @@ export default function InputForm() {
                 <FormField
                     control={form.control}
                     name="category"
-                    render={({ field }) => (
+                    render={({field}) => (
                         <FormItem className="w-2/3">
                             <FormLabel>카테고리</FormLabel>
                             <Select
@@ -122,11 +162,11 @@ export default function InputForm() {
                                     field.onChange(value);
                                     setSelectedCategory(value);
                                 }}
-                                defaultValue={form.getValues("category")}
+                                defaultValue={post.boardId.toString()}
                             >
                                 <FormControl>
                                     <SelectTrigger>
-                                        <SelectValue placeholder="카테고리를 선택해주세요." />
+                                        <SelectValue placeholder="카테고리를 선택해주세요."/>
                                     </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
@@ -137,7 +177,7 @@ export default function InputForm() {
                                     ))}
                                 </SelectContent>
                             </Select>
-                            <FormMessage />
+                            <FormMessage/>
                         </FormItem>
                     )}
                 />
@@ -145,17 +185,17 @@ export default function InputForm() {
                 <FormField
                     control={form.control}
                     name="title"
-                    render={({ field }) => (
+                    render={({field}) => (
                         <FormItem className="w-2/3">
                             <FormLabel>제목</FormLabel>
                             <FormControl>
                                 <Input placeholder="제목을 입력해주세요." {...field} />
                             </FormControl>
-                            <FormMessage />
+                            <FormMessage/>
                         </FormItem>
                     )}
                 />
-                <Editor contents={contents} onChange={handleContentChange} />
+                <Editor contents={contents} onChange={handleContentChange}/>
             </form>
         </Form>
     );
