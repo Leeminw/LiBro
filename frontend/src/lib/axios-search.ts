@@ -1,8 +1,4 @@
 import axios from "axios";
-
-const createProxyMiddleware = require('http-proxy-middleware');
-
-
 const apiClient = axios.create({
   headers: {
     "X-Naver-Client-Id": "1BtBosOmbcBO2P6B8RU5",

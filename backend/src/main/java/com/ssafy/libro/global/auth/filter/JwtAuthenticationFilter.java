@@ -43,8 +43,6 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
             // PrincipalDetailsService의 loadUserByUsername()이 실행됨.
             Authentication authentication = authenticationManager.authenticate(authenticationToken);
             // authentication이 들어왔다는건 DB에 username과 password가 일치하는 것을 찾았다는 것.
-
-
             // 이제 Authentication 객체가 세션영역에 저장됨. 즉, 로그인이 되었다는 뜻.
             return authentication; // 저장을 위해 리턴
 
