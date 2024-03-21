@@ -36,6 +36,9 @@ public class Club {
     private LocalDateTime createdDate;
     private LocalDateTime updatedDate;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "club")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "club", cascade = CascadeType.ALL)
     private List<Board> boards;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "club", cascade = CascadeType.ALL)
+    private List<UserGroup> userGroups;
 }

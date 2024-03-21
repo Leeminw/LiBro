@@ -29,7 +29,6 @@ public class BoardController {
 
     @GetMapping("{boardId}")
     public ResponseEntity<Map<String,Object>> getBoardArticles(@PathVariable("boardId") Long boardId){
-
         return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 
