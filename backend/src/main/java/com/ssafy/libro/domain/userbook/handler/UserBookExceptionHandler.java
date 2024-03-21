@@ -2,6 +2,7 @@ package com.ssafy.libro.domain.userbook.handler;
 
 import com.ssafy.libro.domain.book.exception.BookNotFoundException;
 import com.ssafy.libro.domain.book.exception.BookValidationException;
+import com.ssafy.libro.domain.userbook.exception.NotReadBookException;
 import com.ssafy.libro.domain.userbook.exception.UserBookNotFoundException;
 import com.ssafy.libro.domain.userbook.exception.UserBookValidationException;
 import com.ssafy.libro.global.common.ResponseData;
@@ -27,6 +28,11 @@ public class UserBookExceptionHandler {
     public ResponseEntity<?> handleBookValidationException(UserBookValidationException e) {
         log.error("UserBookValidationException: " + e.getMessage());
         return new ResponseEntity<>(ResponseData.failure(e.getMessage()), HttpStatus.BAD_REQUEST);
+    }
+    @ExceptionHandler(NotReadBookException.class)
+    public ResponseEntity<?> handleNotReadBookException(NotReadBookException e){
+        log.error("NotReadBookException: " + e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseData.failure());
     }
 
 }

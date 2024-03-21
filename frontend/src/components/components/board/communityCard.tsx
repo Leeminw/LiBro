@@ -3,21 +3,16 @@ import {CalendarIcon, MoreHorizontalIcon, SettingsIcon, XIcon, UsersIcon} from "
 import {DropdownMenu, DropdownMenuContent, DropdownMenuTrigger,DropdownMenuItem} from "@/components/ui/dropdown-menu";
 import {Button} from "@/components/ui/button";
 
-interface CommunityInformProps {
-    title: string;
-    date: string;
-    memberType: string;
-    memberCount ?: number
-}
 
-export default function CommunityInformCard(props : CommunityInformProps) {
-    const { title, date, memberType, memberCount } = props
+
+export default function CommunityInformCard(props : CommunityInform) {
+    const { clubName, registeredTime, memberType, memberCount } = props
 
     return (
         <Card>
             <CardHeader className="pb-4">
                 <CardTitle className="flex items-center gap-2 justify-between">
-                    {title}
+                    {clubName}
                     {
                         (memberType === 'ADMIN' || memberType === 'MEMBER') && <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -59,7 +54,7 @@ export default function CommunityInformCard(props : CommunityInformProps) {
                 <div className="flex items-center align-top">
                     <div className="flex items-center gap-2 justify-between">
                         <CalendarIcon className="w-5 h-5"/>
-                        <div className="font-bold">{date}</div>
+                        <div className="font-bold">{registeredTime}</div>
                     </div>
                 </div>
                 <div className="flex items-center align-top">

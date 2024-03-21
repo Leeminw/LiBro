@@ -5,6 +5,7 @@ import com.ssafy.libro.domain.userbookhistory.entity.UserBookHistory;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
 
@@ -13,10 +14,11 @@ import java.time.LocalDateTime;
 @ToString
 public class UserBookHistoryCreateRequestDto {
     private Long userBookId;
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime startDate;
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime endDate;
 
-    private UserBook userbook;
 
     public UserBookHistory toEntity(){
         return UserBookHistory.builder()
