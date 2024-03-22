@@ -1,8 +1,9 @@
-"use client"
+'use client'
 
-import {zodResolver} from "@hookform/resolvers/zod"
-import {useForm} from "react-hook-form"
-import {z} from "zod"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { useState, useEffect } from "react"; // 추가
 
 import {
     Form,
@@ -11,7 +12,7 @@ import {
     FormItem,
     FormLabel,
     FormMessage,
-} from "@/components/ui/form"
+} from "@/components/ui/form";
 
 import {
     Select,
@@ -19,23 +20,16 @@ import {
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 
-import {Input} from "@/components/ui/input"
-import {toast} from "@/components/ui/use-toast"
-import {Button} from "@/components/ui/button";
-import {Editor} from "@/components/ui/quill";
-import {useState} from "react";
+import { Input } from "@/components/ui/input";
+import { toast } from "@/components/ui/use-toast";
+import { Button } from "@/components/ui/button";
+import { Editor } from "@/components/ui/quill";
 
-interface Categories {
-    [key: string]: string;
-}
-
-const categories: Categories = {
-    "example": "m@example.com",
-    "google": "m@google.com",
-    "support": "m@support.com"
-};
+import {getCategoryList, writePost} from "@/lib/club";
+import {QueryClient, useMutation, useQuery, useSuspenseQuery} from "@tanstack/react-query";
+import {useParams, useRouter} from "next/navigation";
 
 
 const FormSchema = z.object({
@@ -43,12 +37,41 @@ const FormSchema = z.object({
         message: "해당 값은 반드시 입력해야 합니다."
     }),
     category: z.string().refine(value => value.trim() !== "", {
-        message: "해당 값은 반드시 입력해야 합니다."}),
-})
+        message: "해당 값은 반드시 입력해야 합니다."
+    }),
+});
 
+const queryClient = new QueryClient()
 
 export default function InputForm() {
-    const [contents, setContents] = useState<string>(''); // content 상태를 상위 컴포넌트에서 관리
+
+    const router = useRouter();
+    const params = useParams()
+    const clubId = params.id;
+
+    const { isLoading, isFetching, data : categories , isError : isFetchingError, error : FetchingError, refetch  } = useSuspenseQuery({
+        queryKey: ['clubCategory', clubId],
+        queryFn: () => getCategoryList(parseInt(clubId))
+    });
+
+    const {isPending, isError, error, mutate, data} = useMutation({
+        mutationFn: (param) => writePost(param),
+        onSuccess: (data, variables, context) => {
+            toast({
+                title: "데이터를 정상적으로 저장하였습니다.",
+            });
+            queryClient.invalidateQueries(['articleList']);
+            router.push(`/club/${clubId}/board/${data.data.id}`);
+        },
+        onError: () => { toast({
+            title: "에러가 발생하여 데이터를 저장할 수 없습니다.",
+        }); },
+    })
+
+
+
+    const [contents, setContents] = useState<string>('');
+    const [selectedCategory, setSelectedCategory] = useState<string>(""); // 선택된 카테고리를 상태로 관리합니다.
 
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
@@ -56,74 +79,84 @@ export default function InputForm() {
             title: "",
             category: "",
         },
-    })
+    });
 
     const handleContentChange = (content: string) => {
-        setContents(content); // content가 변경될 때마다 상태를 업데이트
+        setContents(content);
     };
 
-    function onSubmit(data: z.infer<typeof FormSchema>) {
-        const results : Object = {
-            contents:  contents,
-            ...data
-        }
+    async function onSubmit(data: z.infer<typeof FormSchema>) {
+        const results: Object = {
+            content: contents,
+            title: data["title"],
+            boardId: parseInt(data["category"]),
+            userId: 1
+        };
+
+        mutate(results)
 
         toast({
             title: "You submitted the following values:",
-            description: (
-                <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-                    <code className="text-white">{JSON.stringify(results, null, 2)}</code>
-                </pre>
-            ),
-        })
+        });
     }
 
+    if (isLoading || isFetching) return <>Loading...</>;
+    if (isFetchingError) return <>{FetchingError.message}</>;
+
     return (
-            <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                    <div className="flex justify-end">
-                        <Button type="submit">Submit</Button>
-                    </div>
 
+        <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <div className="flex justify-end">
+                    <Button type="submit">Submit</Button>
+                </div>
 
-                    <FormField
-                        control={form.control}
-                        name="category"
-                        render={({field}) => (
-                            <FormItem className="w-2/3">
-                                <FormLabel>카테고리</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder={categories[field.value] ||  "카테고리를 선택해주세요."}/>
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        {Object.entries(categories).map(([key, value]) => (
-                                            <SelectItem key ={key} value={key}>{value}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage/>
-                            </FormItem>
-                        )}
-                    />
-
-                    <FormField
-                        control={form.control}
-                        name="title"
-                        render={({field}) => (
-                            <FormItem className="w-2/3">
-                                <FormLabel>제목</FormLabel>
+                <FormField
+                    control={form.control}
+                    name="category"
+                    render={({ field }) => (
+                        <FormItem className="w-2/3">
+                            <FormLabel>카테고리</FormLabel>
+                            <Select
+                                onValueChange={(value) => {
+                                    field.onChange(value);
+                                    setSelectedCategory(value);
+                                }}
+                                defaultValue={form.getValues("category")}
+                            >
                                 <FormControl>
-                                    <Input placeholder="제목을 입력해주세요." {...field} />
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="카테고리를 선택해주세요." />
+                                    </SelectTrigger>
                                 </FormControl>
-                                <FormMessage/>
-                            </FormItem>
-                        )}
-                    />
-                    <Editor contents={contents} onChange={handleContentChange}/>
-                </form>
-            </Form>
+                                <SelectContent>
+                                    {categories?.map((category) => (
+                                        <SelectItem key={category.id} value={category.id.toString()}>
+                                            {category.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+
+                <FormField
+                    control={form.control}
+                    name="title"
+                    render={({ field }) => (
+                        <FormItem className="w-2/3">
+                            <FormLabel>제목</FormLabel>
+                            <FormControl>
+                                <Input placeholder="제목을 입력해주세요." {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                <Editor contents={contents} onChange={handleContentChange} />
+            </form>
+        </Form>
     );
 }

@@ -31,19 +31,11 @@ interface Categories {
     [key: string]: string;
 }
 
-const categories: Categories = {
-    "example": "m@example.com",
-    "google": "m@google.com",
-    "support": "m@support.com"
-};
-
 
 const FormSchema = z.object({
     title: z.string().refine(value => value.trim() !== "", {
         message: "해당 값은 반드시 입력해야 합니다."
     }),
-    category: z.string().refine(value => value.trim() !== "", {
-        message: "해당 값은 반드시 입력해야 합니다."}),
 })
 
 
@@ -53,8 +45,8 @@ export default function InputForm() {
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
         defaultValues: {
-            title: "11111",
-            category: "google",
+            title: "",
+            category: "",
         },
     })
 
@@ -85,44 +77,33 @@ export default function InputForm() {
                         <Button type="submit">Submit</Button>
                     </div>
 
-
-                    <FormField
-                        control={form.control}
-                        name="category"
-                        render={({field}) => (
-                            <FormItem className="w-2/3">
-                                <FormLabel>카테고리</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder={categories[field.value] ||  "Select a verified email to display"}/>
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        {/* {Object.entries(categories).map(([key, value]) => (
-                                            <SelectItem value={key}>{value}</SelectItem>
-                                        ))} */}
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage/>
-                            </FormItem>
-                        )}
-                    />
-
                     <FormField
                         control={form.control}
                         name="title"
                         render={({field}) => (
                             <FormItem className="w-2/3">
-                                <FormLabel>제목</FormLabel>
+                                <FormLabel>커뮤니티명</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="제목을 입력해주세요." {...field} />
+                                    <Input placeholder="커뮤니티의 이름을 입력해주세요." {...field} />
                                 </FormControl>
                                 <FormMessage/>
                             </FormItem>
                         )}
                     />
-                    <Editor contents={contents} onChange={handleContentChange}/>
+
+                    <FormField
+                        control={form.control}
+                        name="contents"
+                        render={({field}) => (
+                            <FormItem>
+                                <FormLabel>커뮤니티 설명</FormLabel>
+                                <FormControl>
+                                    <Editor contents={contents} onChange={handleContentChange}/>
+                                </FormControl>
+                                <FormMessage/>
+                            </FormItem>
+                        )}
+                    />
                 </form>
             </Form>
     );
