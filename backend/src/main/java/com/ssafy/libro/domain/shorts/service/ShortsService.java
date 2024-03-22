@@ -7,9 +7,5 @@ import java.io.IOException;
 import java.util.Map;
 
 public interface ShortsService {
-    Map<String, Double> analyzeText(String text);
-
-    PromptResponseDto translatePrompt(PromptRequestDto requestDto) throws IOException;
-
     void createShorts();
 }
