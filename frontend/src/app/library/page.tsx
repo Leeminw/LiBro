@@ -286,7 +286,7 @@ const Library = () => {
                             <p className="text-xs text-gray-300 ml-1">출판사 {book.publisher}</p>
                         </div>
                         <div className="flex mt-6">
-                            <Link href='/' className="text-[#9268EB] text-xs">도서 정보 보기 {'>'}</Link>
+                            <Link href='/detail' className="text-[#9268EB] text-xs">도서 정보 보기 {'>'}</Link>
                         </div>
                         <Button className="absolute right-0 top-0 text-white" variant="ghost" onClick={onClose}>
                             <Image src="x-white.svg" alt='search' width={20} height={20}/>
@@ -364,14 +364,24 @@ const Library = () => {
 
         const currentSavedReview = selectedBook ? savedReview[selectedBook.id] || {} : {};
 
-        // 'YYYY-MM-DD HH:mm:ss' 형식의 문자열로 시간을 변환하는 함수
+        // 'YYYY/MM/DD 오후 HH:mm' 형식의 문자열로 시간을 변환하는 함수
         const formatTimestamp = (timestamp: Date | undefined) => {
             if (!timestamp) return 'Invalid date';
-            const date = new Date(timestamp);
-            const options = { year: 'numeric', month: 'long', day: 'numeric' };
-            const formattedDate = date.toLocaleDateString('en-US', options);
-            return formattedDate;
+            
+            let year = timestamp.getFullYear().toString();
+            let month = (timestamp.getMonth() + 1).toString().padStart(2, '0');
+            let day = timestamp.getDate().toString().padStart(2, '0');
+            let hour = timestamp.getHours();
+            let minute = timestamp.getMinutes().toString().padStart(2, '0');
+            
+            let ampm = hour >= 12 ? '오후' : '오전';
+            hour = hour % 12;
+            hour = hour ? hour : 12; // 시간이 0이면 12로 변경
+            let strHour = hour.toString().padStart(1, '0');
+        
+            return `${year}/${month}/${day} ${ampm} ${strHour}:${minute}`;
         };
+        
 
         return (
             <div className="mx-6 mt-4">
