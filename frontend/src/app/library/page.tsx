@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import { SelectValue, SelectTrigger, SelectItem, SelectContent, Select } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -15,7 +15,16 @@ import {
     CarouselPrevious,
     type CarouselApi,
   } from "@/components/ui/carousel"
-import { userAgent } from "next/server"
+
+interface User {
+    profileUrl: string
+    id: string,
+    nickName: string,
+    truename: string,
+    birth: string
+    readRate: number,
+    bookRate: number,
+}
 
 interface Book {
     id: number;
@@ -46,6 +55,16 @@ interface Review {
 
 
 const Library = () => {
+
+    const [user, setUser] = useState<User>({
+        profileUrl: "https://github.com/shadcn.png",
+        id: '',
+        nickName: '11',
+        truename: '',
+        birth: '11',
+        readRate: 0,
+        bookRate: 1,
+      });
 
     // 책 페이지
     const [currentPage, setCurrentPage] = useState(1);
@@ -122,6 +141,30 @@ const Library = () => {
     const indexOfLastBook = currentPage * booksPerPage;
     const indexOfFirstBook = indexOfLastBook - booksPerPage;
     const currentBooks = processedBooks.slice(indexOfFirstBook, indexOfLastBook);
+
+    // const sliderRef = useRef(null);
+    // const handleMouseDown = (e) => {
+    //     const startX = e.pageX;
+        
+    //     const handleMouseUp = (e: React.MouseEvent<HTMLElement>) => {
+    //         const endX = e.pageX;
+    //         // 오른쪽에서 왼쪽으로 드래그 했을 때
+    //         if (startX - endX > 50) {
+    //             // 다음 페이지로 넘김
+    //             setCurrentPage((prevPage) => Math.min(prevPage + 1, currentBooks.length / 4 - 1));
+    //         }
+    //         // 왼쪽에서 오른쪽으로 드래그 했을 때
+    //         else if (endX - startX > 50) {
+    //             // 이전 페이지로 넘김
+    //             setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
+    //         }
+            
+    //         document.removeEventListener('mouseup', handleMouseUp);
+    //     };
+        
+    //     document.addEventListener('mouseup', handleMouseUp);
+    // };
+
  
     // 페이지 번호를 클릭했을 때 현재 페이지를 업데이트합니다.
     const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
@@ -178,6 +221,48 @@ const Library = () => {
                 );
             }
             return stars;
+        };
+
+        // 책의 독서 시작
+        const startReading = () => {
+            if (selectedBook) {
+            const updatedBooks = books.map(book => {
+                if (book.id === selectedBook.id) {
+                return { ...book, readstartdate: new Date().toISOString(), complete: false };
+                }
+                return book;
+            });
+            setBooks(updatedBooks);
+            setSelectedBook({ ...selectedBook, readstartdate: new Date().toISOString(), complete: false });
+            }
+        };
+
+        // 독서 포기
+        const giveUpReading = () => {
+            if (selectedBook) {
+            const updatedBooks = books.map(book => {
+                if (book.id === selectedBook.id) {
+                return { ...book, readstartdate: 'null', complete: false };
+                }
+                return book;
+            });
+            setBooks(updatedBooks);
+            setSelectedBook({ ...selectedBook, readstartdate: 'null', complete: false });
+            }
+        };
+
+        // 독서 완료
+        const completeReading = () => {
+            if (selectedBook) {
+            const updatedBooks = books.map(book => {
+                if (book.id === selectedBook.id) {
+                return { ...book, readcompletedate: new Date().toISOString(), complete: true };
+                }
+                return book;
+            });
+            setBooks(updatedBooks);
+            setSelectedBook({ ...selectedBook, readcompletedate: new Date().toISOString(), complete: true });
+            }
         };
 
         const Header = () => {
@@ -326,10 +411,10 @@ const Library = () => {
                     <div className="rounded border border-gray-300 shadow-lg p-4">
                         <div className="flex justify-between">
                             <div className="flex mb-1">
-                                <div className="text-sm font-bold mr-2">{}@11 </div>
+                                <div className="text-sm font-bold mr-2">@{user.nickName} </div>
                                 <div className="text-sm">{currentSavedReview.timestamp ? formatTimestamp(currentSavedReview.timestamp) : '날짜 정보 없음'}</div>
                             </div>
-                            <button className="bg-[#9268EB] text-xs text-white p-1 rounded-md">수정하기</button>
+                            <Button className="bg-white text-xs text-gray-400 p-1 rounded-md h-6">수정하기</Button>
                         </div>   
 
                         <div className="flex items-center mb-1">{currentSavedReview.rating !== undefined ? displaySavedRatingStars(currentSavedReview.rating) : '평점 정보 없음'}</div>
@@ -347,7 +432,9 @@ const Library = () => {
             const [api, setApi] = useState<CarouselApi>()
             const [current, setCurrent] = useState(0)
             const [count, setCount] = useState(0)
-            
+            const [inputs, setInputs] = useState(['']); // 입력한 텍스트를 저장할 배열 상태를 추가
+            const [currentInput, setCurrentInput] = useState('');
+
             useEffect(() => {
                 if (!api) {
                 return
@@ -360,43 +447,62 @@ const Library = () => {
                 setCurrent(api.selectedScrollSnap() + 1)
                 })
             }, [api])
+
+            const handleSave = () => {
+                const newInputs = [currentInput, ...inputs]; // 현재 입력한 텍스트를 inputs 배열에 추가
+                setInputs(newInputs);
+                setCurrentInput(''); // 입력 상태 초기화
+                setCount(count+1)
+            };
+        
+            const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+                setCurrentInput(e.target.value); // 입력 필드의 변경사항을 currentInput 상태에 반영
+            };
     
             return (
                 <div className="mx-6 mt-4 mb-2">
-                <h1 className="mb-3 text-xl font-bold">감명깊은 글귀</h1>
-                    <div className="flex items-center justify-center ">
-                    <Carousel setApi={setApi} className="w-5/6 ">
-                        <CarouselContent>
-                        {Array.from({ length: 1 }).map((_, index) => (
-                            <CarouselItem key={index}>
-                                <Card>
-                                    <CardContent className="flex items-center justify-center p-3 h-24 text-xs">
-                                        <textarea 
-                                            placeholder="여기에 글귀를 입력하세요" 
-                                            className="flex w-full p-2 justify-center items-center text-center h-full resize-none"
-                                            rows={4}
-                                        />
-                                    </CardContent>
-                                </Card>
-                            </CarouselItem>
-                        ))}
-                        </CarouselContent>
-                        <CarouselPrevious />
-                        <CarouselNext />
-                    </Carousel>
+                    <div className="flex justify-between">
+                        <h1 className="mb-3 text-xl font-bold">감명깊은 글귀</h1>
+                        <Button onClick={handleSave} className="bg-[#9268EB] text-md text-white font-bold p-3 rounded-md h-8">저장</Button>
+                    </div>
+        
+                    <div className="flex items-center justify-center">
+                        <Carousel setApi={setApi} className="w-5/6">
+                            <CarouselContent>
+                                {inputs.map((input, index) => (
+                                    <CarouselItem key={index}>
+                                        <Card>
+                                            <CardContent className="flex items-center justify-center p-3 h-24 text-xs">
+                                                <textarea 
+                                                    placeholder="여기에 글귀를 입력하세요" 
+                                                    className="flex w-full p-2 justify-center items-center text-center h-full resize-none"
+                                                    rows={4}
+                                                    value={index === inputs.length - 1 ? currentInput : input}
+                                                    onChange={handleInputChange}
+                                                />
+                                            </CardContent>
+                                        </Card>
+                                    </CarouselItem>
+                                ))}
+                            </CarouselContent>
+                            <CarouselPrevious />
+                            <CarouselNext />
+                        </Carousel>
                     </div>
                     <div className="py-2 text-center text-xs text-muted-foreground">
                         {current} / {count}
                     </div>
                 </div>
-            )}
+            );
+        }
 
             const ButtonComponent = () => {
+                
                 if (!selectedBook || selectedBook.readstartdate === 'null' || selectedBook.readstartdate === null) {
                     // 독서 기록이 없을 때
                     return (
                         <div className="flex justify-center"> 
-                            <button className="w-full p-1.5 mx-6 text-center bg-[#9268EB] rounded-md">
+                            <button className="w-full p-1.5 mx-6 text-center bg-[#9268EB] rounded-md" onClick={startReading}>
                                 <div className=" text-white  ">독서 기록 시작하기</div>
                             </button>
                         </div>
@@ -405,7 +511,7 @@ const Library = () => {
                     // 독서 완료일 때
                     return (
                         <div className="flex justify-center"> 
-                            <button className="w-full p-1.5 mx-6 text-center bg-[#9268EB] rounded-md">
+                            <button className="w-full p-1.5 mx-6 text-center bg-[#9268EB] rounded-md" onClick={startReading}>
                                 <div className=" text-white  ">독서 기록 다시 시작하기</div>
                             </button>
                         </div>
@@ -414,8 +520,8 @@ const Library = () => {
                     // 독서 중일 때
                     return (
                         <div className="flex justify-center mx-6"> 
-                            <button className="w-full bg-[#F87171] text-white p-1.5 rounded-md mr-4">독서 포기</button>
-                            <button className="w-full bg-[#9268EB] text-white p-1.5  rounded-md">완독</button>
+                            <button className="w-full bg-[#F87171] text-white p-1.5 rounded-md mr-4" onClick={giveUpReading}>독서 포기</button>
+                            <button className="w-full bg-[#9268EB] text-white p-1.5  rounded-md" onClick={completeReading }>완독</button>
                         </div>
                     );
                 }
@@ -476,7 +582,7 @@ const Library = () => {
                 </div>
                 <div className="p-1">
                     
-                    <div className="grid grid-cols-4 "> {/* 배경을 적용할 부분에 bg-bg-svg 클래스 추가 */}
+                    <div className="grid grid-cols-4 " >
                         {currentBooks.map((book, index) => (
                             <div key={index} className="group relative my-2 pt-2 pb-2 px-2 shadow border-b-4 border-white"
                                 onMouseEnter={() => setHoveredBook(index)}

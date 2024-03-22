@@ -19,7 +19,7 @@ import { boolean } from "zod"
 
 
 interface User {
-    profileUrl: string | null,
+    profileUrl: string
     id: string,
     nickName: string,
     truename: string,
@@ -52,7 +52,7 @@ interface Modal {
 const Mypage = () => {
   
   const [user, setUser] = useState<User>({
-    profileUrl: '',
+    profileUrl: "https://github.com/shadcn.png",
     id: '',
     nickName: '11',
     truename: '',
@@ -64,7 +64,7 @@ const Mypage = () => {
   const [bookRate, setBookRate] = useState(4.0) // 책 평점
   const [reviews, setReviews] = useState(0)
   
-  // 완독한 책의 수와 총 책의 수 예시
+  // 완독한 책의 수와 총 책의 수
   const [readRate, setReadRate] = useState(0) // 완독수
   const [finishedBooks, setFinishedBooks] = useState(3)
   const [totalBooks, setTotalBooks] = useState(35)
@@ -358,7 +358,7 @@ const Mypage = () => {
             <div className="text-xl font-bold ml-2 ">마이페이지</div>
         </div>
 
-        <Tabs defaultValue="account" className="w-full">
+        <Tabs defaultValue="mypage" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="mypage">내 정보</TabsTrigger>
               <TabsTrigger value="calendar">나의 독서기록</TabsTrigger>
@@ -368,7 +368,7 @@ const Mypage = () => {
                 <div className="w-1/3 flex justify-center items-center">
                     <div>
                         <Avatar className="h-24 w-24">
-                            <AvatarImage src={user.profileUrl || "https://github.com/shadcn.png"} alt="@defaultUser"/>
+                            <AvatarImage src={user.profileUrl} alt="@defaultUser"/>
                             <AvatarFallback></AvatarFallback>
                         </Avatar>
                         <Button className="mt-4 bg-[#9268EB] text-white font-bold" onClick={openModal} variant="secondary">
