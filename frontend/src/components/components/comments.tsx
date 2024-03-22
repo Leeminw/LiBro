@@ -1,21 +1,81 @@
-/**
- * v0 by Vercel.
- * @see https://v0.dev/t/Jd3OFwX
- * Documentation: https://v0.dev/docs#integrating-generated-code-into-your-nextjs-app
- */
-import { SelectTrigger, SelectItem, SelectContent, Select } from "@/components/ui/select"
-import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
+'use client'
 
-interface ReplyUser {
-    profileUrl : string | null,
-    nickName : string,
-    registeredAt : string,
-    contents : string,
+import {useState} from 'react';
+import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
+import {useMutation, useQueryClient} from "@tanstack/react-query";
+import {deleteComment, updateComment} from "@/lib/club";
+import {toast} from "@/components/ui/use-toast";
+import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
+import {Button} from "@/components/ui/button";
+import {MoreHorizontalIcon} from "lucide-react";
+import React from "react";
+import dateView from "@/lib/dayjs";
+
+interface CommentProps {
+    comment: Comment;
+    params: { id: number; boardId: number };
 }
 
-export default function Comments(props : ReplyUser) {
+export default function Comments(props: CommentProps) {
+    const {picture, content, createdDate, name, id} = props.comment;
+    const {id: clubId, boardId} = props.params;
+    const queryClient = useQueryClient();
+    const [isEditing, setIsEditing] = useState(false);
+    const [editedContent, setEditedContent] = useState(content);
 
-    const {profileUrl, nickName, registeredAt, contents} = props
+    const deleteMutation = useMutation({
+        mutationFn: (param) => deleteComment(param),
+        onSuccess: () => {
+            toast({
+                title: "댓글을 정상적으로 삭제 하였습니다.",
+            });
+            queryClient.invalidateQueries({queryKey: ['commentList', boardId]});
+        },
+        onError: () => {
+            toast({
+                title: "에러가 발생하여 댓글을 삭제 할 수 없습니다.",
+            });
+        },
+    });
+
+    const updateMutation = useMutation({
+        mutationFn: (param) => updateComment(id, param),
+        onSuccess: () => {
+            toast({
+                title: "댓글을 정상적으로 수정 하였습니다.",
+            });
+            setEditedContent('');
+            queryClient.invalidateQueries({queryKey: ['commentList', boardId]});
+        },
+        onError: () => {
+            toast({
+                title: "에러가 발생하여 댓글을 수정 할 수 없습니다.",
+            });
+        },
+    });
+
+    const editHandler = () => {
+        setIsEditing(true);
+    };
+
+    const cancelEditHandler = () => {
+        setIsEditing(false);
+        setEditedContent('');
+    };
+
+    const saveEditHandler = () => {
+        const editedComment : CommentWrite = {
+            content: editedContent,
+            boardId : boardId,
+            userId : 1
+        }
+
+        updateMutation.mutate(editedComment)
+        setIsEditing(false);
+        // 수정 내용 저장 후 추가 로직 작성
+
+
+    };
 
     return (
         <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden mx-auto my-2">
@@ -23,47 +83,49 @@ export default function Comments(props : ReplyUser) {
                 <div className="flex space-x-4">
                     <div>
                         <Avatar className="h-8 w-8">
-                            <AvatarImage src={profileUrl || "https://github.com/shadcn.png"} alt="@defaultUser" />
-                            <AvatarFallback>{nickName}</AvatarFallback>
+                            <AvatarImage src={picture || "https://github.com/shadcn.png"} alt="@defaultUser"/>
+                            <AvatarFallback>{name}</AvatarFallback>
                         </Avatar>
                     </div>
                     <div>
-                        <div className="text-lg font-bold dark:text-white">{nickName}</div>
-                        <div className="text-sm text-gray-500 dark:text-gray-200">{registeredAt}</div>
+                        <div className="text-lg font-bold dark:text-white">{name}</div>
+                        <div className="text-sm text-gray-500 dark:text-gray-200">{dateView(createdDate)}</div>
                     </div>
                 </div>
                 <div>
-                    <Select className="w-6 h-6 text-gray-500 dark:text-gray-200">
-                        <SelectTrigger aria-label="Options">
-                            <svg
-                                className=" w-6 h-6 text-gray-500 dark:text-gray-200"
-                                fill="none"
-                                height="24"
-                                stroke="currentColor"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                viewBox="0 0 24 24"
-                                width="24"
-                                xmlns="http://www.w3.org/2000/svg"
-                            >
-                                <circle cx="12" cy="12" r="1" />
-                                <circle cx="19" cy="12" r="1" />
-                                <circle cx="5" cy="12" r="1" />
-                            </svg>
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="delete">삭제</SelectItem>
-                        </SelectContent>
-                    </Select>
+                    {isEditing ? (
+                        <>
+                            <Button className="mr-2" onClick={cancelEditHandler}>취소</Button>
+                            <Button onClick={saveEditHandler}>저장</Button>
+                        </>
+                    ) : (
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button className="ml-auto w-8 h-8 rounded-full" size="icon" variant="ghost">
+                                    <MoreHorizontalIcon className="w-4 h-4"/>
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={editHandler}>수정</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => deleteMutation.mutate(id)}>삭제</DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    )}
                 </div>
             </div>
             <div className="px-6 py-4">
-                <div className="text-sm text-gray-800 dark:text-gray-200">
-                    {contents}
-                </div>
+                {isEditing ? (
+                    <textarea
+                        value={editedContent}
+                        onChange={(e) => setEditedContent(e.target.value)}
+                        className="w-full px-3 py-2 border rounded-md"
+                    />
+                ) : (
+                    <div className="text-sm text-gray-800 dark:text-gray-200">
+                        {content}
+                    </div>
+                )}
             </div>
         </div>
-    )
+    );
 }
-

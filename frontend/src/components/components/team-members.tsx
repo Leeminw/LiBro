@@ -1,8 +1,11 @@
+'use client'
+
+import React, { useState } from "react";
 import {
     Avatar,
     AvatarFallback,
     AvatarImage,
-} from "@/components/ui/avatar"
+} from "@/components/ui/avatar";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -11,16 +14,49 @@ import {
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import {Button} from "@/components/ui/button";
-import {BookmarkIcon, FileWarningIcon, MoreHorizontalIcon} from "lucide-react";
-import {StarIcon} from "@radix-ui/react-icons";
+import {MoreHorizontalIcon} from "lucide-react";
+import {useRouter} from "next/navigation";
+import {QueryClient, useMutation} from "@tanstack/react-query";
+import {deletePost, editPost} from "@/lib/club";
+import {toast} from "@/components/ui/use-toast";
 
 interface GroupOwner {
-    profileUrl : string | null,
-    nickName : string,
+    profileUrl: string | null,
+    nickName: string,
+    boardId?: number | null
+    groupId?: number | null
 }
 
-export default function Writter(props : GroupOwner) {
-    const {profileUrl, nickName} = props
+export default function Writer(props: GroupOwner) {
+    const {profileUrl, nickName, boardId, groupId} = props;
+
+    const router = useRouter();
+
+    const queryClient = new QueryClient();
+
+    const {isPending, isError, error, mutate, data} = useMutation({
+        mutationFn: (param) => deletePost(param),
+        onSuccess: (data, variables, context) => {
+            toast({
+                title: "데이터를 정상적으로 삭제 하였습니다.",
+            });
+            queryClient.invalidateQueries(['articleList']);
+            router.push(`/club/${groupId}`);
+        },
+        onError: (data, variables, context) => {
+            toast({
+                title: "에러가 발생하여 데이터를 삭제 할 수 없습니다.",
+            });
+        },
+    })
+
+    const handleEditClick = () => {
+        router.push(`/club/${groupId}/board/${boardId}/edit`);
+    };
+
+    const handleDeleteClick = () => {
+        mutate(boardId)
+    };
 
     return (
         <div className="flex items-center h-3/4 bg-white justify-between p-2 border rounded-md">
@@ -39,14 +75,14 @@ export default function Writter(props : GroupOwner) {
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                    <DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleEditClick}>
                         수정
                     </DropdownMenuItem>
-                    <DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleDeleteClick}>
                         삭제
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
         </div>
-    )
+    );
 }

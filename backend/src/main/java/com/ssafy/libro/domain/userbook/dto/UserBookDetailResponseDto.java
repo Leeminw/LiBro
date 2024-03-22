@@ -19,13 +19,14 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserBookDetailResponseDto {
-    private long id;
+    private long userBookId;
     private Long userId;
     private Long bookId;
     private String type;
-    private Float rating;
+    private Double rating;
     private String ratingComment;
     private Boolean ratingSpoiler;
+    private Boolean isCompleted;
     private LocalDateTime createdDate;
     private LocalDateTime updatedDate;
 
@@ -35,7 +36,7 @@ public class UserBookDetailResponseDto {
     private List<UserBookHistoryDetailResponseDto> historyList;
 
     public UserBookDetailResponseDto(UserBook userBook){
-        this.id = userBook.getId();
+        this.userBookId = userBook.getId();
         this.userId = userBook.getUser().getId();
         this.bookId = userBook.getBook().getId();
         this.type = userBook.getType();
@@ -44,6 +45,7 @@ public class UserBookDetailResponseDto {
         this.ratingSpoiler = userBook.getRatingSpoiler();
         this.createdDate = userBook.getCreatedDate();
         this.updatedDate = userBook.getUpdatedDate();
+        this.isCompleted = userBook.getIsComplete();
     }
 
     public void updateCommentList(List<UserBookCommentDetailResponseDto> commentList){

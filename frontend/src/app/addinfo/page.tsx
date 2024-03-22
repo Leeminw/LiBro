@@ -1,117 +1,129 @@
-'use client'
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { SelectValue, SelectTrigger, SelectItem, SelectContent, Select } from "@/components/ui/select"
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  SelectValue,
+  SelectTrigger,
+  SelectItem,
+  SelectContent,
+  Select,
+} from "@/components/ui/select";
 
-import makeAnimated from 'react-select/animated';
-import { ColourOption, colourOptions } from './data';
-import chroma from 'chroma-js';
-import SelectMenu from 'react-select';
-import { StylesConfig } from 'react-select';
-
+import makeAnimated from "react-select/animated";
+import { ColourOption, colourOptions } from "./data";
+import chroma from "chroma-js";
+import SelectMenu, { ActionMeta, MultiValue } from "react-select";
+import { StylesConfig } from "react-select";
 
 const Header = () => {
-    const router = useRouter();
+  const router = useRouter();
 
-    const handleBack = () => {
-        router.back();
-    };
+  const handleBack = () => {
+    router.back();
+  };
 
-    return (
-      <div className="flex items-center p-3">
-        <Button onClick={handleBack} style={{background: 'none', border: 'none', padding: 0, cursor: 'pointer'}}>
-            <img src="/back.svg" alt="Back" width={24} height={24} />
-        </Button>
-        <h1 className="ml-3 text-lg font-bold">추가 정보입력</h1>
-      </div>
-    );
+  return (
+    <div className="flex items-center p-3">
+      <Button
+        onClick={handleBack}
+        style={{
+          background: "none",
+          border: "none",
+          padding: 0,
+          cursor: "pointer",
+        }}
+      >
+        <img src="/back.svg" alt="Back" width={24} height={24} />
+      </Button>
+      <h1 className="ml-3 text-lg font-bold">추가 정보입력</h1>
+    </div>
+  );
 };
 
 const UserInfo = () => {
+  const [stage, setStage] = useState(1);
+  const [name, setName] = useState("");
+  const [headerText, setHeaderText] = useState("닉네임을 입력하세요.");
+  const [gender, setGender] = useState(""); // 성별 상태 추가
+  const [age, setAge] = useState(""); // 나이 상태 추가
 
-    const [stage, setStage] = useState(1);
-    const [name, setName] = useState('');
-    const [headerText, setHeaderText] = useState('닉네임을 입력하세요.')
-    const [gender, setGender] = useState(''); // 성별 상태 추가
-    const [age, setAge] = useState(''); // 나이 상태 추가
+  const [selectedValues, setSelectedValues] = useState<string[]>([]);
 
-    const [selectedValues, setSelectedValues] = useState<string[]>([]);
+  const handleChange = (newValue: MultiValue<ColourOption>, actionMeta: ActionMeta<ColourOption>) => {
+    if (newValue) {
+      // 선택된 항목들에서 value만 추출하여 저장합니다.
+      const values = newValue.map((option) => option.value);
+      setSelectedValues(values);
+    } else {
+      setSelectedValues([]);
+    }
+  };
 
-    const handleChange = (selected: ColourOption[] | null) => {
-        if (selected) {
-        // 선택된 항목들에서 value만 추출하여 저장합니다.
-        const values = selected.map(option => option.value);
-        setSelectedValues(values);
-        } else {
-        setSelectedValues([]);
-        }
-    };
+  // 성별과 나이가 모두 선택되었는지 확인하는 함수 추가
+  const checkAndAdvanceStage = () => {
+    if (gender !== "" && age !== "") {
+      setStage(3);
+    }
+  };
 
-    // 성별과 나이가 모두 선택되었는지 확인하는 함수 추가
-    const checkAndAdvanceStage = () => {
-        if (gender !== '' && age !== '') {
-            setStage(3);
-        }
-    };
+  const colourStyles: StylesConfig<ColourOption, true> = {
+    control: (styles) => ({ ...styles, backgroundColor: "white" }),
+    option: (styles, { data, isDisabled, isFocused, isSelected }) => {
+      const color = chroma(data.color);
+      return {
+        ...styles,
+        borderColor: "#9268EB", // 테두리 색상 설정
+        "&:hover": { borderColor: "#9268EB" }, // 마우스 호버 시 테두리 색상 유지
+        boxShadow: "none", // 기본적으로 적용되는 그림자 제거 (선택적)
+        backgroundColor: isDisabled
+          ? undefined
+          : isSelected
+          ? data.color
+          : isFocused
+          ? color.alpha(0.1).css()
+          : undefined,
+        color: isDisabled
+          ? "#ccc"
+          : isSelected
+          ? chroma.contrast(color, "white") > 2
+            ? "white"
+            : "black"
+          : data.color,
+        cursor: isDisabled ? "not-allowed" : "default",
 
-    const colourStyles: StylesConfig<ColourOption, true> = {
-        control: (styles) => ({ ...styles, backgroundColor: 'white' }),
-        option: (styles, { data, isDisabled, isFocused, isSelected }) => {
-          const color = chroma(data.color);
-          return {
-            ...styles,
-            borderColor: '#9268EB', // 테두리 색상 설정
-            '&:hover': { borderColor: '#9268EB' }, // 마우스 호버 시 테두리 색상 유지
-            boxShadow: 'none', // 기본적으로 적용되는 그림자 제거 (선택적)
-            backgroundColor: isDisabled
-              ? undefined
-              : isSelected
+        ":active": {
+          ...styles[":active"],
+          backgroundColor: !isDisabled
+            ? isSelected
               ? data.color
-              : isFocused
-              ? color.alpha(0.1).css()
-              : undefined,
-            color: isDisabled
-              ? '#ccc'
-              : isSelected
-              ? chroma.contrast(color, 'white') > 2
-                ? 'white'
-                : 'black'
-              : data.color,
-            cursor: isDisabled ? 'not-allowed' : 'default',
-      
-            ':active': {
-              ...styles[':active'],
-              backgroundColor: !isDisabled
-                ? isSelected
-                  ? data.color
-                  : color.alpha(0.3).css()
-                : undefined,
-            },
-          };
+              : color.alpha(0.3).css()
+            : undefined,
         },
-        multiValue: (styles, { data }) => {
-          const color = chroma(data.color);
-          return {
-            ...styles,
-            backgroundColor: color.alpha(0.1).css(),
-          };
-        },
-        multiValueLabel: (styles, { data }) => ({
-          ...styles,
-          color: data.color,
-        }),
-        multiValueRemove: (styles, { data }) => ({
-          ...styles,
-          color: data.color,
-          ':hover': {
-            backgroundColor: data.color,
-            color: 'white',
-          },
-        }),
       };
+    },
+    multiValue: (styles, { data }) => {
+      const color = chroma(data.color);
+      return {
+        ...styles,
+        backgroundColor: color.alpha(0.1).css(),
+      };
+    },
+    multiValueLabel: (styles, { data }) => ({
+      ...styles,
+      color: data.color,
+    }),
+    multiValueRemove: (styles, { data }) => ({
+      ...styles,
+      color: data.color,
+      ":hover": {
+        backgroundColor: data.color,
+        color: "white",
+      },
+    }),
+  };
 
     return (
         <div className='flex flex-col p-4 min-h-screen transition-all duration-500'>
@@ -237,17 +249,17 @@ const UserInfo = () => {
                 >확인</Button>
             </div>
             )}
+
         </div>
-    );
-};
+      )}
+      
 
 const Addinfo = () => {
-
-    return (
-        <>
-            <Header/>
-            <UserInfo/>
-        </>
-    )
-}
-export default Addinfo
+  return (
+    <>
+      <Header />
+      <UserInfo />
+    </>
+  );
+};
+export default Addinfo;

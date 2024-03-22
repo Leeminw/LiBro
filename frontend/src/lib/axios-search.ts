@@ -13,7 +13,7 @@ const SearchApi = {
   searchBooks: async (query: string, start: number) => {
     try {
       const response = await apiClient.get(
-        "/v1/search/book.json",
+        "/naverapi/v1/search/book.json",
         {
           params:{
             query: query,

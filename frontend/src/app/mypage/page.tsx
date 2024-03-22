@@ -26,6 +26,9 @@ interface User {
     birth: string
     readRate: number,
     bookRate: number,
+    registeredBooks: number,
+    completedBooks: number,
+    sentencedBooks: number,
 }
 
 interface ImageDates {
@@ -59,16 +62,15 @@ const Mypage = () => {
     birth: '11',
     readRate: 0,
     bookRate: 1,
+    registeredBooks: 41,
+    completedBooks: 23,
+    sentencedBooks: 31,
   });
   
   const [bookRate, setBookRate] = useState(4.0) // 책 평점
   const [reviews, setReviews] = useState(0)
   
   // 완독한 책의 수와 총 책의 수
-  const [readRate, setReadRate] = useState(0) // 완독수
-  const [finishedBooks, setFinishedBooks] = useState(3)
-  const [totalBooks, setTotalBooks] = useState(35)
-
   const [rateOneBooks, setRateOneBooks] = useState(1)
   const [rateTwoBooks, setRateTwoBooks] = useState(4)
   const [rateThreeBooks, setRateThreeBooks] = useState(7)
@@ -118,18 +120,22 @@ const Mypage = () => {
 
   useEffect(() => {
     // 완독율 계산 후 상태 업데이트
-    const newReadRate = parseFloat((finishedBooks / totalBooks * 100).toFixed(0));
-    setReadRate(newReadRate);
-  }, [finishedBooks, totalBooks]); // finishedBooks 또는 totalBooks가 변경될 때마다 실행
+    const newReadRate = parseFloat((user.completedBooks / user.registeredBooks * 100).toFixed(0));
+    setUser(prevUser => ({
+      ...prevUser,
+      readRate: newReadRate,
+    }));
+  }, [user.completedBooks, user.registeredBooks]); // user.completedBooks 또는 user.registeredBooks가 변경될 때마다 실행
+  
 
   useEffect(() => {
     // 책 평점 계산 후 상태 업데이트
     console.log(rateOneBooks)
-    const newRate1Books = parseFloat((rateOneBooks / totalBooks * 100).toFixed(0));
-    const newRate2Books = parseFloat((rateTwoBooks / totalBooks * 100).toFixed(0));
-    const newRate3Books = parseFloat((rateThreeBooks / totalBooks * 100).toFixed(0));
-    const newRate4Books = parseFloat((rateFourBooks / totalBooks * 100).toFixed(0));
-    const newRate5Books = parseFloat((rateFiveBooks / totalBooks * 100).toFixed(0));
+    const newRate1Books = parseFloat((rateOneBooks / user.registeredBooks * 100).toFixed(0));
+    const newRate2Books = parseFloat((rateTwoBooks / user.registeredBooks * 100).toFixed(0));
+    const newRate3Books = parseFloat((rateThreeBooks / user.registeredBooks * 100).toFixed(0));
+    const newRate4Books = parseFloat((rateFourBooks / user.registeredBooks * 100).toFixed(0));
+    const newRate5Books = parseFloat((rateFiveBooks / user.registeredBooks * 100).toFixed(0));
     setRateFiveBooks(newRate5Books);
     setRateFourBooks(newRate4Books);
     setRateThreeBooks(newRate3Books);
@@ -350,6 +356,7 @@ const Mypage = () => {
     return stars;
   };
 
+
   return (
     <div className="bg-white h-full pt-12 overflow-auto">
       <div className="p-4">
@@ -371,7 +378,7 @@ const Mypage = () => {
                             <AvatarImage src={user.profileUrl} alt="@defaultUser"/>
                             <AvatarFallback></AvatarFallback>
                         </Avatar>
-                        <Button className="mt-4 bg-[#9268EB] text-white font-bold" onClick={openModal} variant="secondary">
+                        <Button className="mt-4 bg-[#9268EB] text-white font-bold hover:bg-[#9268EB] hover:text-current" onClick={openModal} variant="secondary">
                             프로필 수정
                         </Button>
                         <Modal isOpen={isModalOpen} isClose={isClose}>
@@ -426,15 +433,15 @@ const Mypage = () => {
                 <div className="grid grid-cols-3 gap-4 items-center mt-3 mb-3 pb-3 pt-3 border-b border-t border-gray-300">
                     <div className="flex flex-row items-center justify-center space-x-2 col-span-1 border-r border-gray-300">
                         <div className="text-sm font-bold">담은 책 수</div>
-                        <div className="text-xs">231</div>
+                        <div className="text-xs">{user.registeredBooks}</div>
                     </div>
                     <div className="flex flex-row items-center justify-center space-x-2 col-span-1 border-l border-r border-gray-300">
                         <div className="text-sm font-bold">책 완독 수</div>
-                        <div className="text-xs">231</div>
+                        <div className="text-xs">{user.completedBooks}</div>
                     </div>
                     <div className="flex flex-row items-center justify-center space-x-2 col-span-1 border-l border-gray-300">
                         <div className="text-sm font-bold">기록 글귀 수</div>
-                        <div className="text-xs">231</div>
+                        <div className="text-xs">{user.sentencedBooks}</div>
                     </div>
                 </div>
             </div>
@@ -442,12 +449,12 @@ const Mypage = () => {
             <div className="ml-2 mr-2">
                 <div className="flex items-center justify-between">
                     <div className="text-sm font-bold">완독율</div>
-                    <div className="text-sm font-bold text-gray-500">{readRate}%</div>
+                    <div className="text-sm font-bold text-gray-500">{user.readRate}%</div>
                 </div>
                 <div className="w-full bg-[#E5E7EB] rounded h-2">
                     <div
                     className="bg-[#9268EB] h-2 rounded"
-                    style={{ width: `${readRate}%` }}
+                    style={{ width: `${user.readRate}%` }}
                     ></div>
                 </div>
             </div>

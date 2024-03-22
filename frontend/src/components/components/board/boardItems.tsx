@@ -2,17 +2,13 @@ import React from 'react';
 import { Card, CardHeader, CardFooter} from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import Link from "next/link";
+import {useParams} from "next/navigation";
+import dateView from "@/lib/dayjs";
 
-interface BoardItemProps {
-    userName: string;
-    profileUrl: string;
-    title: string;
-    commentCount: number;
-    created_date: string;
-}
+export default function BoardItem (props : Post) {
+    const { name, title , createdDate , commentCount, picture, articleId} = props
 
-export default function BoardItem (props : BoardItemProps) {
-    const { userName, title , created_date , commentCount, profileUrl} = props
+    const params = useParams();
 
     return (
         <div className="grid gap-4">
@@ -20,17 +16,17 @@ export default function BoardItem (props : BoardItemProps) {
                 <CardHeader className="p-2 flex flex-row items-center">
                         <a className="flex items-center gap-2 text-sm font-semibold">
                             <Avatar className="w-8 h-8 border">
-                                <AvatarImage alt={userName} src={profileUrl}/>
-                                <AvatarFallback>{userName.charAt(0)}</AvatarFallback>
+                                <AvatarImage alt={name} src={picture}/>
+                                <AvatarFallback>{name}</AvatarFallback>
                             </Avatar>
-                            {userName}
+                            {name}
                         </a>
                 </CardHeader>
                 <CardFooter className="p-2 pb-4 grid gap-2">
                     <div className="px-2 text-sm w-full grid gap-1.5">
-                        <div>
+                        <Link className="font-bold" href={`/club/${params.id}/board/${articleId}`}>
                             {title}
-                        </div>
+                        </Link>
                     </div>
                     <div className="px-2 text-sm w-full grid gap-1.5">
                         <div>
@@ -39,7 +35,7 @@ export default function BoardItem (props : BoardItemProps) {
                     </div>
                     <div className="px-2 text-sm w-full grid gap-1.5">
                         <div>
-                            {created_date}
+                            {dateView(createdDate)}
                         </div>
                     </div>
                 </CardFooter>

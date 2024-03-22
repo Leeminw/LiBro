@@ -1,18 +1,22 @@
 package com.ssafy.libro.domain.user.entity;
 
+import com.ssafy.libro.domain.article.entity.Article;
 import com.ssafy.libro.domain.userbook.entity.UserBook;
+import com.ssafy.libro.domain.usergroup.entity.UserGroup;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,7 +29,12 @@ public class User {
     private String email;
 
     @Column
-    private String picture;
+    private String authId;
+    @Column
+    private String authType;
+
+    @Column
+    private String profile;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -34,20 +43,17 @@ public class User {
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY,targetEntity = UserBook.class)
     private List<UserBook> userBookList;
 
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private List<Article> articles;
 
-    @Builder
-    public User(String name, String email, String picture, Role role) {
+    public User update(String name, String profile) {
         this.name = name;
-        this.email = email;
-        this.picture = picture;
-        this.role = role;
-    }
-
-    public User update(String name, String picture) {
-        this.name = name;
-        this.picture = picture;
+        this.profile = profile;
         return this;
     }
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserGroup> userGroupList = new ArrayList<>();
 
     public String getRoleKey() {
         return this.role.getKey();

@@ -24,8 +24,9 @@ public class Book {
     private Long id;
     private String isbn;
     private String title;
-    private String summary;
 
+    @Column(columnDefinition = "LONGTEXT")
+    private String summary;
     private Integer price;
     private Double rating;
     private Integer ratingCount;
@@ -61,8 +62,9 @@ public class Book {
         return this;
     }
 
-    public Book updateRating(Double rating) {
+    public Book updateRating(Double rating, Integer ratingCount) {
         this.rating = rating;
+        this.ratingCount = ratingCount;
         return this;
     }
 
