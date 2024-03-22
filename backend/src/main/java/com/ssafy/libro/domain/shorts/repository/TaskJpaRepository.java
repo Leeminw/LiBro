@@ -9,6 +9,7 @@ import java.util.Optional;
 
 @Repository
 public interface TaskJpaRepository extends JpaRepository<Task, Long> {
+    Boolean existsByIsbn(String isbn);
     Optional<Task> findByIsbn(String isbn);
     Optional<List<Task>> findAllByStatus(Boolean status);
     Optional<List<Task>> findAllByTitleContaining(String title);
