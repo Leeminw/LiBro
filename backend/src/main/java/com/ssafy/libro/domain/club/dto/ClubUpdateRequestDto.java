@@ -3,17 +3,19 @@ package com.ssafy.libro.domain.club.dto;
 import com.ssafy.libro.domain.club.entity.Club;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
+
 @Getter
-public class ClubCreateRequestDto {
+public class ClubUpdateRequestDto {
     private String name;
     private String description;
-    private Long userId;
+    private String userId;
 
-    public Club toClubEntity(){
+    public Club toEntitiy(){
         return Club.builder()
                 .name(name)
                 .description(description)
-                .isDeleted(false)
+                .updatedDate(LocalDateTime.now())
                 .build();
     }
 }
