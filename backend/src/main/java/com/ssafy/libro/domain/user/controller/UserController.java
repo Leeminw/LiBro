@@ -23,9 +23,6 @@ import java.util.Optional;
 @Slf4j
 public class UserController {
     private final UserService userService;
-    private final RefreshTokenRepository tokenRepository;
-    private final RefreshTokenService tokenService;
-    private final JwtProvider jwtProvider;
 
     @GetMapping("/load")
     public ResponseEntity<?> userLogin(@RequestHeader("Authorization") final String accessToken) {
@@ -45,23 +42,5 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(ResponseData.success("회원가입 성공"));
     }
 
-    @GetMapping("/token/logout")
-    public ResponseEntity<?> logout(@RequestHeader("Authorization") final String accessToken) {
-        tokenService.removeRefreshToken(accessToken);
-        return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success("200"));
-    }
-
-    @GetMapping("/token/refresh")
-    public ResponseEntity<?> refresh(@RequestHeader("Authorization") final String accessToken) {
-        Optional<RefreshToken> refreshToken = tokenRepository.findByAccessToken(accessToken);
-        if (refreshToken.isPresent() && jwtProvider.verifyToken(refreshToken.get().getRefreshToken())) {
-            RefreshToken resultToken = refreshToken.get();
-            String newAccessToken = jwtProvider.createAccessToken(resultToken.getId(), jwtProvider.getUserRole(resultToken.getRefreshToken()));
-            resultToken.updateAccessToken(newAccessToken);
-            tokenRepository.save(resultToken);
-            return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success("200", newAccessToken));
-        }
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseData.failure("400"));
-    }
 
 }

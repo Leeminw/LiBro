@@ -31,19 +31,11 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     private final UserRepository userRepository;
     private final JwtProvider jwtProvider;
 
-//    public JwtAuthorizationFilter(AuthenticationManager authenticationManager, UserRepository userRepository, JwtProvider jwtProvider) {
-//        super(authenticationManager);
-//        this.userRepository = userRepository;
-//        this.jwtProvider = jwtProvider;
-//    }
-
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
         try {
-            System.out.println("인증이나 권한이 필요한 주소 요청!");
-
             String jwtToken = request.getHeader("Authorization");
-            System.out.println("jwtHeader : " + jwtToken);
+            System.out.println("filter - jwtHeader : " + jwtToken);
 
             //header 있는지 확인
             if (jwtToken == null || !jwtToken.startsWith("Bearer")) {

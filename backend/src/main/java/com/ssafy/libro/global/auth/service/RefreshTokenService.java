@@ -24,7 +24,6 @@ public class RefreshTokenService {
     public void removeRefreshToken(String accessToken) {
         RefreshToken token = repository.findByAccessToken(accessToken)
                 .orElseThrow(IllegalArgumentException::new);
-        log.info("--테스트--");
         repository.delete(token);
     }
 

@@ -26,6 +26,7 @@ public class UserServiceImpl implements UserService {
                 Object principal = authentication.getPrincipal();
                 if (principal instanceof User) {
                     User user = (User) principal;
+                    System.out.println(user.getId());
                     return user;
                 }
             }
@@ -45,4 +46,9 @@ public class UserServiceImpl implements UserService {
             return response.handleFail("회원가입 실패.", null);
         }
     }
+
+    //  요청할 떄 헤더에서 baerer token 뜯어
+    // user id >>
+    // user repository find by ~~
+    // user return service.
 }

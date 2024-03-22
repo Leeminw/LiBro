@@ -47,10 +47,9 @@ public class SecurityConfig {
                     authorizeRequests
                             .requestMatchers("/api/user/join")
                             .hasRole("GUEST")
-//                            .requestMatchers("/api/**")
-//                            .anonymous()
                             .requestMatchers("/api/admin/**")
                             .hasRole("ADMIN")
+                            .requestMatchers("/token/**").permitAll()
                             .anyRequest().permitAll();
                 })
                 .oauth2Login(httpSecurityOAuth2LoginConfigurer -> httpSecurityOAuth2LoginConfigurer
