@@ -23,6 +23,8 @@ const Logo = () => {
       </div>
     );
 };
+// GOOGLE_API_KEY=575331075763-mb2d05gmd3u5ddnpotu23cbr8jgo7odp.apps.googleusercontent.com;
+// GOOGLE_API_SECRET_KEY=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
 
 const GoogleLoginButton = () => {
     const login = useGoogleLogin({

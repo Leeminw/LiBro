@@ -7,10 +7,13 @@ import lombok.Getter;
 public class ClubCreateRequestDto {
     private String name;
     private String description;
+    private Long userId;
 
-    public Club toEntitiy(){
+    public Club toClubEntity(){
         return Club.builder()
                 .name(name)
-                .description(description).build();
+                .description(description)
+                .isDeleted(false)
+                .build();
     }
 }

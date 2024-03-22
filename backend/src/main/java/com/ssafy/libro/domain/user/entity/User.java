@@ -2,12 +2,14 @@ package com.ssafy.libro.domain.user.entity;
 
 import com.ssafy.libro.domain.article.entity.Article;
 import com.ssafy.libro.domain.userbook.entity.UserBook;
+import com.ssafy.libro.domain.usergroup.entity.UserGroup;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -44,12 +46,14 @@ public class User {
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<Article> articles;
 
-
     public User update(String name, String profile) {
         this.name = name;
         this.profile = profile;
         return this;
     }
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserGroup> userGroupList = new ArrayList<>();
 
     public String getRoleKey() {
         return this.role.getKey();

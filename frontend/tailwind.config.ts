@@ -10,6 +10,7 @@ const config = {
 	],
   prefix: "",
   theme: {
+    
     container: {
       center: true,
       padding: "2rem",
@@ -72,6 +73,9 @@ const config = {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
       },
+      backgroundImage: {
+        'bg-svg': "url('/BG.svg')", // 배경 이미지로 사용할 SVG 파일 경로를 지정합니다.
+      }
     },
   },
   plugins: [require("tailwindcss-animate"), require("tailwind-scrollbar-hide")],
