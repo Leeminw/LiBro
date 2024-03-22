@@ -37,7 +37,7 @@ const GoogleLoginButton = () => {
     >
       <Button
         onClick={() => login()}
-        className="bg-white text-black font-bold py-2 px-4 rounded flex items-center m-2"
+        className="bg-white text-black font-bold py-2 px-4 rounded flex items-center m-2 hover:bg-white transition-transform hover:scale-105 duration-200"
         style={{ width: "70%", height: "7%", border: "1px solid #D9D9D9" }}
       >
         <div

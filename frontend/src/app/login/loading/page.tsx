@@ -16,7 +16,7 @@ const LoginPage = () => {
     if (accessToken && refreshToken) {
       localStorage.setItem("accessToken", accessToken);
       localStorage.setItem("refreshToken", refreshToken);
-      LoginApi.loginUser(accessToken)
+      LoginApi.loadUser(accessToken)
         .then((data) => {
           console.log("응답 값", data);
           if (data !== undefined && data.status === "success") {
@@ -28,7 +28,7 @@ const LoginPage = () => {
               nickname: data.data.name,
             });
             toast({
-              title: "로그인 성공",
+              title: "로그인",
               description: `${data.data.name}님 반갑습니다.`,
             });
             router.push("/");

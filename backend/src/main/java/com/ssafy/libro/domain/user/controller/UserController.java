@@ -42,5 +42,9 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(ResponseData.success("회원가입 성공"));
     }
 
+    @GetMapping("/test")
+    public ResponseEntity<?> getTest() {
+        return ResponseEntity.status(HttpStatus.CREATED).body(ResponseData.success("성공"));
+    }
 
 }

@@ -26,7 +26,7 @@ public class UserServiceImpl implements UserService {
                 Object principal = authentication.getPrincipal();
                 if (principal instanceof User) {
                     User user = (User) principal;
-                    System.out.println(user.getId());
+                    System.out.println(user.toString());
                     return user;
                 }
             }

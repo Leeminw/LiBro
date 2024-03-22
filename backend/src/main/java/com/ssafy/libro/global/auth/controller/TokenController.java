@@ -31,7 +31,7 @@ public class TokenController {
         Optional<RefreshToken> refreshToken = tokenRepository.findByAccessToken(accessToken);
         if (refreshToken.isPresent() && jwtProvider.verifyToken(refreshToken.get().getRefreshToken())) {
             RefreshToken resultToken = refreshToken.get();
-            String newAccessToken = jwtProvider.createAccessToken(resultToken.getId(), jwtProvider.getUserRole(resultToken.getRefreshToken()));
+            String newAccessToken = jwtProvider.createAccessToken(Long.parseLong(resultToken.getId()), jwtProvider.getUserRole(resultToken.getRefreshToken()));
             resultToken.updateAccessToken(newAccessToken);
             tokenRepository.save(resultToken);
             return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success("200", newAccessToken));

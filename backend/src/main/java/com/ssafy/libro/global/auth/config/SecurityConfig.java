@@ -1,7 +1,6 @@
 package com.ssafy.libro.global.auth.config;
 
 import com.ssafy.libro.global.auth.filter.JwtAuthorizationFilter;
-import com.ssafy.libro.global.auth.filter.JwtExceptionFilter;
 import com.ssafy.libro.global.oauth.filter.OAuth2LoginFailureHandler;
 import com.ssafy.libro.global.oauth.filter.OAuth2LoginSuccessHandler;
 import com.ssafy.libro.global.oauth.service.CustomOAuth2UserService;
@@ -16,9 +15,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
 
 @Configuration
 @EnableWebSecurity //스프링 시큐리티 필터(SecurityConfig)가 스프링 필터체인에 등록됨.
@@ -47,9 +43,12 @@ public class SecurityConfig {
                     authorizeRequests
                             .requestMatchers("/api/user/join")
                             .hasRole("GUEST")
+//                            .requestMatchers("/api/user/load")
+//                            .authenticated()
+//                            .requestMatchers("/api/user/test")
+//                            .authenticated()
                             .requestMatchers("/api/admin/**")
                             .hasRole("ADMIN")
-                            .requestMatchers("/token/**").permitAll()
                             .anyRequest().permitAll();
                 })
                 .oauth2Login(httpSecurityOAuth2LoginConfigurer -> httpSecurityOAuth2LoginConfigurer
@@ -57,7 +56,8 @@ public class SecurityConfig {
                                 .userService(customOAuth2UserService))
                         .failureHandler(oAuth2LoginFailureHandler)
                         .successHandler(oAuth2LoginSuccessHandler));
-        return http.addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class)
+        return http
+                .addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 }
