@@ -31,7 +31,7 @@ public class TaskController {
     }
 
     @DeleteMapping("/api/v1/task/{id}")
-    public ResponseEntity<?> createTask(@PathVariable Long id) {
+    public ResponseEntity<?> deleteTask(@PathVariable Long id) {
         TaskResponseDto responseDto = taskService.deleteTask(id);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(responseDto));
     }
@@ -49,7 +49,7 @@ public class TaskController {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     @GetMapping("/api/v1/task/list")
-    public ResponseEntity<?> getTaskById(@RequestParam(required = false) Boolean status,
+    public ResponseEntity<?> getTasksBy(@RequestParam(required = false) Boolean status,
                                          @RequestParam(required = false) String title,
                                          @RequestParam(required = false) String summary,
                                          @RequestParam(required = false) String korPrompt,
