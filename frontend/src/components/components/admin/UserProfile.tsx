@@ -7,14 +7,8 @@ import {BanIcon} from "lucide-react"
 import {Toast} from "@/components/ui/toast"
 import {toast} from "@/components/ui/use-toast";
 
-interface UserProfileProps {
-    profileImageUrl: string;
-    userName: string;
-    userNo : number,
-    date: string
-}
 
-const UserProfile: React.FC<UserProfileProps> = (props) => {
+const UserProfile: React.FC<UserProfile> = (props) => {
     const { profileImageUrl, userNo, userName, date } = props;
 
     const handleBanUser = (userNo : number, e : React.MouseEvent<HTMLButtonElement>) => {

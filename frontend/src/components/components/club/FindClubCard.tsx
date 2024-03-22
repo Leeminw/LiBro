@@ -4,15 +4,10 @@ import {CalendarIcon} from "lucide-react"
 import {Button} from '@/components/ui/button';
 
 // 클럽 정보를 담은 객체의 타입 정의
-interface ClubInfo {
-    clubName: string;
-    openingTime: string;
-    organizerName: string;
-    clubId: string;
-}
+
 
 interface ClubListProps {
-    clubs: ClubInfo[];
+    clubs: CommunityItemInform[];
 }
 
 const ClubList: React.FC<ClubListProps> = ({clubs}) => {
@@ -31,10 +26,10 @@ const ClubList: React.FC<ClubListProps> = ({clubs}) => {
                         <div className="text-lg font-bold">{club.clubName}</div>
                         <div className="flex items-center space-x-2 mb-4">
                             <CalendarIcon className="w-4 h-4 text-gray-500"/>
-                            <span className="text-sm text-gray-500">{club.openingTime}</span>
+                            <span className="text-sm text-gray-500">{club.registeredTime}</span>
                         </div>
                         <div className="mb-4 flex justify-between">
-                            {club.organizerName}
+                            {club.clubOwner}
                         </div>
                         <div className="flex">
                             <Button className="bg-[#7f5af0] text-white"
