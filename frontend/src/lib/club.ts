@@ -15,6 +15,27 @@ export const getCategoryList = async (
     return axiosResponse.data.data
 };
 
+export const writeCategory = async (
+    param: CategoryWrite
+) => {
+    const axiosResponse = await mutationInstance.post("http://localhost:8080/api/board", param);
+    return axiosResponse.data.data
+}
+
+export const updateCategory = async (
+    param: CategoryUpdate
+) => {
+    const axiosResponse = await mutationInstance.put("http://localhost:8080/api/board", param);
+    return axiosResponse.data.data
+}
+
+export const deleteCategory = async (
+    boardId: number
+) => {
+    const axiosResponse = await mutationInstance.delete(`http://localhost:8080/api/board/${boardId}`);
+    return axiosResponse.data.data
+}
+
 export const writePost = async (
     param: PostWrite
 ) => {
@@ -83,8 +104,102 @@ export const getPostList = async (
 ) => {
     let axiosParams: AxiosRequestConfig | undefined;
     if (params) {
-        axiosParams = { params };
+        axiosParams = {params};
     }
     const axiosResponse = await queryInstance.get(`http://localhost:8080/api/article/list/${clubId}`, axiosParams);
+    return axiosResponse.data.data
+}
+
+export const getClubList = async (
+    params?: ClubSearch
+) => {
+    let axiosParams: AxiosRequestConfig | undefined;
+    if (params) {
+        axiosParams = {params};
+    }
+    const axiosResponse = await queryInstance.get(`http://localhost:8080/api/usergroup/list`, axiosParams);
+    return axiosResponse.data.data
+}
+
+export const getMyClubList = async (
+    userId: number,
+    params?: ClubSearch
+) => {
+    let axiosParams: AxiosRequestConfig | undefined;
+    if (params) {
+        axiosParams = {params};
+    }
+    const axiosResponse = await queryInstance.get(`http://localhost:8080/api/usergroup/myClubList?userId=${userId}`, axiosParams);
+    return axiosResponse.data.data
+}
+
+
+export const writeClub = async (
+    param: ClubWrite
+) => {
+    const axiosResponse = await mutationInstance.post(`http://localhost:8080/api/club`, param)
+    return axiosResponse.data.data
+}
+
+export const updateClub = async (
+    clubId: number,
+    param: ClubWrite
+) => {
+    console.log(`http://localhost:8080/api/club/${clubId}`)
+    const axiosResponse = await mutationInstance.put(`http://localhost:8080/api/club/${clubId}`, param)
+    return axiosResponse.data.data
+}
+
+export const deleteClub = async (
+    clubId: number,
+) => {
+    const axiosResponse = await mutationInstance.delete(`http://localhost:8080/api/club/${clubId}`)
+    return axiosResponse.data.data
+}
+
+
+export const getClubDetail = async (
+    clubId: number
+) => {
+    const axiosResponse = await queryInstance.get(`http://localhost:8080/api/usergroup/${clubId}`);
+    return axiosResponse.data.data
+}
+
+export const getClubSummary = async (
+    clubId: number,
+) => {
+    const axiosResponse = await mutationInstance.get(`http://localhost:8080/api/usergroup/summary/${clubId}`);
+    return axiosResponse.data.data
+}
+
+export const joinClub = async (
+    clubId: number,
+    param: ClubJoin
+) => {
+    const axiosResponse = await mutationInstance.post(`http://localhost:8080/api/usergroup/${clubId}/join`, param)
+    return axiosResponse.data.data
+}
+
+export const leaveClub = async (
+    clubId: number,
+    userId: number,
+) => {
+    const axiosResponse = await mutationInstance.delete(`http://localhost:8080/api/usergroup/${clubId}/members/${userId}`)
+    return axiosResponse.data.data
+}
+
+export const getClubMemberList = async (
+    clubId: number
+) => {
+    const axiosResponse = await queryInstance.get(`http://localhost:8080/api/usergroup/${clubId}/members`)
+    return axiosResponse.data.data
+}
+
+export const getClubMemberShip = async (
+    clubId: number,
+    userId: number
+) => {
+
+    const axiosResponse = await queryInstance.get(`http://localhost:8080/api/usergroup/hasPermission/${clubId}/${userId}`)
     return axiosResponse.data.data
 }
