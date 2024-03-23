@@ -1,16 +1,16 @@
 import axios from "axios";
-const apiClient = axios.create();
+const apiClient = axios.create({
+  baseURL: "http://localhost:8080",
+});
 const LoginApi = {
   loadUser: async (token: string) => {
     try {
-      const response = await apiClient.get(
-        "http://localhost:8080/api/user/load",
-        {
-          headers: {
-            Authorization: "Bearer " + token,
-          },
-        }
-      );
+      console.log("token", token);
+      const response = await apiClient.get("/api/user/load", {
+        headers: {
+          Authorization: "Bearer " + token,
+        },
+      });
       return response.data;
     } catch (error) {
       console.error(error);
@@ -18,14 +18,11 @@ const LoginApi = {
   },
   logoutUser: async (token: string) => {
     try {
-      const response = await apiClient.get(
-        "http://localhost:8080/api/user/token/logout",
-        {
-          headers: {
-            Authorization: "Bearer " + token,
-          },
-        }
-      );
+      const response = await apiClient.get("/api/token/logout", {
+        headers: {
+          Authorization: "Bearer " + token,
+        },
+      });
       return response.data;
     } catch (error) {
       console.error(error);
@@ -33,14 +30,11 @@ const LoginApi = {
   },
   test: async (token: string) => {
     try {
-      const response = await apiClient.get(
-        "http://localhost:8080/api/user/test",
-        {
-          headers: {
-            Authorization: "Bearer " + token,
-          },
-        }
-      );
+      const response = await apiClient.get("/api/user/test", {
+        headers: {
+          Authorization: "Bearer " + token,
+        },
+      });
       return response.data;
     } catch (error) {
       console.error(error);
