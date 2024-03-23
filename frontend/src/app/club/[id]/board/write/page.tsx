@@ -1,35 +1,22 @@
 'use client'
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { useState, useEffect } from "react"; // 추가
+import {zodResolver} from "@hookform/resolvers/zod";
+import {useForm} from "react-hook-form";
+import {z} from "zod";
+import React, {useState} from "react"; // 추가
+import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage,} from "@/components/ui/form";
 
-import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from "@/components/ui/form";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select";
 
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
-
-import { Input } from "@/components/ui/input";
-import { toast } from "@/components/ui/use-toast";
-import { Button } from "@/components/ui/button";
-import { Editor } from "@/components/ui/quill";
+import {Input} from "@/components/ui/input";
+import {toast} from "@/components/ui/use-toast";
+import {Button} from "@/components/ui/button";
+import {Editor} from "@/components/ui/quill";
 
 import {getCategoryList, writePost} from "@/lib/club";
-import {QueryClient, useMutation, useQuery, useSuspenseQuery} from "@tanstack/react-query";
+import {QueryClient, useMutation, useSuspenseQuery} from "@tanstack/react-query";
 import {useParams, useRouter} from "next/navigation";
+import SubHeader from "@/components/SubHeader";
 
 
 const FormSchema = z.object({
@@ -41,7 +28,6 @@ const FormSchema = z.object({
     }),
 });
 
-const queryClient = new QueryClient()
 
 export default function InputForm() {
 
@@ -49,10 +35,20 @@ export default function InputForm() {
     const params = useParams()
     const clubId = params.id;
 
-    const { isLoading, isFetching, data : categories , isError : isFetchingError, error : FetchingError, refetch  } = useSuspenseQuery({
+    const {
+        isLoading,
+        isFetching,
+        data: categories,
+        isError: isFetchingError,
+        error: FetchingError,
+        refetch
+    } = useSuspenseQuery({
         queryKey: ['clubCategory', clubId],
         queryFn: () => getCategoryList(parseInt(clubId))
     });
+
+    const queryClient = new QueryClient()
+
 
     const {isPending, isError, error, mutate, data} = useMutation({
         mutationFn: (param) => writePost(param),
@@ -63,11 +59,12 @@ export default function InputForm() {
             queryClient.invalidateQueries(['articleList']);
             router.push(`/club/${clubId}/board/${data.data.id}`);
         },
-        onError: () => { toast({
-            title: "에러가 발생하여 데이터를 저장할 수 없습니다.",
-        }); },
+        onError: () => {
+            toast({
+                title: "에러가 발생하여 데이터를 저장할 수 없습니다.",
+            });
+        },
     })
-
 
 
     const [contents, setContents] = useState<string>('');
@@ -104,59 +101,64 @@ export default function InputForm() {
     if (isFetchingError) return <>{FetchingError.message}</>;
 
     return (
+        <>
+            <SubHeader title="글 작성하기" backArrow={true}/>
+            <div className="pt-24"/>
 
-        <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <div className="flex justify-end">
-                    <Button type="submit">Submit</Button>
-                </div>
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                    <div className="flex justify-end">
+                        <Button type="submit">작성하기</Button>
+                    </div>
 
-                <FormField
-                    control={form.control}
-                    name="category"
-                    render={({ field }) => (
-                        <FormItem className="w-2/3">
-                            <FormLabel>카테고리</FormLabel>
-                            <Select
-                                onValueChange={(value) => {
-                                    field.onChange(value);
-                                    setSelectedCategory(value);
-                                }}
-                                defaultValue={form.getValues("category")}
-                            >
+                    <FormField
+                        control={form.control}
+                        name="category"
+                        render={({field}) => (
+                            <FormItem className="w-2/3">
+                                <FormLabel>카테고리</FormLabel>
+                                <Select
+                                    onValueChange={(value) => {
+                                        field.onChange(value);
+                                        setSelectedCategory(value);
+                                    }}
+                                    defaultValue={form.getValues("category")}
+                                >
+                                    <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="카테고리를 선택해주세요."/>
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        {categories?.map((category) => (
+                                            <SelectItem key={category.id} value={category.id.toString()}>
+                                                {category.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage/>
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="title"
+                        render={({field}) => (
+                            <FormItem className="w-2/3">
+                                <FormLabel>제목</FormLabel>
                                 <FormControl>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="카테고리를 선택해주세요." />
-                                    </SelectTrigger>
+                                    <Input placeholder="제목을 입력해주세요." {...field} />
                                 </FormControl>
-                                <SelectContent>
-                                    {categories?.map((category) => (
-                                        <SelectItem key={category.id} value={category.id.toString()}>
-                                            {category.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
+                                <FormMessage/>
+                            </FormItem>
+                        )}
+                    />
+                    <Editor contents={contents} onChange={handleContentChange}/>
+                </form>
+            </Form>
+        </>
 
-                <FormField
-                    control={form.control}
-                    name="title"
-                    render={({ field }) => (
-                        <FormItem className="w-2/3">
-                            <FormLabel>제목</FormLabel>
-                            <FormControl>
-                                <Input placeholder="제목을 입력해주세요." {...field} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                <Editor contents={contents} onChange={handleContentChange} />
-            </form>
-        </Form>
     );
 }
