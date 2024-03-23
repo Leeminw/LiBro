@@ -15,6 +15,8 @@ app = Flask(__name__)
 engine = get_db()
 app.config['JSON_AS_ASCII'] = False
 
+## 공통 리스폰스 엔티티
+
 def response_entity(data = "", status = 200) :
     success = status//100 <= 2
     payload = json.dumps(
