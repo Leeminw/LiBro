@@ -1,5 +1,8 @@
 package com.ssafy.libro.domain.club.service;
 
+import com.ssafy.libro.domain.board.dto.BoardCreateRequestDto;
+import com.ssafy.libro.domain.board.entity.Board;
+import com.ssafy.libro.domain.board.repository.BoardRepository;
 import com.ssafy.libro.domain.club.dto.ClubCreateRequestDto;
 import com.ssafy.libro.domain.club.dto.ClubUpdateRequestDto;
 import com.ssafy.libro.domain.club.entity.Club;
@@ -15,6 +18,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -22,6 +27,7 @@ public class ClubServiceImpl implements ClubService {
     private final ClubRepository clubRepository;
     private final UserGroupRepository userGroupRepository;
     private final UserRepository userRepository;
+    private final BoardRepository boardRepository;
 
     @Override
     public Long createClub(ClubCreateRequestDto dto) {
@@ -29,6 +35,11 @@ public class ClubServiceImpl implements ClubService {
         User user = userRepository.findById(dto.getUserId()).orElseThrow(
                 () -> new UserNotFoundException(dto.getUserId())
         );
+
+         boardRepository.saveAll(List.of(
+                Board.builder().name("공지 게시판").club(club).build(),
+                Board.builder().name("자유 게시판").club(club).build()
+        ));
 
         UserGroup userGroup = UserGroup.builder()
                 .user(user)

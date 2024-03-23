@@ -7,12 +7,11 @@ import java.util.List;
 
 public interface UserGroupService {
     ClubDetailResponseDto getClubDetail(Long clubId);
+    ClubSummaryResponseDto getClubSummary(Long clubId);
 
     Slice<ClubListDetailResponseDto> getClubList(ClubListDetailRequestDto dto);
 
     List<ClubMemberDetailResponseDto> getClubMembers(Long clubId);
-
-    void deleteClubMember(Long clubId, Long memberId);
 
     void joinClub(Long clubId, ClubJoinClubRequestDto dto);
 
