@@ -11,10 +11,10 @@ import {toast} from "@/components/ui/use-toast"
 import {Button} from "@/components/ui/button";
 import {Editor} from "@/components/ui/quill";
 import React, {useEffect, useState} from "react";
-import SubHeader from "@/components/SubHeader";
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {deleteClub, getClubDetail, updateClub} from "@/lib/club";
 import {useParams, useRouter} from "next/navigation";
+import BackBar from "@/components/layout/backbar";
 
 const FormSchema = z.object({
     title: z.string().refine(value => value.trim() !== "", {
@@ -122,8 +122,8 @@ export default function InputForm() {
 
     return (
         <>
-            <SubHeader title="커뮤니티 수정하기" backArrow={true}/>
-            <div className="pt-24"/>
+            <BackBar title="커뮤니티 수정하기"/>
+            {/*<div className="pt-24"/>*/}
 
             <Form {...form}>
                 <form className="space-y-6">
