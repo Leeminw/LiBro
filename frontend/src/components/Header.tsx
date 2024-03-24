@@ -1,12 +1,7 @@
 "use client";
 import { Button } from "./ui/button";
 import { AiOutlineSearch } from "react-icons/ai";
-import {
-  RedirectType,
-  redirect,
-  usePathname,
-  useRouter,
-} from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Input } from "./ui/input";
 import { useEffect, useRef, useState } from "react";
 import { LoginApi } from "@/lib/axios-login";
@@ -79,16 +74,13 @@ const Header = () => {
               <Button
                 className="aspect-square mr-1 w-20 min-w-20 bg-gray-400 hover:bg-gray-300"
                 onClick={() => {
-                  const token = localStorage.getItem("accessToken");
-                  if (token) {
-                    deleteUserInfo();
-                    loadLogin();
-                    router.push("/");
-                    toast({
-                      title: "로그아웃",
-                      description: `정상적으로 로그아웃 되었습니다.`,
-                    });
-                  }
+                  deleteUserInfo();
+                  loadLogin();
+                  router.push("/");
+                  toast({
+                    title: "로그아웃",
+                    description: `정상적으로 로그아웃 되었습니다.`,
+                  });
                 }}
               >
                 로그아웃
@@ -96,18 +88,25 @@ const Header = () => {
               <Button
                 className="aspect-square mr-1 w-20 min-w-20 bg-gray-400 hover:bg-gray-300"
                 onClick={() => {
-                  const token = localStorage.getItem("accessToken");
-                  if (token) {
-                    LoginApi.test(token)
-                      .then((data) => {
-                        console.log(data);
+                  LoginApi.test()
+                    .then((data) => {
+                      console.log(data);
+                      toast({
+                        title: "테스트",
+                        description: `완료`,
+                      });
+                    })
+                    .catch((err) => {
+                      if (err === "expired") {
+                        deleteUserInfo();
+                        loadLogin();
+                        router.push("/login");
                         toast({
-                          title: "테스트",
-                          description: `완료`,
+                          title: "세션이 만료됨",
+                          description: `세션이 만료되어 로그아웃 되었습니다.`,
                         });
-                      })
-                      .catch((err) => console.log(err));
-                  }
+                      }
+                    });
                 }}
               >
                 테스트

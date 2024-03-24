@@ -40,6 +40,7 @@ public class UserController {
 
     @GetMapping("/test")
     public ResponseEntity<?> getTest() {
+        log.info("call test");
         return ResponseEntity.status(HttpStatus.CREATED).body(ResponseData.success("성공"));
     }
 

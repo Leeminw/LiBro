@@ -10,8 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
-
 @RequestMapping("/api/token")
 @RequiredArgsConstructor
 @RestController
@@ -26,23 +24,23 @@ public class TokenController {
         try {
             tokenService.removeRefreshToken(token);
         } catch (Exception e) {
-            log.info("logout exception");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseData.failure("401"));
+            return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success("201"));
         }
-        log.info("logout ok");
         return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success("200"));
     }
 
     @PostMapping("/refresh")
     public ResponseEntity<?> refresh(@RequestHeader("Authorization") final String token) {
         long id = jwtProvider.getUserId(token);
-        String refreshToken = redisTemplate.opsForValue().get(id);
+        String refreshToken = redisTemplate.opsForValue().get(String.valueOf(id));
+        log.info("refresh controller"+ refreshToken);
         if (jwtProvider.verifyToken(refreshToken)) {
+            log.info("verified");
             String newAccessToken = jwtProvider.createAccessToken(id, jwtProvider.getUserRole(token));
             return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success("200", newAccessToken));
         } else {
             tokenService.removeRefreshToken(token);
+            return ResponseEntity.status(HttpStatus.CREATED).body(ResponseData.success("201"));
         }
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseData.failure("400"));
     }
 }

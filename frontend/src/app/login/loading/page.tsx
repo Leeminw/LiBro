@@ -22,6 +22,7 @@ const LoginPage = () => {
           if (data !== undefined && data.status === "success") {
             localStorage.setItem("id", data.data.id);
             setUserInfo({
+              id: data.data.id,
               email: data.data.email,
               name: data.data.name,
               profile: data.profile,
@@ -45,10 +46,7 @@ const LoginPage = () => {
   }, []);
   return (
     <>
-      <div
-        role="status"
-        className="flex flex-col justify-center items-center min-h-screen"
-      >
+      <div role="status" className="flex flex-col justify-center items-center min-h-screen">
         <svg
           aria-hidden="true"
           className="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"

@@ -62,6 +62,7 @@ public class JwtProvider {
     }
 
     public String createRefreshToken(Long id, List<String> role) {
+        // refresh 토큰 생성
         String refreshToken = Jwts.builder()
                 .claim("id", id)
                 .claim("type", "refresh")
@@ -69,6 +70,7 @@ public class JwtProvider {
                 .setExpiration(new Date(System.currentTimeMillis() + refreshExpTime))
                 .signWith(SECRET_KEY)
                 .compact();
+        // redis 서버에 refresh 토큰 저장
         redisTemplate.opsForValue().set(
                 String.valueOf(id), //key
                 refreshToken, //value
@@ -95,7 +97,7 @@ public class JwtProvider {
     }
 
     public String validateToken(String accessToken) {
-        System.out.println("access check : " + accessToken);
+        System.out.println("validate check : " + accessToken);
         accessToken = accessToken.replace("Bearer ", "");
         try {
             Claims claims = Jwts.parserBuilder()
@@ -116,28 +118,42 @@ public class JwtProvider {
         } catch (NullPointerException e) {
             return "null";
         } catch (Exception e) {
-            return "exception";
+            return "unknown";
         }
     }
 
     public String validateRefreshToken(String refreshToken) {
         System.out.println("refresh check");
         refreshToken = refreshToken.replace("Bearer ", "");
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(SECRET_KEY)
-                .build()
-                .parseClaimsJws(refreshToken)
-                .getBody();
-        String type = (String) claims.get("type");
-        if (type.equals("refresh")) {
-            System.out.println("create refresh");
-            ValueOperations<String, Object> stringValueOperations = redisTemplate.opsForValue();
-            String redisValue = (String) stringValueOperations.get(String.valueOf(claims.get("email")));
-            if (redisValue != null) {
-                return claims.getExpiration().after(new Date()) ? "validate" : "refresh_expired";
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(SECRET_KEY)
+                    .build()
+                    .parseClaimsJws(refreshToken)
+                    .getBody();
+            String type = (String) claims.get("type");
+            if (type.equals("refresh")) {
+                log.info("redis access");
+                ValueOperations<String, Object> stringValueOperations = redisTemplate.opsForValue();
+                String redisValue = (String) stringValueOperations.get(String.valueOf(claims.get("id")));
+                if (redisValue != null) {
+                    return claims.getExpiration().after(new Date()) ? "validate" : "refresh_expired";
+                }
             }
+            return "failed";
+        } catch (ExpiredJwtException e) {
+            return "expired";
+        } catch (JwtException | IllegalArgumentException e) {
+            return "invalid";
+        } catch (NoSuchElementException e) {
+            return "not_found";
+        } catch (ArrayIndexOutOfBoundsException e) {
+            return "index_out_of_bounds";
+        } catch (NullPointerException e) {
+            return "null";
+        } catch (Exception e) {
+            return "unknown";
         }
-        return "failed";
     }
 
     public Long getUserId(String jwt) {
@@ -147,7 +163,7 @@ public class JwtProvider {
                 .build()
                 .parseClaimsJws(jwt)
                 .getBody();
-        return Long.valueOf((Integer) claims.get("id"));
+        return ((Integer) claims.get("id")).longValue();
     }
 
     public List<String> getUserRole(String jwt) {

@@ -3,6 +3,7 @@ import { persist, PersistStorage, createJSONStorage } from "zustand/middleware";
 import { LoginApi } from "./axios-login";
 
 interface UserInfoType {
+  id: number;
   email: string;
   name: string;
   profile: string;
@@ -15,9 +16,11 @@ interface UserState {
   setUserInfo: (userInfo: UserInfoType) => void;
   deleteUserInfo: () => void;
   isLogin: boolean;
+  getAccessToken: () => string | null;
 }
 
 const defaultState: UserInfoType = {
+  id: 0,
   email: "",
   name: "",
   profile: "",
@@ -38,12 +41,14 @@ const useUserState = create(
         set({ userInfo });
       },
       deleteUserInfo: () => {
-        const refreshToken = localStorage.getItem("refreshToken");
-        if (refreshToken) LoginApi.logoutUser(refreshToken);
+        LoginApi.logoutUser();
         localStorage.removeItem("id");
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
         set({ userInfo: defaultState });
+      },
+      getAccessToken: () => {
+        return localStorage.getItem("accessToken");
       },
     }),
     {

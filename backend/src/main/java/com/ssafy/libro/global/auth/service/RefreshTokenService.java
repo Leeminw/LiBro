@@ -2,8 +2,6 @@ package com.ssafy.libro.global.auth.service;
 
 
 import com.ssafy.libro.global.auth.entity.JwtProvider;
-import com.ssafy.libro.global.auth.entity.RefreshToken;
-import com.ssafy.libro.global.auth.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;

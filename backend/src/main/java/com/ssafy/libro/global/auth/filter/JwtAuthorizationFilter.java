@@ -1,18 +1,16 @@
 package com.ssafy.libro.global.auth.filter;
 
-import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.libro.domain.user.entity.User;
 import com.ssafy.libro.domain.user.repository.UserRepository;
-import com.ssafy.libro.global.auth.entity.JWToken;
+//import com.ssafy.libro.global.auth.entity.JWToken;
 import com.ssafy.libro.global.auth.entity.JwtProvider;
-import com.ssafy.libro.global.util.entity.Response;
-import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -30,6 +28,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Component
 @CrossOrigin
+@Slf4j
 public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
     private final UserRepository userRepository;
@@ -37,8 +36,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
         String jwtToken = request.getHeader("Authorization");
-        System.out.println("filter - jwtHeader : " + jwtToken);
-
+        log.info("filter - jwtHeader : " + jwtToken);
         //header 있는지 확인
         if (jwtToken == null || !jwtToken.startsWith("Bearer")) {
             chain.doFilter(request, response);
@@ -50,7 +48,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         response.setStatus(HttpStatus.CREATED.value());
         String providerResult = jwtProvider.validateToken(jwtToken);
         if (providerResult.equals("access")) {
-            System.out.println("ACCESS TOKEN!!");
+            log.info("Access Token Filter");
             User user = userRepository.findById(jwtProvider.getUserId(jwtToken))
                     .orElseThrow(IllegalAccessError::new);
             Authentication auth = getAuthentication(user);
@@ -58,20 +56,20 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
             chain.doFilter(request, response);
             return;
         } else if(providerResult.equals("refresh")) {
-            System.out.println("REFRESH TOKEN!!");
+            log.info("Refresh Token Filter");
             providerResult = jwtProvider.validateRefreshToken(jwtToken);
             if (providerResult.equals("validate")) {
                 jwtToken = jwtToken.replace("Bearer ", "");
                 String accessToken = jwtProvider.reCreateAccessToken(jwtToken);
-                JWToken token = JWToken.builder().grantType("Bearer ").accessToken(accessToken).refreshToken(jwtToken).build();
-                chain.doFilter(request, response);
-                return;
-            } else if(providerResult.equals("refresh_expired")){
-                User user = userRepository.findById(jwtProvider.getUserId(jwtToken))
-                        .orElseThrow(IllegalAccessError::new);
-                String refreshToken = jwtProvider.createRefreshToken(user.getId(), List.of(user.getRole().getKey()));
-                
+                response.setStatus(HttpServletResponse.SC_OK);
+                result.put("accessToken", accessToken);
+            } else {
+                response.setStatus(HttpServletResponse.SC_GONE);
             }
+        } else if(providerResult.equals("expired")) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        } else {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
         }
         result.put("result", providerResult);
         response.getWriter().write(new ObjectMapper().writeValueAsString(result));
