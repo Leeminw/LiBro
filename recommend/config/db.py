@@ -1,10 +1,11 @@
 import os
 from dotenv import load_dotenv
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, Engine
 
-def get_db() :
+load_dotenv()
 
-    load_dotenv()
+def get_db() -> Engine:
+    
     DB_USER=os.getenv("DB_USER")
     DB_PASS=os.getenv("DB_PASS")
     DB_HOST=os.getenv("DB_HOST")
