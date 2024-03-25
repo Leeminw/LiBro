@@ -1,46 +1,46 @@
 import axios from "axios";
-
+import instance from "./interceptor";
+import useUserState from "./login-state";
 const apiClient = axios.create({
-    baseURL: "http://localhost:8080",
+  baseURL: "http://localhost:8080",
 });
+
 const LoginApi = {
-    loadUser: async (token: string) => {
-        try {
-            console.log("token", token);
-            const response = await apiClient.get("/api/user/load", {
-                headers: {
-                    Authorization: "Bearer " + token,
-                },
-            });
-            return response.data;
-        } catch (error) {
-            console.error(error);
-        }
-    },
-    logoutUser: async (token: string) => {
-        try {
-            const response = await apiClient.get("/api/token/logout", {
-                headers: {
-                    Authorization: "Bearer " + token,
-                },
-            });
-            return response.data;
-        } catch (error) {
-            console.error(error);
-        }
-    },
-    test: async (token: string) => {
-        try {
-            const response = await apiClient.get("/api/user/test", {
-                headers: {
-                    Authorization: "Bearer " + token,
-                },
-            });
-            return response.data;
-        } catch (error) {
-            console.error(error);
-        }
-    },
+  loadUser: async (token: string) => {
+    try {
+      console.log("token", token);
+      const response = await apiClient.get("/api/user/load", {
+        headers: {
+          Authorization: "Bearer " + token,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error(error);
+    }
+  },
+  logoutUser: async () => {
+    try {
+      const response = await apiClient.get("/api/token/logout", {
+        headers: {
+          Authorization: "Bearer " + localStorage.getItem("refreshToken"),
+        },
+      });
+      console.log("logout OK", response);
+      return response.data;
+    } catch (error) {
+      console.error(error);
+    }
+  },
+  test: async () => {
+    try {
+      const response = await instance.get("/api/user/test");
+      return response.data;
+    } catch (error) {
+      console.log(error);
+      return Promise.reject("expired");
+    }
+  },
 };
 
-export {LoginApi};
+export { LoginApi };

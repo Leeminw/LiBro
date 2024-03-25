@@ -1,6 +1,7 @@
 package com.ssafy.libro.global.handlers;
 
 import com.ssafy.libro.global.common.ResponseData;
+import io.jsonwebtoken.ExpiredJwtException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +30,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<?> handleException(Exception e) {
         log.error("GlobalExceptionHandler: " + e.getMessage());
         return new ResponseEntity<>(ResponseData.error(), HttpStatus.BAD_REQUEST);
+        // return new ResponseEntity<>(ResponseData.error(e.getMessage()), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(ExpiredJwtException.class)
+    public ResponseEntity<?> handleExpiredJwtException(Exception e) {
+        log.error("GlobalExceptionHandler: " + e.getMessage());
+        return new ResponseEntity<>(ResponseData.error("401"), HttpStatus.BAD_REQUEST);
         // return new ResponseEntity<>(ResponseData.error(e.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
