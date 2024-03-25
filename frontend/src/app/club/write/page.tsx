@@ -77,6 +77,33 @@ export default function InputForm() {
                         <Button type="submit">Submit</Button>
                     </div>
 
+<<<<<<< HEAD:frontend/src/app/club/[id]/board/edit/page.tsx
+
+                    <FormField
+                        control={form.control}
+                        name="category"
+                        render={({field}) => (
+                            <FormItem className="w-2/3">
+                                <FormLabel>카테고리</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder={categories[field.value] ||  "Select a verified email to display"}/>
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        {/* {Object.entries(categories).map(([key, value]) => (
+                                            <SelectItem value={key}>{value}</SelectItem>
+                                        ))} */}
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage/>
+                            </FormItem>
+                        )}
+                    />
+
+=======
+>>>>>>> 55a0b39f3553c861606869d1a2f90045eee16636:frontend/src/app/club/write/page.tsx
                     <FormField
                         control={form.control}
                         name="title"
