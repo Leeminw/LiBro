@@ -25,9 +25,24 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-        User user = ((OAuth2UserImpl)authentication.getPrincipal()).getUser();
+        User user = ((OAuth2UserImpl) authentication.getPrincipal()).getUser();
 
-        if(user.getRole().equals(Role.GUEST)){
+        // 처음 가입한 회원일 시
+        if (user.getRole().equals(Role.GUEST)) {
+            List<String> input = new ArrayList<>();
+            input.add(user.getRole().getTitle());
+            String token = jwtProvider.createAccessToken(user.getId(), input);
+            String refreshToken = jwtProvider.createRefreshToken(user.getId(), input);
+            String redirectURL = UriComponentsBuilder.fromUriString("http://localhost:3000/addinfo")
+                    .queryParam("accessToken", token)
+                    .queryParam("refreshToken", refreshToken)
+                    .build()
+                    .encode(StandardCharsets.UTF_8)
+                    .toUriString();
+            getRedirectStrategy().sendRedirect(request, response, redirectURL);
+        }
+        // 이미 가입한 회원일 시
+        else if (user.getRole().equals(Role.USER)) {
             List<String> input = new ArrayList<>();
             input.add(user.getRole().getTitle());
             String token = jwtProvider.createAccessToken(user.getId(), input);
