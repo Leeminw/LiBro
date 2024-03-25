@@ -7,5 +7,7 @@ import java.io.IOException;
 import java.util.Map;
 
 public interface ShortsService {
+
+    void createImages(PromptRequestDto requestDto) throws IOException;
     void createShorts();
 }
