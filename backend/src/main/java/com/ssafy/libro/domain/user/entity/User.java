@@ -1,12 +1,14 @@
 package com.ssafy.libro.domain.user.entity;
 
 import com.ssafy.libro.domain.article.entity.Article;
+import com.ssafy.libro.domain.user.dto.UserJoinRequestDto;
 import com.ssafy.libro.domain.userbook.entity.UserBook;
 import com.ssafy.libro.domain.usergroup.entity.UserGroup;
 import com.ssafy.libro.global.util.entity.StringListConverter;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -38,6 +40,9 @@ public class User {
     private String profile;
 
     @Column
+    private String nickname;
+
+    @Column
     private char gender;
 
     @Column
@@ -67,11 +72,6 @@ public class User {
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
     private List<Article> articles;
 
-    public User update(String name, String profile) {
-        this.name = name;
-        this.profile = profile;
-        return this;
-    }
 
     @Builder.Default
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
@@ -79,5 +79,14 @@ public class User {
 
     public String getRoleKey() {
         return this.role.getKey();
+    }
+
+
+    public void updateUserJoin(UserJoinRequestDto user) {
+        this.nickname = user.getNickname();
+        this.gender = user.getGender();
+        this.age = user.getAge();
+        this.interest = user.getInterest();
+        this.role = Role.USER;
     }
 }

@@ -22,8 +22,8 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/load")
-    public ResponseEntity<?> userLogin(@RequestHeader("Authorization") final String accessToken) {
-        User user = userService.loadUser(accessToken);
+    public ResponseEntity<?> userLogin() {
+        User user = userService.loadUser();
         if (user != null){
             OAuthUser result = OAuthUser.builder()
                     .id(user.getId())
@@ -40,7 +40,8 @@ public class UserController {
 
     @PostMapping("/join")
     public ResponseEntity<?> joinUser(@RequestBody UserJoinRequestDto requestDto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(ResponseData.success("회원가입 성공"));
+        userService.joinUser(requestDto);
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success("회원가입 성공"));
     }
 
     @GetMapping("/mypage")

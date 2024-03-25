@@ -41,6 +41,14 @@ const LoginApi = {
       return Promise.reject("expired");
     }
   },
+  addInfo: async () => {
+    try {
+      const response = await instance.put("/api/user/join");
+      return response.data;
+    } catch (error) {
+      return Promise.reject(error);
+    }
+  },
 };
 
 export { LoginApi };

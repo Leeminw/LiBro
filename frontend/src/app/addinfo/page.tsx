@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { LoginApi } from "@/lib/axios-login";
 import {
   SelectValue,
   SelectTrigger,
@@ -256,7 +257,9 @@ const UserInfo = () => {
             />
           </div>
           <Button
-            onClick={() => {}}
+            onClick={() => {
+              // addinfo
+            }}
             className="mb-6 bg-[#9268EB] text-white px-6 py-2 rounded w-full"
           >
             확인
