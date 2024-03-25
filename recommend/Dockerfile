@@ -10,5 +10,6 @@ COPY . /app
 # 필요한 라이브러리를 설치합니다. requirements.txt 파일이 있어야 합니다.
 RUN pip install --no-cache-dir -r requirements.txt
 
+Run python3 train.py
 # Gunicorn을 사용하여 Flask 애플리케이션을 실행합니다.
 CMD ["gunicorn", "-b", "0.0.0.0:5000", "app:app"]
