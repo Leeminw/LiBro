@@ -16,7 +16,7 @@ import DetailAnalyze from "@/components/components/detailAnalyze";
 import { SearchApi } from "@/lib/axios-search";
 import { FaPlus, FaStar } from "react-icons/fa6";
 import { RiPencilFill } from "react-icons/ri";
-import { dateFormatter } from "@/lib/dateFormatter";
+import { dateFormatter } from "@/lib/date-formatter";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
