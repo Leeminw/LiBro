@@ -3,11 +3,27 @@ import { Button } from "./ui/button";
 import { AiOutlineSearch } from "react-icons/ai";
 import { usePathname, useRouter } from "next/navigation";
 import { Input } from "./ui/input";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { LoginApi } from "@/lib/axios-login";
+import { useToast } from "@/components/ui/use-toast";
+import useUserState from "@/lib/login-state";
 const Header = () => {
   const router = useRouter();
   const pathname = usePathname();
   const searchRef = useRef<HTMLInputElement>(null);
+  const { deleteUserInfo } = useUserState();
+  const { toast } = useToast();
+  const [isLogin, setIsLogin] = useState(false);
+  const [loginLoad, setLoginLoad] = useState(false);
+  const loadLogin = () => {
+    setIsLogin(!!localStorage.getItem("accessToken"));
+    setLoginLoad(true);
+  };
+
+  useEffect(() => {
+    loadLogin();
+  }, []);
+
   const handleSearch = () => {
     if (searchRef.current) {
       router.push(`/search/result?query=${searchRef.current.value}&start=1`);
@@ -52,14 +68,63 @@ const Header = () => {
         >
           <AiOutlineSearch size={"1.2rem"} className="justify-items-end" />
         </Button>
-        <Button
-          className="aspect-square mr-1 w-20 min-w-20 bg-[#9268EB] hover:bg-[#684ba6]"
-          onClick={() => {
-            router.push("/login");
-          }}
-        >
-          로그인
-        </Button>
+        {loginLoad ? (
+          isLogin ? (
+            <>
+              <Button
+                className="aspect-square mr-1 w-20 min-w-20 bg-gray-400 hover:bg-gray-300"
+                onClick={() => {
+                  deleteUserInfo();
+                  loadLogin();
+                  router.push("/");
+                  toast({
+                    title: "로그아웃",
+                    description: `정상적으로 로그아웃 되었습니다.`,
+                  });
+                }}
+              >
+                로그아웃
+              </Button>
+              <Button
+                className="aspect-square mr-1 w-20 min-w-20 bg-gray-400 hover:bg-gray-300"
+                onClick={() => {
+                  LoginApi.test()
+                    .then((data) => {
+                      console.log(data);
+                      toast({
+                        title: "테스트",
+                        description: `완료`,
+                      });
+                    })
+                    .catch((err) => {
+                      if (err === "expired") {
+                        deleteUserInfo();
+                        loadLogin();
+                        router.push("/login");
+                        toast({
+                          title: "세션이 만료됨",
+                          description: `세션이 만료되어 로그아웃 되었습니다.`,
+                        });
+                      }
+                    });
+                }}
+              >
+                테스트
+              </Button>
+            </>
+          ) : (
+            <Button
+              className="aspect-square mr-1 w-20 min-w-20 bg-[#9268EB] hover:bg-[#684ba6]"
+              onClick={() => {
+                router.push("/login");
+              }}
+            >
+              로그인
+            </Button>
+          )
+        ) : (
+          <div className="mr-1 w-20 min-w-20"></div>
+        )}
       </div>
     </div>
   );

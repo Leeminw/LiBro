@@ -17,7 +17,7 @@ public class OAuthAttributes {
     private final String authId;
 
     @Builder
-    public OAuthAttributes(Map<String, Object> attributes, String authType, String authId, String name, String email, String profile) {
+    public OAuthAttributes(Map<String, Object> attributes, Long id, String authType, String authId, String name, String email, String profile) {
         this.attributes = attributes;
         this.name = name;
         this.email = email;
@@ -27,14 +27,15 @@ public class OAuthAttributes {
     }
 
     public static OAuthAttributes of(String registrationId, Map<String, Object> attributes) {
-        switch (registrationId){
+        switch (registrationId) {
             case "google":
-                return ofGoogle(registrationId,attributes);
+                return ofGoogle(registrationId, attributes);
         }
         return null;
     }
 
     private static OAuthAttributes ofGoogle(String registrationId, Map<String, Object> attributes) {
+        System.out.println(attributes.toString());
         return OAuthAttributes.builder()
                 .name((String) attributes.get("name"))
                 .email((String) attributes.get("email"))
