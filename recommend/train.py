@@ -10,9 +10,14 @@ import os
 # 가중치 어떻게 적용하지..
 USER_BOOK_WEIGHT = 0.5
 BOOK_REGIST_WEIHGT = 0.2
-
+VIEW_COUNT_WEIGHT = 0.2
 # 흠.. 
 
+
+# 볼떄마다 다르게 하려면 어떻게..
+# 협업 상위 n개중 랜덤한 m 개
+# 다른 추천 방식 ex 그냥 랜덤 
+# 하위 n개중 랜덤한 m개 
 
 # 주기적으로 학습해서 모델
 def train() : 
