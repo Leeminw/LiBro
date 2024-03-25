@@ -9,6 +9,8 @@ import com.ssafy.libro.domain.club.entity.*;
 import com.ssafy.libro.domain.club.exception.*;
 import com.ssafy.libro.domain.usergroup.entity.ClubRole;
 import com.ssafy.libro.domain.usergroup.entity.UserGroup;
+import com.ssafy.libro.domain.usergroup.exception.AlreadyJoinedException;
+import com.ssafy.libro.domain.usergroup.exception.NotFoundJoinException;
 import com.ssafy.libro.domain.usergroup.repository.UserGroupRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +18,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -28,7 +31,16 @@ public class UserGroupServiceImpl implements UserGroupService {
 
     @Override
     public ClubDetailResponseDto getClubDetail(Long clubId) {
-        return userGroupRepository.getClubDetail(clubId);
+        return userGroupRepository.getClubDetail(clubId).orElseThrow(
+                () -> new ClubNotFoundException(clubId)
+        );
+    }
+
+    @Override
+    public ClubSummaryResponseDto getClubSummary(Long clubId) {
+        return userGroupRepository.getClubSummary(clubId).orElseThrow(
+                () -> new ClubNotFoundException(clubId)
+        );
     }
 
     @Override
@@ -42,18 +54,6 @@ public class UserGroupServiceImpl implements UserGroupService {
     }
 
     @Override
-    public void deleteClubMember(Long clubId, Long memberId) {
-        Club club = clubRepository.findById(clubId).orElseThrow(
-                () -> new ClubNotFoundException(clubId)
-        );
-        User user = userRepository.findById(memberId).orElseThrow(
-                () -> new UserNotFoundException(memberId)
-        );
-
-        userGroupRepository.deleteByUserAndClub(club, user);
-    }
-
-    @Override
     public void joinClub(Long clubId, ClubJoinClubRequestDto dto) {
         Club club = clubRepository.findById(clubId).orElseThrow(
                 () -> new ClubNotFoundException(clubId)
@@ -62,6 +62,12 @@ public class UserGroupServiceImpl implements UserGroupService {
         User user = userRepository.findById(dto.getUserId()).orElseThrow(
                 () -> new UserNotFoundException(dto.getUserId())
         );
+
+        Optional<UserGroup> byClubAndUser = userGroupRepository.findByClubAndUser(club, user);
+
+        if (byClubAndUser.isPresent()) {
+            throw new AlreadyJoinedException(club, user);
+        }
 
         UserGroup userGroup = UserGroup.builder()
                 .user(user)
@@ -81,7 +87,11 @@ public class UserGroupServiceImpl implements UserGroupService {
                 () -> new UserNotFoundException(memberId)
         );
 
-        userGroupRepository.deleteByUserAndClub(club, user);
+        userGroupRepository.findByClubAndUser(club, user).orElseThrow(
+                () -> new NotFoundJoinException(club, user)
+        );
+
+        userGroupRepository.deleteByClubAndUser(club, user);
     }
 
     @Override
@@ -93,7 +103,7 @@ public class UserGroupServiceImpl implements UserGroupService {
     public ClubMemberShipResponseDto getClubMemberShip(Long clubId, Long userId) {
         ClubMemberShipResponseDto memberShip = userGroupRepository.getClubMemberShip(clubId, userId);
 
-        if(memberShip == null) return new ClubMemberShipResponseDto(clubId, userId, null);
+        if (memberShip == null) return new ClubMemberShipResponseDto(clubId, userId, null);
         return memberShip;
     }
 }

@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Data
 public class ClubMemberDetailResponseDto {
+    private Long userId;
     private String name;
     private String profile;
     private LocalDateTime createdDate;

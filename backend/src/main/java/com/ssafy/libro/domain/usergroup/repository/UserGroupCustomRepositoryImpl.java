@@ -1,12 +1,15 @@
 package com.ssafy.libro.domain.usergroup.repository;
 
 import com.nimbusds.oauth2.sdk.util.StringUtils;
-import com.querydsl.core.types.OrderSpecifier;
-import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.*;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.SimpleExpression;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.ssafy.libro.domain.usergroup.dto.*;
 import com.ssafy.libro.domain.usergroup.entity.ClubRole;
+import com.ssafy.libro.domain.usergroup.entity.QUserGroup;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -15,6 +18,7 @@ import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.ssafy.libro.domain.club.entity.QClub.club;
 import static com.ssafy.libro.domain.usergroup.entity.QUserGroup.userGroup;
@@ -26,20 +30,56 @@ public class UserGroupCustomRepositoryImpl implements UserGroupCustomRepository 
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public ClubDetailResponseDto getClubDetail(Long clubId) {
-        return jpaQueryFactory
+    public Optional<ClubDetailResponseDto> getClubDetail(Long clubId) {
+        SimpleExpression<Long> memberCount = Expressions.as(
+                JPAExpressions.select(userGroup.user.count())
+                        .from(userGroup)
+                        .where(equalClubId(clubId))
+                        .groupBy(userGroup.club.id)
+                , "memberCount"
+        );
+
+        ClubDetailResponseDto result = jpaQueryFactory
                 .select(Projections.constructor(
                         ClubDetailResponseDto.class,
-                        userGroup.club.id,
-                        userGroup.club.name,
+                        userGroup.club.id.as("clubId"),
+                        userGroup.club.name.as("clubName"),
                         userGroup.club.description,
                         userGroup.club.createdDate,
-                        userGroup.user.name.as("userName"),
-                        userGroup.user.profile
+                        userGroup.user.name.as("clubOwnerName"),
+                        userGroup.user.profile,
+                        memberCount
+
                 ))
                 .from(userGroup)
                 .where(equalClubId(clubId), equalAdmin())
                 .fetchOne();
+        return Optional.ofNullable(result);
+    }
+
+    @Override
+    public Optional<ClubSummaryResponseDto> getClubSummary(Long clubId) {
+        SimpleExpression<Long> memberCount = Expressions.as(
+                JPAExpressions.select(userGroup.user.count())
+                        .from(userGroup)
+                        .where(equalClubId(clubId))
+                        .groupBy(userGroup.club.id)
+                , "memberCount"
+        );
+
+        ClubSummaryResponseDto result = jpaQueryFactory
+                .select(Projections.constructor(
+                        ClubSummaryResponseDto.class,
+                        userGroup.club.id.as("clubId"),
+                        userGroup.club.name.as("clubName"),
+                        userGroup.club.createdDate,
+                        memberCount
+
+                ))
+                .from(userGroup)
+                .where(equalClubId(clubId), equalAdmin())
+                .fetchOne();
+        return Optional.ofNullable(result);
     }
 
 
@@ -50,8 +90,8 @@ public class UserGroupCustomRepositoryImpl implements UserGroupCustomRepository 
         List<ClubListDetailResponseDto> fetch = jpaQueryFactory.select(Projections.constructor(
                         ClubListDetailResponseDto.class,
                         userGroup.club.id.as("clubId"),
-                        userGroup.user.name.as("userName"),
-                        userGroup.club.name,
+                        userGroup.user.name.as("clubOwnerName"),
+                        userGroup.club.name.as("clubName"),
                         userGroup.club.createdDate
                 ))
                 .from(userGroup)
@@ -60,7 +100,7 @@ public class UserGroupCustomRepositoryImpl implements UserGroupCustomRepository 
                         equalKeyword(dto.getKeyword()),
                         equalAdmin()
                 )
-                .orderBy(orderBy(dto.getSortOrder()))
+                .orderBy(orderByCreatedDate(dto.getSortOrder()))
                 .limit(pageable.getPageSize() + 1)
                 .fetch();
 
@@ -72,6 +112,7 @@ public class UserGroupCustomRepositoryImpl implements UserGroupCustomRepository 
     public List<ClubMemberDetailResponseDto> getClubMemberList(Long clubId) {
         return jpaQueryFactory.select(Projections.constructor(
                         ClubMemberDetailResponseDto.class,
+                        userGroup.user.id.as("userId"),
                         userGroup.user.name.as("name"),
                         userGroup.user.profile,
                         userGroup.createdDate,
@@ -86,22 +127,29 @@ public class UserGroupCustomRepositoryImpl implements UserGroupCustomRepository 
     @Override
     public Slice<MyClubResponseDto> getMyClubs(MyClubRequestDto dto) {
         Pageable pageable = PageRequest.ofSize(10);
+        QUserGroup subUserGroup = new QUserGroup("sub");
+
+        Expression<String> clubOwnerName = ExpressionUtils.as(JPAExpressions
+                .select(subUserGroup.user.name)
+                .from(subUserGroup)
+                .where(subUserGroup.club.id.eq(userGroup.club.id)
+                        .and(subUserGroup.role.eq(ClubRole.CLUB_ADMIN))), "clubOwnerName");
 
         List<MyClubResponseDto> fetch = jpaQueryFactory.select(Projections.constructor(
                         MyClubResponseDto.class,
                         userGroup.club.id.as("clubId"),
-                        userGroup.user.name.as("userName"),
-                        userGroup.club.name,
-                        userGroup.club.createdDate
+                        clubOwnerName,
+                        userGroup.club.name.as("clubName"),
+                        userGroup.club.createdDate,
+                        userGroup.role
                 ))
                 .from(userGroup)
                 .where(
                         decideId(dto.getClubId(), dto.getSortOrder()),
                         equalKeyword(dto.getKeyword()),
-                        equalAdmin(),
                         equalMe(dto.getUserId())
                 )
-                .orderBy(orderBy(dto.getSortOrder()))
+                .orderBy(orderByJoinedDate(dto.getSortOrder()))
                 .limit(pageable.getPageSize() + 1)
                 .fetch();
 
@@ -152,11 +200,14 @@ public class UserGroupCustomRepositoryImpl implements UserGroupCustomRepository 
         return userGroup.club.id.eq(clubId);
     }
 
-    private OrderSpecifier<?> orderBy(String sortOrder) {
+    private OrderSpecifier<?> orderByCreatedDate(String sortOrder) {
         if ("latest".equals(sortOrder) || sortOrder == null) return club.createdDate.desc();
         return club.createdDate.asc();
     }
-
+    private OrderSpecifier<?> orderByJoinedDate(String sortOrder) {
+        if ("latest".equals(sortOrder) || sortOrder == null) return userGroup.createdDate.desc();
+        return userGroup.createdDate.asc();
+    }
 
     private boolean hasNextPage(List<?> contents, int pageSize) {
         if (contents.size() > pageSize) {

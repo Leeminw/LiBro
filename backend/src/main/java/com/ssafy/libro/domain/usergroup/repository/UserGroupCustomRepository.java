@@ -4,9 +4,12 @@ import com.ssafy.libro.domain.usergroup.dto.*;
 import org.springframework.data.domain.Slice;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface UserGroupCustomRepository {
-    ClubDetailResponseDto getClubDetail(Long clubId);
+    Optional<ClubDetailResponseDto> getClubDetail(Long clubId);
+
+    Optional<ClubSummaryResponseDto> getClubSummary(Long clubId);
 
     List<ClubMemberDetailResponseDto> getClubMemberList(Long clubId);
 

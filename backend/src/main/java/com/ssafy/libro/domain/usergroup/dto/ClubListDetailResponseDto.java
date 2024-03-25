@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class ClubListDetailResponseDto {
     private Long clubId;
-    private String userName;
-    private String name;
+    private String clubOwnerName;
+    private String clubName;
     private LocalDateTime createdDate;
 }

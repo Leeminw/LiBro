@@ -3,6 +3,7 @@ package com.ssafy.libro.domain.board.controller;
 
 import com.ssafy.libro.domain.board.dto.BoardCreateRequestDto;
 import com.ssafy.libro.domain.board.dto.BoardResponseDto;
+import com.ssafy.libro.domain.board.dto.BoardUpdateRequestDto;
 import com.ssafy.libro.domain.board.service.BoardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -27,17 +28,19 @@ public class BoardController {
         return ResponseEntity.status(HttpStatus.OK).body(map);
     }
 
-    @GetMapping("{boardId}")
-    public ResponseEntity<Map<String,Object>> getBoardArticles(@PathVariable("boardId") Long boardId){
-        return ResponseEntity.status(HttpStatus.OK).body(null);
-    }
-
     @PostMapping("")
     public ResponseEntity<Map<String,Object>> createBoard(@RequestBody BoardCreateRequestDto dto){
         System.out.println("dto:"+dto.getName()+"clubId:"+dto.getClubId());
         boardService.createBoard(dto);
         return ResponseEntity.status(HttpStatus.OK).body(null);
     }
+
+    @PutMapping("")
+    public ResponseEntity<Map<String,Object>> updateBoard(@RequestBody BoardUpdateRequestDto dto){
+        boardService.updateBoard(dto);
+        return ResponseEntity.status(HttpStatus.OK).body(null);
+    }
+
 
     @DeleteMapping("{boardId}")
     public ResponseEntity<Map<String,Object>> deleteBoard(@PathVariable("boardId") Long boardId){
