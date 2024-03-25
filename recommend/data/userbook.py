@@ -1,5 +1,3 @@
-from str import str
-
 class UserBook:
     id : int
     book_id : int
