@@ -27,7 +27,7 @@ public class UserBookController {
         return ResponseEntity.ok("data");
     }
 
-//    등록 도서 목록 조회
+//    등록 도서 목록 조회 todo
     @GetMapping("/user/{userId}")
     public ResponseEntity<?> getUserBookList (@PathVariable Long userId){
         List<UserBookListResponseDto> responseDtoList = userBookService.getUserBookList(userId);
@@ -70,7 +70,7 @@ public class UserBookController {
         UserBookDetailResponseDto responseDto = userBookService.updateRating(requestDto);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(responseDto));
     }
-//    독서 기록 조회( 회원별 완독한 도서를 월별로 조회하는기능)
+//    독서 기록 조회( 회원별 완독한 도서를 월별로 조회하는기능) todo
     @GetMapping("/date/{userId}")
     public ResponseEntity<?> getBookListByDate
             (@PathVariable Long userId, @RequestParam Integer year, @RequestParam Integer month){
@@ -78,7 +78,7 @@ public class UserBookController {
         return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(responseDtoList));
     }
 
-//    사용자 등록 도서 완독
+//    사용자 등록 도서 완독 todo
     @GetMapping("/read-ratio/user/{userId}")
     public ResponseEntity<?> getUserReadRatio(@PathVariable Long userId){
         UserBookRatioResponseDto responseDto = userBookService.getUserReadRatio(userId);
@@ -91,12 +91,13 @@ public class UserBookController {
         UserBookRatioResponseDto responseDto = userBookService.getBookReadRatio(bookId);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(responseDto));
     }
-//    @GetMapping("/")
+//    todo
     @GetMapping("/complete/{userId}")
     public ResponseEntity<?> getUserBookReadComplete(@PathVariable Long userId){
         List<UserBookListResponseDto> responseDtoList = userBookService.getUserBookReadComplete(userId);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(responseDtoList));
     }
+    // todo
     @GetMapping("/on-read/{userId}")
     public ResponseEntity<?> getUserBookOnRead(@PathVariable Long userId){
         List<UserBookListResponseDto> responseDtoList = userBookService.getUserBookOnReading(userId);
