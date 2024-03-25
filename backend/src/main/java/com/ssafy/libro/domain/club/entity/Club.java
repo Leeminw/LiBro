@@ -1,6 +1,9 @@
 package com.ssafy.libro.domain.club.entity;
 
+import com.ssafy.libro.domain.article.dto.ArticleUpdateRequestDto;
 import com.ssafy.libro.domain.board.entity.Board;
+import com.ssafy.libro.domain.club.dto.ClubUpdateRequestDto;
+import com.ssafy.libro.domain.usergroup.entity.UserGroup;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -36,6 +39,15 @@ public class Club {
     private LocalDateTime createdDate;
     private LocalDateTime updatedDate;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "club")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "club", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Board> boards;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "club", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserGroup> userGroups;
+
+    public void update(ClubUpdateRequestDto dto){
+        this.name = dto.getName();
+        this.description = dto.getDescription();
+        this.updatedDate = LocalDateTime.now();
+    }
 }

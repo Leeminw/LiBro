@@ -17,31 +17,7 @@ import { ColourOption, colourOptions } from "./data";
 import chroma from "chroma-js";
 import SelectMenu, { ActionMeta, MultiValue } from "react-select";
 import { StylesConfig } from "react-select";
-
-const Header = () => {
-  const router = useRouter();
-
-  const handleBack = () => {
-    router.back();
-  };
-
-  return (
-    <div className="flex items-center p-3">
-      <Button
-        onClick={handleBack}
-        style={{
-          background: "none",
-          border: "none",
-          padding: 0,
-          cursor: "pointer",
-        }}
-      >
-        <img src="/back.svg" alt="Back" width={24} height={24} />
-      </Button>
-      <h1 className="ml-3 text-lg font-bold">추가 정보입력</h1>
-    </div>
-  );
-};
+import SubHeader from "@/components/SubHeader";
 
 const UserInfo = () => {
   const [stage, setStage] = useState(1);
@@ -52,7 +28,10 @@ const UserInfo = () => {
 
   const [selectedValues, setSelectedValues] = useState<string[]>([]);
 
-  const handleChange = (newValue: MultiValue<ColourOption>, actionMeta: ActionMeta<ColourOption>) => {
+  const handleChange = (
+    newValue: MultiValue<ColourOption>,
+    actionMeta: ActionMeta<ColourOption>
+  ) => {
     if (newValue) {
       // 선택된 항목들에서 value만 추출하여 저장합니다.
       const values = newValue.map((option) => option.value);
@@ -126,9 +105,7 @@ const UserInfo = () => {
   };
 
   return (
-    <div
-      className={`flex flex-col p-4 min-h-screen transition-all duration-500`}
-    >
+    <div className="flex flex-col pt-28 px-6 transition-all duration-500">
       {stage === 1 && (
         <div>
           <h1 className="text-lg font-bold mb-6">{headerText}</h1>
@@ -264,7 +241,7 @@ const UserInfo = () => {
             </div>
           </div>
           <div
-            className="flex w-full flex-col gap-5 mb-6 bg-white "
+            className="flex w-full flex-col gap-5 mb-6 bg-white"
             onFocus={() => setHeaderText("관심분야를 선택하세요.")}
           >
             <SelectMenu
@@ -273,11 +250,15 @@ const UserInfo = () => {
               isMulti={true}
               options={colourOptions}
               styles={colourStyles}
-              minMenuHeight={130}
-              onChange={handleChange}
+              onChange={() => {
+                handleChange;
+              }}
             />
           </div>
-          <Button className="mb-6 bg-[#9268EB] text-white px-6 py-2 rounded w-full">
+          <Button
+            onClick={() => {}}
+            className="mb-6 bg-[#9268EB] text-white px-6 py-2 rounded w-full"
+          >
             확인
           </Button>
         </div>
@@ -289,7 +270,7 @@ const UserInfo = () => {
 const Addinfo = () => {
   return (
     <>
-      <Header />
+      <SubHeader title="회원 가입" backArrow={true} />
       <UserInfo />
     </>
   );
