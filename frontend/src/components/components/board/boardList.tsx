@@ -12,8 +12,7 @@ import BoardItem from "@/components/components/board/boardItems";
 import {useInView} from "react-intersection-observer";
 import {useInfiniteQuery, useQueryClient, useSuspenseQuery} from "@tanstack/react-query";
 import {getCategoryList, getPostList} from "@/lib/club";
-import {useParams} from "next/navigation";
-import {useRouter} from "next/navigation";
+import {useParams, useRouter} from "next/navigation";
 
 
 export default function BoardList() {
@@ -95,7 +94,7 @@ export default function BoardList() {
     return (
         <>
             <div className="flex justify-between">
-                <Button onClick={writeHandler} children="글쓰기"/>
+                <Button onClick={writeHandler}>글쓰기</Button>
                 <div className="w-2/3">
                     <div className="relative ">
                         <Search className="absolute left-2 top-3 h-4 w-4 text-muted-foreground"/>
