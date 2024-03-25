@@ -1,5 +1,8 @@
 package com.ssafy.libro.domain.board.entity;
 
+import com.ssafy.libro.domain.article.dto.ArticleUpdateRequestDto;
+import com.ssafy.libro.domain.article.entity.Article;
+import com.ssafy.libro.domain.board.dto.BoardUpdateRequestDto;
 import com.ssafy.libro.domain.club.entity.Club;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -9,6 +12,8 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -34,4 +39,12 @@ public class Board {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="club_id")
     private Club club;
+
+    @OneToMany(mappedBy = "board", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    List<Article> articles = new ArrayList<>();
+
+    public void update(BoardUpdateRequestDto dto){
+        this.name= dto.getName();
+        this.updatedDate = LocalDateTime.now();
+    }
 }
