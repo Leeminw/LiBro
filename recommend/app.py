@@ -3,7 +3,6 @@ from http import HTTPStatus
 from service.service import get_random_book_list, get_recommend_book_list
 from data.response import make_response_entity
 app = Flask(__name__)
-from pyspark.sql import SparkSession
 
 app.config['JSON_AS_ASCII'] = False
 
