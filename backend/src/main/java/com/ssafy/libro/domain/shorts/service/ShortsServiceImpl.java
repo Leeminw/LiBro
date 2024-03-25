@@ -1,14 +1,16 @@
 package com.ssafy.libro.domain.shorts.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.ssafy.libro.domain.shorts.dto.PromptRequestDto;
 import com.ssafy.libro.domain.shorts.dto.PromptResponseDto;
 import com.ssafy.libro.domain.shorts.dto.ShortsRequestDto;
 import com.ssafy.libro.domain.shorts.dto.ShortsResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.bytedeco.javacv.FFmpegFrameRecorder;
-import org.bytedeco.javacv.Java2DFrameConverter;
+import org.bytedeco.javacv.*;
+import org.bytedeco.javacv.Frame;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -24,11 +26,17 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class ShortsServiceImpl implements ShortsService {
+
+    @Value("${cloud.aws.bucket-name}")
+    private String bucketName;
+
+    private final AmazonS3 amazonS3;
 
     private final PromptServiceImpl promptService;
 
@@ -53,17 +61,18 @@ public class ShortsServiceImpl implements ShortsService {
 
             // 이미지 데이터와 줄거리를 매개변수로 넣으면 동영상파일이 리턴됨
 
-            // 이미지 파일을 임시 디렉토리에 저장
+            // 동영상 파일을 임시 디렉토리에 저장
             Path tempDir = Files.createTempDirectory("outputs");
-//            for (int i = 0; i < decodedImages.size(); i++) {
-//                Path imagePath = tempDir.resolve(String.format("image%03d.jpg", i));
-//                Files.write(imagePath, decodedImages.get(i));
-//            }
-
-            // ffmpeg를 사용하여 이미지로부터 동영상 생성
             String videoFileName = UUID.randomUUID() + ".mp4";
             String videoFilePath = tempDir.resolve(videoFileName).toString();
 
+            for (byte[] decodedImage : decodedImages) {
+                String imageFileName = UUID.randomUUID() + ".jpg";
+                Path imagePath = tempDir.resolve(imageFileName);
+                Files.write(imagePath, decodedImage);
+            }
+
+            // ffmpeg를 사용하여 이미지로부터 동영상 생성
             try (FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(videoFilePath, VIDEO_WIDTH, VIDEO_HEIGHT)) {
                 recorder.setFrameRate(FRAME_RATE);
                 recorder.setVideoCodec(org.bytedeco.ffmpeg.global.avcodec.AV_CODEC_ID_H264);
@@ -71,44 +80,34 @@ public class ShortsServiceImpl implements ShortsService {
                 recorder.start();
 
                 createShorts(decodedImages, recorder);
-
                 recorder.stop();
-            } catch (Exception e) {
-                log.error(e.getMessage());
             }
 
-            // 리턴된 동영상 파일을 S3에 저장하면 끝!!!
-//            try {
-//                // AWS S3 클라이언트 초기화
-//                S3Client s3 = S3Client.builder()
-//                        .region(Region.of("YOUR_REGION")) // 예: us-east-1
-//                        .credentialsProvider(DefaultCredentialsProvider.create())
-//                        .build();
-//
-//                // S3 버킷 이름과 파일명 설정
-//                String bucketName = "YOUR_BUCKET_NAME";
-//                // 파일을 S3에 업로드
-//                s3.putObject(PutObjectRequest.builder()
-//                                .bucket(bucketName)
-//                                .key("videos/" + videoFileName) // 예: videos/UUID.mp4
-//                                .build(),
-//                        RequestBody.fromFile(new File(videoFilePath)));
-//
-//                log.info("Video uploaded to S3: " + videoFileName);
-//            } catch (Exception e) {
-//                log.error("Failed to upload video to S3: " + e.getMessage());
-//            }
+            // 생성된 동영상에 자막추가 처리
+            // addSubtitlesToVideo(videoFilePath, videoFilePath, subtitleText, 0, 20000);
+
+            // 생성된 동영상 파일을 S3에 저장
+            File videoFile = new File(videoFilePath);
+            if (videoFile.exists()) {
+                String s3Key = "shorts/" + videoFileName;
+                amazonS3.putObject(new PutObjectRequest(bucketName, s3Key, videoFile));
+                log.info("Uploaded video to S3: {}", s3Key);
+            } else {
+                log.error("Video file does not exist: {}", videoFilePath);
+            }
+
+            // S3에 업로드된 동영상 파일의 주소를, Book Entity의 shortsUrl 필드에 업데이트
 
             // 임시 파일 및 디렉토리 삭제
-            try {
-                Files.walk(tempDir)
-                        .sorted(Comparator.reverseOrder())
+            try (Stream<Path> walk = Files.walk(tempDir)) {
+                walk.sorted(Comparator.reverseOrder())
                         .map(Path::toFile)
-                        .forEach(File::delete);
-            } catch (IOException e) {
-                log.error("Failed to delete temp files: " + e.getMessage());
+                        .forEach(file -> {
+                            if (!file.delete()) {
+                                log.error("Failed to delete {}", file.getAbsolutePath());
+                            }
+                        });
             }
-
 
             log.info("Images: {}", responseBody.getImages());
             log.info("Parameters: {}", responseBody.getParameters());
@@ -140,12 +139,55 @@ public class ShortsServiceImpl implements ShortsService {
         }
     }
 
+    public static String addSubtitlesToVideo(String inputVideoPath, String outputVideoPath, String subtitleText,
+                                             long startTimeMillis, long endTimeMillis) throws Exception {
+        try (FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(inputVideoPath)) {
+            grabber.start();
 
-//    private void uploadFileToS3(String bucketName, String key, String filePath) {
-//        s3Client.putObject(PutObjectRequest.builder().bucket(bucketName).key(key).build(),
-//                RequestBody.fromFile(new File(filePath)));
-//        log.info("File uploaded to S3 bucket: " + bucketName + ", Key: " + key);
-//    }
+            try (FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(outputVideoPath, grabber.getImageWidth(), grabber.getImageHeight(), grabber.getAudioChannels())) {
+                recorder.setFormat(grabber.getFormat());
+                recorder.setFrameRate(grabber.getFrameRate());
+                recorder.setVideoCodec(grabber.getVideoCodec());
+                recorder.setAudioChannels(grabber.getAudioChannels());
+                recorder.start();
+
+                // 문장 단위로 텍스트 나누기
+                String[] sentences = subtitleText.split("\\.\\s*|\\?\\s*|!\\s*");
+                long totalDuration = endTimeMillis - startTimeMillis;
+                long durationPerSentence = totalDuration / sentences.length;
+                long currentStartTime = startTimeMillis;
+
+                Frame frame;
+                int frameNumber = 0;
+
+                while ((frame = grabber.grabFrame()) != null) {
+                    long timestamp = grabber.getTimestamp();
+
+                    if (timestamp >= currentStartTime && timestamp <= currentStartTime + durationPerSentence) {
+                        String filterString = String.format("drawtext=text='%s':x=(w-text_w)/2:y=(h-text_h)/2:fontsize=24:fontcolor=white", sentences[frameNumber]);
+                        try (FFmpegFrameFilter frameFilter = new FFmpegFrameFilter(filterString, grabber.getImageWidth(), grabber.getImageHeight())) {
+                            frameFilter.setPixelFormat(grabber.getPixelFormat());
+                            frameFilter.start();
+                            frameFilter.push(frame);
+                            frame = frameFilter.pull();
+                        }
+                    }
+
+                    recorder.record(frame);
+
+                    if (timestamp > currentStartTime + durationPerSentence) {
+                        currentStartTime += durationPerSentence;
+                        if (frameNumber < sentences.length)
+                            frameNumber++;
+                    }
+                }
+            }
+        }
+
+        return outputVideoPath; // 처리된 동영상 파일의 경로 반환
+    }
+
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     private static final int WIDTH = 360;
