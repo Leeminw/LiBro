@@ -1,8 +1,9 @@
 from flask import Flask
 from http import HTTPStatus
-from service.service import get_random_book_list 
+from service.service import get_random_book_list, get_recommend_book_list
 from data.response import make_response_entity
 app = Flask(__name__)
+from pyspark.sql import SparkSession
 
 app.config['JSON_AS_ASCII'] = False
 
@@ -14,9 +15,15 @@ def random_book() :
 
     return make_response_entity(result,HTTPStatus.OK)
 
+
+@app.route('/recommend/<userId>')
+def get_book_list(userId) :
+    
+    result = get_recommend_book_list(user_id=int(userId),size=10)
+    
+    return make_response_entity(result,HTTPStatus.OK)
 @app.route('/flask/api/v1/recommend')
 def recommend():
-    # db 연결 
         
     # 추천알고리즘 
     result = {

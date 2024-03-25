@@ -2,9 +2,8 @@ import os
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, Engine
 
-load_dotenv()
-
 def get_db() -> Engine:
+    load_dotenv()
     
     DB_USER=os.getenv("DB_USER")
     DB_PASS=os.getenv("DB_PASS")
@@ -16,3 +15,7 @@ def get_db() -> Engine:
     engine = create_engine(db_url, pool_size=20, max_overflow=0, echo=True, future=True)
 
     return engine
+
+def get_model_url() -> str :
+    load_dotenv()
+    return os.getenv("MODEL_URL")

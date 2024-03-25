@@ -270,3 +270,5 @@ pyrightconfig.json
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
+
+*.pkl

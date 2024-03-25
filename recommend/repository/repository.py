@@ -1,9 +1,10 @@
-from config.db import get_db
 from sqlalchemy import Engine, text
-from data.book import Book
 from typing import List,Dict,Tuple
-import random
 from datetime import datetime
+import pandas as pd
+
+
+
 
 def get_total_book_count(engine : Engine) -> int :
     with engine.connect() as con : 
@@ -45,3 +46,32 @@ def get_book_list(engine : Engine, recommended : list) -> List[dict] :
             response.append(response_data)
         
     return response
+
+def get_user_book_matrix(engine : Engine) -> pd.DataFrame:
+    with engine.connect() as con :
+        statement = text(
+            '''
+            SELECT user_id, book_id, rating
+            FROM user_book
+            WHERE is_deleted = false
+            '''
+        )
+        result = con.execute(statement)
+        data = result.fetchall()
+        df = pd.DataFrame(data, columns=result.keys())
+
+        return df.fillna(0)
+
+
+def get_user_book_count_distinct(engine : Engine) -> int :
+    with engine.connect() as con :
+        statement = text(
+            '''
+            SELECT count(distinct book_id)
+            FROM user_book
+            WHERE is_deleted = false
+            '''
+        )
+        result = con.execute(statement)
+        data = result.fetchone()[0]
+        return data
