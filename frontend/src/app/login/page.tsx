@@ -28,17 +28,12 @@ const Logo = () => {
 // GOOGLE_API_SECRET_KEY=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
 
 const GoogleLoginButton = () => {
-  const router = useRouter();
-  const { toast } = useToast();
-  const login = () => {};
-
   return (
     <a
-      href="http://localhost:8080/oauth2/authorization/google?redirect_uri=http://localhost:3000/"
+      href="http://localhost:8080/oauth2/authorization/google"
       className="w-full flex justify-center"
     >
       <Button
-        onClick={() => login()}
         className="bg-white text-black font-bold py-2 px-4 rounded flex items-center m-2 hover:bg-white transition-transform hover:scale-105 duration-200"
         style={{ width: "70%", height: "7%", border: "1px solid #D9D9D9" }}
       >
@@ -64,26 +59,31 @@ const NaverLoginButton = () => {
   };
 
   return (
-    <Button
-      onClick={handleLogin}
-      className="bg-[#03C75A] text-white font-bold py-2 px-4 rounded flex items-center m-2"
-      style={{ width: "70%", height: "7%", backgroundColor: "#03C75A" }} // 배경색 및 버튼 크기 수정
+    <a
+      href="http://localhost:8080/oauth2/authorization/naver"
+      className="w-full flex justify-center"
     >
-      <div
-        className="flex items-center border-r-2 border-white-300 pr-3"
-        style={{ height: "40px" }}
+      <Button
+        onClick={handleLogin}
+        className="bg-[#03C75A] text-white font-bold py-2 px-4 rounded flex items-center m-2"
+        style={{ width: "70%", height: "7%", backgroundColor: "#03C75A" }} // 배경색 및 버튼 크기 수정
       >
-        {" "}
-        {/* Tailwind CSS로 오른쪽 경계선 및 패딩 추가 */}
-        <img
-          src="/naver.svg"
-          alt="Naver"
-          className="w-7 h-7 transform scale-130"
-        />{" "}
-        {/* Tailwind CSS로 크기 및 스케일 조정 */}
-      </div>
-      <span className="flex-1 text-center">네이버 로그인</span>
-    </Button>
+        <div
+          className="flex items-center border-r-2 border-white-300 pr-3"
+          style={{ height: "40px" }}
+        >
+          {" "}
+          {/* Tailwind CSS로 오른쪽 경계선 및 패딩 추가 */}
+          <img
+            src="/naver.svg"
+            alt="Naver"
+            className="w-7 h-7 transform scale-130"
+          />{" "}
+          {/* Tailwind CSS로 크기 및 스케일 조정 */}
+        </div>
+        <span className="flex-1 text-center">네이버 로그인</span>
+      </Button>
+    </a>
   );
 };
 
@@ -93,26 +93,31 @@ const KakaoLoginButton = () => {
   };
 
   return (
-    <Button
-      onClick={handleLogin}
-      className="text-black font-bold py-2 px-4 rounded flex items-center m-2"
-      style={{ width: "70%", height: "7%", backgroundColor: "#FDE500" }} // 배경색 및 버튼 크기 수정
+    <a
+      href="http://localhost:8080/oauth2/authorization/kakao"
+      className="w-full flex justify-center"
     >
-      <div
-        className="flex items-center border-r-2 border-white-300 pr-3"
-        style={{ height: "40px" }}
+      <Button
+        onClick={handleLogin}
+        className="text-black font-bold py-2 px-4 rounded flex items-center m-2"
+        style={{ width: "70%", height: "7%", backgroundColor: "#FDE500" }} // 배경색 및 버튼 크기 수정
       >
-        {" "}
-        {/* Tailwind CSS로 오른쪽 경계선 및 패딩 추가 */}
-        <img
-          src="/kakao.svg"
-          alt="Kakao"
-          className="w-7 h-7 transform scale-130"
-        />{" "}
-        {/* Tailwind CSS로 크기 및 스케일 조정 */}
-      </div>
-      <span className="flex-1 text-center">카카오 로그인</span>
-    </Button>
+        <div
+          className="flex items-center border-r-2 border-white-300 pr-3"
+          style={{ height: "40px" }}
+        >
+          {" "}
+          {/* Tailwind CSS로 오른쪽 경계선 및 패딩 추가 */}
+          <img
+            src="/kakao.svg"
+            alt="Kakao"
+            className="w-7 h-7 transform scale-130"
+          />{" "}
+          {/* Tailwind CSS로 크기 및 스케일 조정 */}
+        </div>
+        <span className="flex-1 text-center">카카오 로그인</span>
+      </Button>
+    </a>
   );
 };
 
