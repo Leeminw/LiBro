@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 from sqlalchemy import create_engine, Engine
 
 def get_db() -> Engine:
-    load_dotenv()
+    load_dotenv(override=True)
     
     DB_USER=os.getenv("DB_USER")
     DB_PASS=os.getenv("DB_PASS")
@@ -17,5 +17,5 @@ def get_db() -> Engine:
     return engine
 
 def get_model_url() -> str :
-    load_dotenv()
+    load_dotenv(override=True)
     return os.getenv("MODEL_URL")
