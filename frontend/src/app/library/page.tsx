@@ -16,6 +16,7 @@ import {
     type CarouselApi,
   } from "@/components/ui/carousel"
 import { useSearchParams } from "next/navigation";
+import { userBooks } from "@/lib/axios-userBook"
 
 interface User {
     profileUrl: string
@@ -56,8 +57,8 @@ interface Review {
 
 
 const Library = () => {
+
     const isbn = useSearchParams().get("isbn");
-    console.log(isbn)
     const [user, setUser] = useState<User>({
         profileUrl: "https://github.com/shadcn.png",
         id: '',
@@ -77,25 +78,7 @@ const Library = () => {
         { id: 1, isbn: 0, image: 'book1.svg', name: '니모를 찾아서', publisher: '바다출판사', date: '2023-01-04', author: '한명진', readstartdate: '2023-02-12', readcompletedate: '2023-03-14', complete: true, readrate: '100%', currentpage: 484, finalpage: 484},
         { id: 2, image: 'book2.svg', name: '우주 탐험', publisher: '별빛출판사', date: '2023-02-15', author: '김우주', readstartdate: '2023-02-12', readcompletedate: '2023-03-14', complete: false, readrate: '42%', currentpage: 203, finalpage: 484},
         { id: 3, image: 'book3.svg', name: '코딩의 정석', publisher: '코드출판사', date: '2023-03-20', author: '이코더', readstartdate: 'null', readcompletedate: 'null', complete: false, readrate: '0%', currentpage: 0, finalpage: 484},
-        { id: 4, image: 'book4.svg', name: '식물의 비밀', publisher: '자연출판사', date: '2023-04-10', author: '박식물', readstartdate: 'null', readcompletedate: 'null', complete: false, readrate: '0%', currentpage: 0, finalpage: 484},
-        { id: 5, image: 'book5.svg', name: '역사 속으로', publisher: '시간여행출판사', date: '2023-05-05', author: '정역사', readstartdate: 'null', readcompletedate: 'null', complete: true, readrate: '0%', currentpage: 0, finalpage: 484},
-        { id: 6, image: 'book1.svg', name: '꿈꾸는 다락방', publisher: '희망출판사', date: '2023-06-20', author: '이꿈꾸', readstartdate: '2023-02-12', readcompletedate: '2023-03-14', complete: false, readrate: '12%', currentpage: 58, finalpage: 484},
-        { id: 7, image: 'book2.svg', name: '자연 속으로', publisher: '대지출판사', date: '2023-07-05', author: '박자연', readstartdate: '2023-02-12', readcompletedate: '2023-03-14', complete: true, readrate: '100%', currentpage: 484, finalpage: 484},
-        { id: 8, image: 'book3.svg', name: '우주의 미래', publisher: '과학출판사', date: '2023-07-18', author: '최우주', readstartdate: 'null', readcompletedate: 'null', complete: false, readrate: '0%', currentpage: 0, finalpage: 484},
-        { id: 9, image: 'book4.svg', name: '인간 본성의 법칙', publisher: '심리출판사', date: '2023-08-01', author: '정인간', readstartdate: '2023-02-12', readcompletedate: '2023-03-14', complete: false, readrate: '70%', currentpage: 339, finalpage: 484},
-        { id: 10, image: 'book5.svg', name: '시간의 역사', publisher: '역사출판사', date: '2023-08-15', author: '홍시간', readstartdate: '2023-02-12', readcompletedate: '2023-03-14', complete: false, readrate: '82%', currentpage: 397, finalpage: 484},
-        { id: 11, image: 'book1.svg', name: '빛의 세계', publisher: '과학출판사', date: '2023-09-01', author: '김빛', readstartdate: '2023-02-12', readcompletedate: '2023-03-14', complete: false, readrate: '65%', currentpage: 315, finalpage: 484},
-        { id: 12, image: 'book2.svg', name: '컴퓨터 과학의 정석', publisher: '기술출판사', date: '2023-09-17', author: '이컴퓨터', readstartdate: '2023-02-12', readcompletedate: '2023-03-14', complete: false, readrate: '45%', currentpage: 216, finalpage: 484},
-        { id: 13, image: 'book3.svg', name: '심리학 입문', publisher: '심리출판사', date: '2023-10-02', author: '박심리', readstartdate: '2023-02-12', readcompletedate: '2023-03-14', complete: false, readrate: '32%', currentpage: 156, finalpage: 484},
-        { id: 14, image: 'book4.svg', name: '음악의 숨결', publisher: '소리출판사', date: '2023-12-05', author: '이음악', readstartdate: '2023-02-12', readcompletedate: '2023-03-14', complete: false, readrate: '23%', currentpage: 111, finalpage: 484},
-        { id: 15, image: 'book5.svg', name: '컴퓨터와 함께하는 하루', publisher: '기술출판사', date: '2023-07-20', author: '박컴퓨터', readstartdate: '2023-02-12', readcompletedate: '2023-03-14', complete: false, readrate: '12%', currentpage: 59, finalpage: 484},
-        { id: 16, image: 'book1.svg', name: '시간을 거슬러', publisher: '시간여행출판사', date: '2023-08-11', author: '정시간', readstartdate: '2023-02-12', readcompletedate: '2023-03-14', complete: false, readrate: '11%', currentpage: 54, finalpage: 484},
-        { id: 17, image: 'book2.svg', name: '지구 너머의 삶', publisher: '외계출판사', date: '2023-09-30', author: '한외계', readstartdate: '2023-02-12', readcompletedate: '2023-03-14', complete: false, readrate: '12%', currentpage: 59, finalpage: 484},
-        { id: 19, image: 'book4.svg', name: '세계사의 이해', publisher: '역사출판사', date: '2023-10-18', author: '최역사', readstartdate: '2023-02-12', readcompletedate: '2023-03-14', complete: false, readrate: '1%', currentpage: 5, finalpage: 484},
-        { id: 20, image: 'book5.svg', name: '미술의 이해', publisher: '예술출판사', date: '2023-11-01', author: '김미술', readstartdate: '2023-02-12', readcompletedate: '2023-03-14', complete: true, readrate: '100%', currentpage: 484, finalpage: 484},
-        { id: 21, image: 'book1.svg', name: '미래의 문', publisher: '내일출판사', date: '2023-06-01', author: '김미래', readstartdate: '2023-02-12', readcompletedate: '2023-03-14', complete: false, readrate: '3%', currentpage: 16, finalpage: 484},
-        { id: 22, image: 'book2.svg', name: '별에서 온 그대', publisher: '우주출판사', date: '2023-06-15', author: '별하늘', readstartdate: '2023-02-12', readcompletedate: '2023-03-14', complete: true, readrate: '100%', currentpage: 484, finalpage: 484},
-    ]);
+    ])
 
     // 검색어를 업데이트하는 함수입니다.
     const [searchTerm, setSearchTerm] = useState('');
@@ -138,7 +121,33 @@ const Library = () => {
         setProcessedBooks(updatedBooks);
     }, [searchTerm, arrange, books]);
     
+    // 등록 책 전체 조회
+    useEffect(() => {
+        userBooks.books()
+        .then((response) => {
+            // console.log(response.data)
+            setBooks(response.data)
+        })
+        .catch((error) => {
+            console.log(error)
+        })
+    }, [])
 
+    // 모달 열릴 시 특정 등록 책 조회
+    useEffect(() => { 
+        if (isModalOpen) {
+            userBooks.bookDetail()
+              .then((response) => {
+                // 요청이 성공적으로 완료되면 데이터를 상태에 저장
+              console.log(response.data);
+            })
+              .catch((error) => {
+                // 요청이 실패하면 에러 처리
+              console.error('There was an error!', error);
+            });
+        }
+    })
+    
     // 현재 페이지에 보여줄 책들을 계산합니다.
     const indexOfLastBook = currentPage * booksPerPage;
     const indexOfFirstBook = indexOfLastBook - booksPerPage;
@@ -204,7 +213,7 @@ const Library = () => {
 
     const BookModal = ({ book, onClose }: ModalProps) => {
         if (!book) return null;
-
+        
         const renderStars = () => {
             let stars = [];
             for (let i = 1; i <= 5; i++) {
