@@ -15,6 +15,7 @@ import {
     CarouselPrevious,
     type CarouselApi,
   } from "@/components/ui/carousel"
+import { useSearchParams } from "next/navigation";
 
 interface User {
     profileUrl: string
@@ -55,7 +56,8 @@ interface Review {
 
 
 const Library = () => {
-
+    const isbn = useSearchParams().get("isbn");
+    console.log(isbn)
     const [user, setUser] = useState<User>({
         profileUrl: "https://github.com/shadcn.png",
         id: '',
@@ -72,7 +74,7 @@ const Library = () => {
     const numberOfRows = 3; // 총 행의 수
 
     const [books, setBooks] = useState([
-        { id: 1, image: 'book1.svg', name: '니모를 찾아서', publisher: '바다출판사', date: '2023-01-04', author: '한명진', readstartdate: '2023-02-12', readcompletedate: '2023-03-14', complete: true, readrate: '100%', currentpage: 484, finalpage: 484},
+        { id: 1, isbn: 0, image: 'book1.svg', name: '니모를 찾아서', publisher: '바다출판사', date: '2023-01-04', author: '한명진', readstartdate: '2023-02-12', readcompletedate: '2023-03-14', complete: true, readrate: '100%', currentpage: 484, finalpage: 484},
         { id: 2, image: 'book2.svg', name: '우주 탐험', publisher: '별빛출판사', date: '2023-02-15', author: '김우주', readstartdate: '2023-02-12', readcompletedate: '2023-03-14', complete: false, readrate: '42%', currentpage: 203, finalpage: 484},
         { id: 3, image: 'book3.svg', name: '코딩의 정석', publisher: '코드출판사', date: '2023-03-20', author: '이코더', readstartdate: 'null', readcompletedate: 'null', complete: false, readrate: '0%', currentpage: 0, finalpage: 484},
         { id: 4, image: 'book4.svg', name: '식물의 비밀', publisher: '자연출판사', date: '2023-04-10', author: '박식물', readstartdate: 'null', readcompletedate: 'null', complete: false, readrate: '0%', currentpage: 0, finalpage: 484},
