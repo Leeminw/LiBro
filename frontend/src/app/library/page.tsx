@@ -15,8 +15,9 @@ import {
     CarouselPrevious,
     type CarouselApi,
   } from "@/components/ui/carousel"
-import { useSearchParams } from "next/navigation";
 
+import { getUserBookList } from "@/lib/test"
+import { useSearchParams } from "next/navigation"
 interface User {
     profileUrl: string
     id: string,
@@ -73,6 +74,7 @@ const Library = () => {
     const booksPerPage = 12;
     const numberOfRows = 3; // 총 행의 수
 
+
     const [books, setBooks] = useState([
         { id: 1, isbn: 0, image: 'book1.svg', name: '니모를 찾아서', publisher: '바다출판사', date: '2023-01-04', author: '한명진', readstartdate: '2023-02-12', readcompletedate: '2023-03-14', complete: true, readrate: '100%', currentpage: 484, finalpage: 484},
         { id: 2, image: 'book2.svg', name: '우주 탐험', publisher: '별빛출판사', date: '2023-02-15', author: '김우주', readstartdate: '2023-02-12', readcompletedate: '2023-03-14', complete: false, readrate: '42%', currentpage: 203, finalpage: 484},
@@ -96,7 +98,15 @@ const Library = () => {
         { id: 21, image: 'book1.svg', name: '미래의 문', publisher: '내일출판사', date: '2023-06-01', author: '김미래', readstartdate: '2023-02-12', readcompletedate: '2023-03-14', complete: false, readrate: '3%', currentpage: 16, finalpage: 484},
         { id: 22, image: 'book2.svg', name: '별에서 온 그대', publisher: '우주출판사', date: '2023-06-15', author: '별하늘', readstartdate: '2023-02-12', readcompletedate: '2023-03-14', complete: true, readrate: '100%', currentpage: 484, finalpage: 484},
     ]);
-
+    
+    useEffect(() =>{
+        getUserBookList.getBooks()
+        .then((response) => {
+            // console.log(response.data)
+            setBooks(response.data)
+        })
+        .catch( (error) => console.log(error))
+    })
     // 검색어를 업데이트하는 함수입니다.
     const [searchTerm, setSearchTerm] = useState('');
     const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
