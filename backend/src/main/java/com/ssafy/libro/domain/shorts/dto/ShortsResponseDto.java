@@ -4,16 +4,16 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
-import java.util.Map;
+import org.springframework.core.io.Resource;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class ShortsResponseDto {
-    private List<String> images;
-    private Map<String, Object> parameters;
-    private String info;
+    private String title;
+    private String content;
+    private String korPrompt;
+    private String engPrompt;
+    private Resource resource;
 }
