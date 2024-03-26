@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class TaskResponseDto {
     private Long id;
+    private Long bookId;
     private String isbn;
     private String title;
     private Boolean status;
@@ -27,6 +28,8 @@ public class TaskResponseDto {
 
     public TaskResponseDto(Task entity) {
         this.id = entity.getId();
+        this.bookId = entity.getBookId();
+
         this.isbn = entity.getIsbn();
         this.title = entity.getTitle();
         this.status = entity.getStatus();

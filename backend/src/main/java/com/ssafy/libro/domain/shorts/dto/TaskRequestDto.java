@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TaskRequestDto {
+    private Long bookId;
     private String isbn;
     private String title;
     private Boolean status;
