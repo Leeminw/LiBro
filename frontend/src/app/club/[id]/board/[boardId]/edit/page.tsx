@@ -3,41 +3,19 @@
 import {zodResolver} from "@hookform/resolvers/zod";
 import {useForm} from "react-hook-form";
 import {z} from "zod";
-import {useState, useEffect} from "react"; // 추가
+import {useEffect, useState} from "react"; // 추가
+import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage,} from "@/components/ui/form";
 
-import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from "@/components/ui/form";
-
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select";
 
 import {Input} from "@/components/ui/input";
 import {toast} from "@/components/ui/use-toast";
 import {Button} from "@/components/ui/button";
 import {Editor} from "@/components/ui/quill";
 
-import {editPost, getCategoryList, getPostDetail, writePost} from "@/lib/club";
-import {
-    QueryClient,
-    useMutation,
-    useQueries,
-    useQuery,
-    useSuspenseQueries,
-    useSuspenseQuery
-} from "@tanstack/react-query";
+import {editPost, getCategoryList, getPostDetail} from "@/lib/club";
+import {QueryClient, useMutation, useQueries} from "@tanstack/react-query";
 import {useRouter} from "next/navigation";
-import {signOut} from "next-auth/react";
 
 
 const FormSchema = z.object({
@@ -83,7 +61,6 @@ export default function InputForm({params}: { params: { id: number, boardId: num
         onSuccess: (data, variables, context) => {
             toast({
                 title: "데이터를 정상적으로 수정 하였습니다.",
-                description : `${JSON.stringify(data, null, 2)}`
             });
             queryClient.invalidateQueries(['boardDetail', boardId])
             queryClient.invalidateQueries(['articleList']);
