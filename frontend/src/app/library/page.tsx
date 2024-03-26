@@ -16,7 +16,6 @@ import {
     type CarouselApi,
   } from "@/components/ui/carousel"
 
-import { getUserBookList } from "@/lib/test"
 import { useSearchParams } from "next/navigation"
 interface User {
     profileUrl: string
@@ -99,14 +98,7 @@ const Library = () => {
         { id: 22, image: 'book2.svg', name: '별에서 온 그대', publisher: '우주출판사', date: '2023-06-15', author: '별하늘', readstartdate: '2023-02-12', readcompletedate: '2023-03-14', complete: true, readrate: '100%', currentpage: 484, finalpage: 484},
     ]);
     
-    useEffect(() =>{
-        getUserBookList.getBooks()
-        .then((response) => {
-            // console.log(response.data)
-            setBooks(response.data)
-        })
-        .catch( (error) => console.log(error))
-    })
+
     // 검색어를 업데이트하는 함수입니다.
     const [searchTerm, setSearchTerm] = useState('');
     const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
