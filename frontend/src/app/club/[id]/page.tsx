@@ -1,32 +1,63 @@
-import { Search, MessageCircleIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
+'use client'
+
+import {MessageCircleIcon} from "lucide-react";
+import {Button} from "@/components/ui/button";
 import CommunityInformCard from "@/components/components/board/communityCard";
 import BoardList from "@/components/components/board/boardList";
-import {dehydrate, HydrationBoundary, QueryClient, useQueryClient} from "@tanstack/react-query";
-import {getCategoryList} from "@/lib/club";
+import {useQueries} from "@tanstack/react-query";
+import {getClubMemberShip, getClubSummary} from "@/lib/club";
+import {Skeleton} from "@/components/ui/skeleton";
+import React from "react";
+import BackBar from "@/components/layout/backbar";
 
-export default function CommunityPostPage({params}: {params: { id: number};}) {
+export default function CommunityPostPage({params}: { params: { id: number }; }) {
+    const clubId = params.id;
 
-    const queryClient = new QueryClient();
 
-    queryClient.prefetchQuery({
-            queryKey: ['clubCategory', params.id],
-            queryFn: () => getCategoryList(params.id)
-        }
-    )
+    const results = useQueries({
+        queries: [
+            {
+                queryKey: ['membership', clubId, 1],
+                queryFn: () => getClubMemberShip(clubId, 1),
+                staleTime: Infinity
+            },
+            {
+                queryKey: ['club', clubId],
+                queryFn: () => getClubSummary(clubId),
+                staleTime: Infinity
+            }
+        ]
+    });
 
-    const dehydratedState = dehydrate(queryClient);
+    const isLoading = results.some((query) => query.isLoading);
+    const hasError = results.some((query) => query.isError);
+    const isSuccess = results.every((query) => query.isSuccess);
 
-    return (
+    const [memberShip, clubInfo] = results.map(result => result.data)
+
+    if (isLoading)
+        return (
+            <Skeleton></Skeleton>
+        )
+
+    if (hasError) {
+        return (
+            <>
+                Error
+            </>
+        )
+    }
+
+    return isSuccess && (
         <>
+            <div className="pt-12"></div>
+            <BackBar title={"커뮤니티 메인 페이지"}/>
 
-            <div className="pt-12">
-                <CommunityInformCard clubName={"을왕리"} registeredTime={"2024-12-12"} memberType={"MEMBER"} memberCount={3}/>
-            </div>
+            <CommunityInformCard clubId={clubInfo.info} clubName={clubInfo.clubName} createdDate={clubInfo.createdDate}
+                                 memberType={memberShip.role} memberCount={clubInfo.memberCount}/>
 
-            <HydrationBoundary state={dehydratedState}>
-                <BoardList />
-            </HydrationBoundary>
+
+            <BoardList/>
 
             <div className="mb-4"></div>
 

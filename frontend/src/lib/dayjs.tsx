@@ -13,4 +13,12 @@ function dateView(date : string) {
     return dayjs().to(dayjs(date).tz().format("YYYY.MM.DD HH:mm:ss"));
 }
 
-export default dateView;
+function dateFormat(date : string) {
+    dayjs.extend(utc);
+    dayjs.extend(timezone);
+    dayjs.locale(ko);
+
+    return dayjs(date).format("YYYY.MM.DD");
+}
+
+export {dateView, dateFormat};

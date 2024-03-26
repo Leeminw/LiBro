@@ -1,14 +1,14 @@
 import CategoryList from "@/components/components/admin/BoardList";
+import SubHeader from "@/components/SubHeader";
+import React from "react";
 
 
 export default function CategoryAdmin(){
-
-    const data = [
-        { id: 1, title: '게시판판' },
-        { id: 2, title: '게시판' },
-    ];
-
     return (
-        <CategoryList props={data}/>
+        <>
+            <SubHeader title="게시판 관리" backArrow={true}/>
+            <div className="pt-24"/>
+            <CategoryList/>
+        </>
     )
 }

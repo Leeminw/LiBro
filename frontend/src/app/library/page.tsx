@@ -15,8 +15,9 @@ import {
     CarouselPrevious,
     type CarouselApi,
   } from "@/components/ui/carousel"
-import { getUserBookList } from "@/lib/test"
 
+import { getUserBookList } from "@/lib/test"
+import { useSearchParams } from "next/navigation"
 interface User {
     profileUrl: string
     id: string,
@@ -56,7 +57,8 @@ interface Review {
 
 
 const Library = () => {
-
+    const isbn = useSearchParams().get("isbn");
+    console.log(isbn)
     const [user, setUser] = useState<User>({
         profileUrl: "https://github.com/shadcn.png",
         id: '',
@@ -74,7 +76,7 @@ const Library = () => {
 
 
     const [books, setBooks] = useState([
-        { id: 1, image: 'book1.svg', name: '니모를 찾아서', publisher: '바다출판사', date: '2023-01-04', author: '한명진', readstartdate: '2023-02-12', readcompletedate: '2023-03-14', complete: true, readrate: '100%', currentpage: 484, finalpage: 484},
+        { id: 1, isbn: 0, image: 'book1.svg', name: '니모를 찾아서', publisher: '바다출판사', date: '2023-01-04', author: '한명진', readstartdate: '2023-02-12', readcompletedate: '2023-03-14', complete: true, readrate: '100%', currentpage: 484, finalpage: 484},
         { id: 2, image: 'book2.svg', name: '우주 탐험', publisher: '별빛출판사', date: '2023-02-15', author: '김우주', readstartdate: '2023-02-12', readcompletedate: '2023-03-14', complete: false, readrate: '42%', currentpage: 203, finalpage: 484},
         { id: 3, image: 'book3.svg', name: '코딩의 정석', publisher: '코드출판사', date: '2023-03-20', author: '이코더', readstartdate: 'null', readcompletedate: 'null', complete: false, readrate: '0%', currentpage: 0, finalpage: 484},
         { id: 4, image: 'book4.svg', name: '식물의 비밀', publisher: '자연출판사', date: '2023-04-10', author: '박식물', readstartdate: 'null', readcompletedate: 'null', complete: false, readrate: '0%', currentpage: 0, finalpage: 484},
@@ -296,7 +298,7 @@ const Library = () => {
                             <p className="text-xs text-gray-300 ml-1">출판사 {book.publisher}</p>
                         </div>
                         <div className="flex mt-6">
-                            <Link href='/' className="text-[#9268EB] text-xs">도서 정보 보기 {'>'}</Link>
+                            <Link href='/detail' className="text-[#9268EB] text-xs">도서 정보 보기 {'>'}</Link>
                         </div>
                         <Button className="absolute right-0 top-0 text-white" variant="ghost" onClick={onClose}>
                             <Image src="x-white.svg" alt='search' width={20} height={20}/>
@@ -374,14 +376,24 @@ const Library = () => {
 
         const currentSavedReview = selectedBook ? savedReview[selectedBook.id] || {} : {};
 
-        // 'YYYY-MM-DD HH:mm:ss' 형식의 문자열로 시간을 변환하는 함수
+        // 'YYYY/MM/DD 오후 HH:mm' 형식의 문자열로 시간을 변환하는 함수
         const formatTimestamp = (timestamp: Date | undefined) => {
             if (!timestamp) return 'Invalid date';
-            const date = new Date(timestamp);
-            const options = { year: 'numeric', month: 'long', day: 'numeric' };
-            const formattedDate = date.toLocaleDateString('en-US', options);
-            return formattedDate;
+            
+            let year = timestamp.getFullYear().toString();
+            let month = (timestamp.getMonth() + 1).toString().padStart(2, '0');
+            let day = timestamp.getDate().toString().padStart(2, '0');
+            let hour = timestamp.getHours();
+            let minute = timestamp.getMinutes().toString().padStart(2, '0');
+            
+            let ampm = hour >= 12 ? '오후' : '오전';
+            hour = hour % 12;
+            hour = hour ? hour : 12; // 시간이 0이면 12로 변경
+            let strHour = hour.toString().padStart(1, '0');
+        
+            return `${year}/${month}/${day} ${ampm} ${strHour}:${minute}`;
         };
+        
 
         return (
             <div className="mx-6 mt-4">
