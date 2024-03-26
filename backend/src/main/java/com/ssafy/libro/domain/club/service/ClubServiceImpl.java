@@ -1,6 +1,5 @@
 package com.ssafy.libro.domain.club.service;
 
-import com.ssafy.libro.domain.board.dto.BoardCreateRequestDto;
 import com.ssafy.libro.domain.board.entity.Board;
 import com.ssafy.libro.domain.board.repository.BoardRepository;
 import com.ssafy.libro.domain.club.dto.ClubCreateRequestDto;
@@ -61,8 +60,10 @@ public class ClubServiceImpl implements ClubService {
     @Override
     public void deleteClub(Long clubId) {
         Club club = clubRepository.findById(clubId).orElseThrow(() -> new ClubNotFoundException(clubId));
-        userGroupRepository.deleteByClub(club);
-        clubRepository.delete(club);
+        List<Long> boardId = club.getBoards().stream().map(Board::getId).toList();
+        boardRepository.deleteAllById(boardId);
+        List<UserGroup> clubs = userGroupRepository.findAllByClub(club);
+        clubs.forEach(UserGroup::leaveClub);
     }
 
 }

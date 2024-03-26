@@ -42,5 +42,9 @@ public class UserGroup {
     private LocalDateTime createdDate;
     @UpdateTimestamp
     private LocalDateTime updatedDate;
+
+    public void leaveClub() {
+        this.user = null;
+    }
 }
 
