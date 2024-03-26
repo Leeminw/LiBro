@@ -5,24 +5,10 @@ import {Card, CardContent} from "@/components/ui/card";
 import Writter from "@/components/components/team-members";
 import {ScrollArea} from "@/components/ui/scroll-area";
 import CommentList from "@/components/components/board/commentList";
-import {useParams} from 'next/navigation'
-import {useQueries, useQuery} from "@tanstack/react-query";
-import {getCategoryList, getCommentList, getPostDetail} from "@/lib/club";
+import {useQuery} from "@tanstack/react-query";
+import {getPostDetail} from "@/lib/club";
 import TitleCard from "@/components/components/board/titleCard";
-
-
-// 예시용 게시글 정보
-const examplePost: PostDetail = {
-    title: "을왕리 독서 커뮤니티",
-    createdDate: "2024-03-01",
-    content: "여러분의 소중한 책 읽기 경험을 공유해주세요!",
-    name: "제네시스",
-    picture: null,
-};
-
-const exampleCommnets: Comment[] = [
-]
-
+import BackBar from "@/components/layout/backbar";
 
 export default function CommunityPostPage({params}: { params: { id: number; boardId: number }; }) {
 
@@ -57,10 +43,12 @@ export default function CommunityPostPage({params}: { params: { id: number; boar
     //
     // const [post, comments ] = results.map(result => result.data)
 
+
     return (
         <>
             {isSuccess && (
                 <>
+                    <BackBar title={"글 조회하기"}/>
                     <TitleCard title={post.title} createdDate={post.createdDate}/>
 
                     <Writter nickName={post.name} profileUrl={post.picture} boardId={boardId} groupId={clubId}/>
