@@ -7,6 +7,6 @@ import org.springframework.http.ResponseEntity;
 import java.util.Map;
 
 public interface UserService {
-    User loadUser(String token);
+    User loadUser();
     ResponseEntity<Map<String,Object>> joinUser(UserJoinRequestDto requestDto);
 }

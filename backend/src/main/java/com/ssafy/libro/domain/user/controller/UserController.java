@@ -1,5 +1,6 @@
 package com.ssafy.libro.domain.user.controller;
 
+import com.ssafy.libro.domain.user.dto.OAuthUser;
 import com.ssafy.libro.domain.user.dto.UserJoinRequestDto;
 import com.ssafy.libro.domain.user.entity.User;
 import com.ssafy.libro.domain.user.service.UserService;
@@ -22,9 +23,10 @@ public class UserController {
 
     @GetMapping("/load")
     public ResponseEntity<?> userLogin(@RequestHeader("Authorization") final String accessToken) {
-        User result = userService.loadUser(accessToken);
-        if (result != null)
+        User result = userService.loadUser();
+        if (result != null) {
             return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success("회원 정보 로드 성공", result));
+        }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseData.failure("회원 정보 로드 실패"));
     }
 
