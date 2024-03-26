@@ -23,16 +23,8 @@ public class UserController {
 
     @GetMapping("/load")
     public ResponseEntity<?> userLogin(@RequestHeader("Authorization") final String accessToken) {
-        User user = userService.loadUser(accessToken);
-        if (user != null){
-            OAuthUser result = OAuthUser.builder()
-                    .id(user.getId())
-                    .email(user.getEmail())
-                    .profile(user.getProfile())
-                    .name(user.getName())
-                    .authType(user.getAuthType())
-                    .role(user.getRole())
-                    .build();
+        User result = userService.loadUser();
+        if (result != null)
             return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success("회원 정보 로드 성공", result));
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseData.failure("회원 정보 로드 실패"));
