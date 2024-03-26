@@ -89,22 +89,28 @@ const DetailPage = () => {
           "api/v1/book", addBook );
         
       } 
+      // mapping
       const data = response.data || postResponse?.data
 
-      // mapping
-      
+    // console.log(data.data[0].id)
+      const bookId = (data.data[0].id)
+      // 이미 되어있는지 확인하기 todo 
+
+      // mapping 
+      const mappingResponse = await instance.post(
+        "/api/v1/userbook", {
+          bookId :bookId,
+          type : '관심'
+        }
+      )
+    
+      console.log(mappingResponse.data) 
       
     }
     catch (error : any) {
       
       console.log(error)
     }
-    // 도서 찾기
-    const data = response?.data || postResponse?.data
-    
-    console.log(data)
-    console.log(data.data)
-
   }
 
   return (
