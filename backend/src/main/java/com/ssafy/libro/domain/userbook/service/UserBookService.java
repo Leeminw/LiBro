@@ -11,7 +11,7 @@ public interface UserBookService {
     // 등록도서 검색
 
     // 등록도서 목록
-    List<UserBookListResponseDto> getUserBookList(Long userId);
+    List<UserBookListResponseDto> getUserBookList();
 
     // 등록도서 상세 >> history, comment 같이 조회
     UserBookDetailResponseDto getUserBook(Long id);
@@ -24,14 +24,16 @@ public interface UserBookService {
     void deleteUserBook(Long id);
 
     // 회원별 월별 도서 기록
-    List<UserBookListByDateResponseDto> getBookListByDate(Long userId, Integer year, Integer month);
+    List<UserBookListByDateResponseDto> getBookListByDate(Integer year, Integer month);
     UserBookDetailResponseDto updateRating(UserBookRatingRequestDto requestDto);
     UserBookDetailResponseDto updateType(UserBookTypeUpdateRequestDto requestDto);
-    UserBookRatioResponseDto getUserReadRatio(Long userId);
+    //
+    UserBookRatioResponseDto getUserReadRatio();
     UserBookRatioResponseDto getBookReadRatio(Long bookId);
-
-    List<UserBookListResponseDto> getUserBookOnReading(Long userId);
-    List<UserBookListResponseDto> getUserBookReadComplete(Long userId);
+    //
+    List<UserBookListResponseDto> getUserBookOnReading();
+    //
+    List<UserBookListResponseDto> getUserBookReadComplete();
 
 
 

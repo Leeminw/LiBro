@@ -7,6 +7,7 @@ import com.ssafy.libro.domain.book.repository.BookRepository;
 import com.ssafy.libro.domain.user.entity.User;
 import com.ssafy.libro.domain.user.exception.UserNotFoundException;
 import com.ssafy.libro.domain.user.repository.UserRepository;
+import com.ssafy.libro.domain.user.service.UserService;
 import com.ssafy.libro.domain.userbook.dto.*;
 import com.ssafy.libro.domain.userbook.entity.UserBook;
 import com.ssafy.libro.domain.userbook.exception.NotReadBookException;
@@ -40,11 +41,11 @@ public class UserBookServiceImpl implements UserBookService{
     private final UserBookHistoryRepository userBookHistoryRepository;
     private final UserBookCommentRepository userBookCommentRepository;
     private final UserRepository userRepository;
-    public List<UserBookListResponseDto> getUserBookList(Long userId){
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
+    private final UserService userService;
+    public List<UserBookListResponseDto> getUserBookList(){
+        User user = userService.loadUser();
         List<UserBook> userBookList = userBookRepository.findUserBookByUser(user)
-                .orElseThrow(() -> new UserBookNotFoundException("user : " + userId));
+                .orElseThrow(() -> new UserBookNotFoundException("user : " + user.getId()));
 
         return getUserBookListResponseDtos(userBookList);
     }
@@ -121,8 +122,8 @@ public class UserBookServiceImpl implements UserBookService{
     }
 
     @Override
-    public List<UserBookListByDateResponseDto> getBookListByDate(Long userId, Integer year, Integer month) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
+    public List<UserBookListByDateResponseDto> getBookListByDate(Integer year, Integer month) {
+        User user = userService.loadUser();
         // date parsing
         LocalDateTime startDateTime = LocalDateTime.of(year, month, 1, 0, 0);
         int lastDayOfMonth = Month.of(month).length(Year.isLeap(year));
@@ -131,7 +132,7 @@ public class UserBookServiceImpl implements UserBookService{
         log.debug("service layer : startDate = {} , endDate = {}",startDateTime, endDateTime);
 
         List<UserBook> result = userBookRepository.findUserBookByUserAndDate(user,startDateTime,endDateTime)
-                .orElseThrow(()-> new UserBookNotFoundException("userid : " + userId));
+                .orElseThrow(()-> new UserBookNotFoundException("userid : " + user.getId()));
         List<UserBookListByDateResponseDto> responseDtoList = new ArrayList<>();
         log.debug("service layer : result size = {}", result.size());
 
@@ -205,10 +206,8 @@ public class UserBookServiceImpl implements UserBookService{
     }
 
     @Override
-    public UserBookRatioResponseDto getUserReadRatio(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
-
+    public UserBookRatioResponseDto getUserReadRatio() {
+        User user = userService.loadUser();
         long total = userBookRepository.countUserBookByUser(user)
                 .orElseThrow(() -> new UserBookNotFoundException("no data"));
         long read = userBookRepository.countUserBookByUserReadComplete(user)
@@ -243,20 +242,16 @@ public class UserBookServiceImpl implements UserBookService{
     }
 
     @Override
-    public List<UserBookListResponseDto> getUserBookOnReading(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
-
+    public List<UserBookListResponseDto> getUserBookOnReading() {
+        User user = userService.loadUser();
         List<UserBook> userBookList = userBookRepository.findUserBookOnReading(user)
                 .orElseThrow(() -> new UserBookNotFoundException("no data"));
         return getUserBookListResponseDtos(userBookList);
     }
 
     @Override
-    public List<UserBookListResponseDto> getUserBookReadComplete(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
-
+    public List<UserBookListResponseDto> getUserBookReadComplete() {
+        User user = userService.loadUser();
         List<UserBook> userBookList = userBookRepository.findUserBookReadComplete(user)
                 .orElseThrow(() -> new UserBookNotFoundException("no data"));
         return getUserBookListResponseDtos(userBookList);
