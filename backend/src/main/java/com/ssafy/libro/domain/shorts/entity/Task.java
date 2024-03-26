@@ -20,6 +20,7 @@ public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private Long bookId;
     private String isbn;
     private String title;
     private Boolean status;
@@ -37,6 +38,7 @@ public class Task {
     private LocalDateTime updatedDate;
 
     public Task update(TaskRequestDto requestDto) {
+        if (requestDto.getBookId() != null) this.bookId = requestDto.getBookId();
         if (requestDto.getIsbn() != null) this.isbn = requestDto.getIsbn();
         if (requestDto.getTitle() != null) this.title = requestDto.getTitle();
         if (requestDto.getStatus() != null) this.status = requestDto.getStatus();
