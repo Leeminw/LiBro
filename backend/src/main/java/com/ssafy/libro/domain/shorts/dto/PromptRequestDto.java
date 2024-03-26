@@ -11,5 +11,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class PromptRequestDto {
     private String title;
-    private String summary;
+    private String content;
 }

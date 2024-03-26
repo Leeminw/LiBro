@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class PromptResponseDto {
     private String title;
-    private String summary;
+    private String content;
     private String korPrompt;
     private String engPrompt;
 }
