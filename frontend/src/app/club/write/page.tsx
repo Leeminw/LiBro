@@ -35,13 +35,13 @@ export default function InputForm() {
     const userId = getUserInfo().id;
 
     const {isPending, isError, error, mutate, data} = useMutation({
-        mutationFn: (param) => writeClub(param),
+        mutationFn: (param: ClubWrite) => writeClub(param),
         onSuccess: (data, variables, context) => {
             toast({
                 title: "데이터를 정상적으로 저장하였습니다.",
             });
-            queryClient.invalidateQueries(['clubList']);
-            queryClient.invalidateQueries(['myclubList']);
+            queryClient.invalidateQueries({queryKey: ['clubList']});
+            queryClient.invalidateQueries({queryKey: ['myclubList']});
             router.push(`/club/${data.clubId}`);
         },
         onError: () => {

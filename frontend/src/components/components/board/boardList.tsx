@@ -27,6 +27,7 @@ export default function BoardList() {
     const [sortOrder, setSortOrder] = useState('latest'); // 초기 정렬 순서를 설정합니다. 여기서는 최신순으로 초기화합니다.
     const [selectedCategory, setSelectedCategory] = useState('');
 
+    const clubId = parseInt(param.id as string);
     const {
         isLoading: isCategoryLoading,
         isFetching: isCategoryisFetching,
@@ -35,8 +36,8 @@ export default function BoardList() {
         error: FetchingCategoryError,
         isSuccess: isCategorySuccess
     } = useSuspenseQuery({
-        queryKey: ['clubCategory', param.id],
-        queryFn: () => getCategoryList(param.id)
+        queryKey: ['clubCategory', clubId],
+        queryFn: () => getCategoryList(clubId)
     });
 
     const {
@@ -49,8 +50,8 @@ export default function BoardList() {
         refetch
     } = useInfiniteQuery({
         queryKey: ['articleList'],
-        queryFn: ({pageParam}) => getPostList(param.id, {
-            boardId: selectedCategory,
+        queryFn: ({pageParam}) => getPostList(clubId, {
+            boardId: parseInt(selectedCategory),
             sortOrder: sortOrder,
             keyword: searchTerm,
             articleId: pageParam
@@ -58,20 +59,21 @@ export default function BoardList() {
         getNextPageParam: (lastPage, allPages, lastPageParam, allPageParams) => {
             return lastPage.content.length === 0 ? undefined : lastPage.content[lastPage.content.length - 1].id;
         },
+        initialPageParam: Infinity,
     })
 
-    const handleSearchChange = (event) => {
+    const handleSearchChange = (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === 'Enter') {
             setSearchTerm(event.currentTarget.value);
             refetch();
         }
     };
 
-    const handleSortChange = (event) => {
+    const handleSortChange = (event: string) => {
         setSortOrder(event);
     };
 
-    const handleCategoryChange = (event) => {
+    const handleCategoryChange = (event: string) => {
         setSelectedCategory(event);
     };
 
@@ -89,7 +91,7 @@ export default function BoardList() {
 
 
     const  writeHandler =  () => {
-        router.push(`/club/${param.id}/board/write`)
+        router.push(`/club/${clubId}/board/write`)
     };
     return (
         <>

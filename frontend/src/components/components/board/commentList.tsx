@@ -1,12 +1,11 @@
 'use client'
 
 import Comments from "@/components/components/comments";
-import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
 import {Textarea} from "@/components/ui/textarea";
 import {PlusIcon} from "lucide-react";
 import React, {useState} from "react";
-import {QueryClient, useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
-import {getCommentList, updateComment, writeComment} from "@/lib/club";
+import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
+import {getCommentList, writeComment} from "@/lib/club";
 import {toast} from "@/components/ui/use-toast";
 import useUserState from "@/lib/login-state";
 import {Card, CardContent, CardDescription, CardHeader} from "@/components/ui/card";
@@ -18,7 +17,7 @@ interface CommentListProps {
 export default function CommentList(props: CommentListProps) {
     const {id, boardId} = props.params;
 
-    const {isError : isFetchingError, isLoading , isSuccess : isFetchingSuccess, data: comments} = useQuery({
+    const {isError: isFetchingError, isLoading, isSuccess: isFetchingSuccess, data: comments} = useQuery<Comment[]>({
         queryKey: ['commentList', boardId],
         queryFn: () => getCommentList(boardId)
     })
@@ -32,7 +31,7 @@ export default function CommentList(props: CommentListProps) {
 
 
     const {isPending, isError, error, mutate, isSuccess} = useMutation({
-        mutationFn: (param) => writeComment(param),
+        mutationFn: (param: CommentWrite) => writeComment(param),
         onSuccess: (data, variables, context) => {
             toast({
                 title: "댓글을 정상적으로 저장하였습니다.",
@@ -110,8 +109,6 @@ export default function CommentList(props: CommentListProps) {
                             </div>
                         </CardContent>
                     </Card>
-
-
                 </>
             }
         </>

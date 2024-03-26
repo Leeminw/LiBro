@@ -1,23 +1,13 @@
 'use client'
 
-import React, { useState } from "react";
-import {
-    Avatar,
-    AvatarFallback,
-    AvatarImage,
-} from "@/components/ui/avatar";
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
+import React from "react";
+import {Avatar, AvatarFallback, AvatarImage,} from "@/components/ui/avatar";
+import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
 import {Button} from "@/components/ui/button";
 import {MoreHorizontalIcon} from "lucide-react";
 import {useRouter} from "next/navigation";
 import {QueryClient, useMutation} from "@tanstack/react-query";
-import {deletePost, editPost} from "@/lib/club";
+import {deletePost} from "@/lib/club";
 import {toast} from "@/components/ui/use-toast";
 import useUserState from "@/lib/login-state";
 
@@ -42,12 +32,12 @@ export default function Writer(props: GroupOwner) {
     console.log(userId, writerId);
 
     const {isPending, isError, error, mutate, data} = useMutation({
-        mutationFn: (param) => deletePost(param),
+        mutationFn: (param: number) => deletePost(param),
         onSuccess: (data, variables, context) => {
             toast({
                 title: "데이터를 정상적으로 삭제 하였습니다.",
             });
-            queryClient.invalidateQueries(['articleList']);
+            queryClient.invalidateQueries({queryKey: ['articleList']});
             router.push(`/club/${groupId}`);
         },
         onError: (data, variables, context) => {
@@ -62,7 +52,7 @@ export default function Writer(props: GroupOwner) {
     };
 
     const handleDeleteClick = () => {
-        mutate(boardId)
+        mutate(boardId as number)
     };
 
     return (

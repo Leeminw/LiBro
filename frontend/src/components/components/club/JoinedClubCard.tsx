@@ -44,15 +44,16 @@ const JoinedClubCard: React.FC = () => {
             console.log(nextCursor)
             return nextCursor;
         },
+        initialPageParam: Infinity
     })
 
-    const handleSearchKeyDown = (event) => {
+    const handleSearchKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === 'Enter') {
             setSearchTerm(event.currentTarget.value);
         }
     };
 
-    const handleSortChange = (event) => {
+    const handleSortChange = (event: string) => {
         setSortOrder(event);
     };
 

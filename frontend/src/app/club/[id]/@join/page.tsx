@@ -31,7 +31,7 @@ export default function CommunityPostPage({params}: { params: { id: number } }) 
             toast({
                 title: "클럽에 정상적으로 가입되었습니다.",
             });
-            queryClient.invalidateQueries(['myclubList']);
+            queryClient.invalidateQueries({queryKey: ['myclubList']});
             router.refresh();
 
 

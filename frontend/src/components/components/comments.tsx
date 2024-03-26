@@ -1,6 +1,6 @@
 'use client'
 
-import {useState} from 'react';
+import React, {useState} from 'react';
 import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {deleteComment, updateComment} from "@/lib/club";
@@ -8,7 +8,6 @@ import {toast} from "@/components/ui/use-toast";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
 import {Button} from "@/components/ui/button";
 import {MoreHorizontalIcon} from "lucide-react";
-import React from "react";
 import {dateView} from "@/lib/dayjs";
 import useUserState from "@/lib/login-state";
 
@@ -29,7 +28,7 @@ export default function Comments(props: CommentProps) {
 
 
     const deleteMutation = useMutation({
-        mutationFn: (param) => deleteComment(param),
+        mutationFn: (param: number) => deleteComment(param),
         onSuccess: () => {
             toast({
                 title: "댓글을 정상적으로 삭제 하였습니다.",
@@ -44,7 +43,7 @@ export default function Comments(props: CommentProps) {
     });
 
     const updateMutation = useMutation({
-        mutationFn: (param) => updateComment(id, param),
+        mutationFn: (param: CommentWrite) => updateComment(id, param),
         onSuccess: () => {
             toast({
                 title: "댓글을 정상적으로 수정 하였습니다.",

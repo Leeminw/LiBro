@@ -12,7 +12,6 @@ import {ScrollArea} from "@/components/ui/scroll-area";
 import {Skeleton} from "@/components/ui/skeleton";
 import {dateView} from "@/lib/dayjs";
 import Link from "next/link";
-import {Button} from "@/components/ui/button";
 import useUserState from "@/lib/login-state";
 
 const FindClubCard: React.FC = () => {
@@ -45,15 +44,16 @@ const FindClubCard: React.FC = () => {
             console.log(nextCursor)
             return nextCursor;
         },
+        initialPageParam: Infinity
     })
 
-    const handleSearchKeyDown = (event) => {
+    const handleSearchKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === 'Enter') {
             setSearchTerm(event.currentTarget.value);
         }
     };
 
-    const handleSortChange = (event) => {
+    const handleSortChange = (event: string) => {
         setSortOrder(event);
     };
 

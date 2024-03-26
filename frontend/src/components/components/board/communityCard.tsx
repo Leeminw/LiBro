@@ -18,7 +18,7 @@ export default function CommunityInformCard(props: ClubInform) {
     const {clubName, createdDate, memberType, memberCount} = props
     const router = useRouter();
     const params = useParams();
-    const clubId = parseInt(params.id);
+    const clubId = parseInt(params.id as string);
     const queryClient = useQueryClient();
     const { getUserInfo } = useUserState();
     const userId = getUserInfo().id;
@@ -32,7 +32,7 @@ export default function CommunityInformCard(props: ClubInform) {
             toast({
                 title: "성공적으로 탈퇴 하였습니다.",
             });
-            queryClient.invalidateQueries(['membership', clubId, userId])
+            queryClient.invalidateQueries({queryKey: ['membership', clubId, userId]})
             router.push(`/club`);
         },
 
