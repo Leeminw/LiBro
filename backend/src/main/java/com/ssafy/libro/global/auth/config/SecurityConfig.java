@@ -43,8 +43,6 @@ public class SecurityConfig {
                 // 특정 URL에 대한 권한 설정.
                 .authorizeHttpRequests((authorizeRequests) -> {
                     authorizeRequests
-                            .requestMatchers("/api/user/join")
-                            .hasRole("GUEST")
 //                            .requestMatchers("/api/user/load")
 //                            .authenticated()
 //                            .requestMatchers("/api/user/test")

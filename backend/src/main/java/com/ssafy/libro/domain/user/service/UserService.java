@@ -8,5 +8,5 @@ import java.util.Map;
 
 public interface UserService {
     User loadUser();
-    ResponseEntity<Map<String,Object>> joinUser(UserJoinRequestDto requestDto);
+    boolean joinUser(UserJoinRequestDto requestDto);
 }

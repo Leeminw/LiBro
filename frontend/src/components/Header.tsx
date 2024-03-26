@@ -70,7 +70,6 @@ const Header = () => {
         </Button>
         {loginLoad ? (
           isLogin ? (
-            <>
               <Button
                 className="aspect-square mr-1 w-20 min-w-20 bg-gray-400 hover:bg-gray-300"
                 onClick={() => {
@@ -85,33 +84,6 @@ const Header = () => {
               >
                 로그아웃
               </Button>
-              <Button
-                className="aspect-square mr-1 w-20 min-w-20 bg-gray-400 hover:bg-gray-300"
-                onClick={() => {
-                  LoginApi.test()
-                    .then((data) => {
-                      console.log(data);
-                      toast({
-                        title: "테스트",
-                        description: `완료`,
-                      });
-                    })
-                    .catch((err) => {
-                      if (err === "expired") {
-                        deleteUserInfo();
-                        loadLogin();
-                        router.push("/login");
-                        toast({
-                          title: "세션이 만료됨",
-                          description: `세션이 만료되어 로그아웃 되었습니다.`,
-                        });
-                      }
-                    });
-                }}
-              >
-                테스트
-              </Button>
-            </>
           ) : (
             <Button
               className="aspect-square mr-1 w-20 min-w-20 bg-[#9268EB] hover:bg-[#684ba6]"
