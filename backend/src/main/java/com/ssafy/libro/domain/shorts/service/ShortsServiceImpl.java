@@ -2,20 +2,26 @@ package com.ssafy.libro.domain.shorts.service;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.ssafy.libro.domain.shorts.dto.PromptRequestDto;
-import com.ssafy.libro.domain.shorts.dto.PromptResponseDto;
-import com.ssafy.libro.domain.shorts.dto.ShortsRequestDto;
-import com.ssafy.libro.domain.shorts.dto.ShortsResponseDto;
+import com.ssafy.libro.domain.book.dto.BookDetailResponseDto;
+import com.ssafy.libro.domain.book.entity.Book;
+import com.ssafy.libro.domain.book.exception.BookNotFoundException;
+import com.ssafy.libro.domain.book.repository.BookRepository;
+import com.ssafy.libro.domain.shorts.dto.*;
+import com.ssafy.libro.domain.shorts.repository.TaskJpaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bytedeco.javacv.*;
 import org.bytedeco.javacv.Frame;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import javax.imageio.ImageIO;
@@ -33,30 +39,191 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class ShortsServiceImpl implements ShortsService {
 
+    private static final int PROMPT_DIVIDE_NUM = 3;
+
     @Value("${cloud.aws.bucket-name}")
     private String bucketName;
 
     private final AmazonS3 amazonS3;
 
+    private final TaskServiceImpl taskService;
     private final PromptServiceImpl promptService;
 
+    private final BookRepository bookRepository;
+    private final TaskJpaRepository taskJpaRepository;
+
+
+    @Override
+    public ShortsResponseDto createShorts(ShortsRequestDto requestDto) throws IOException {
+        PromptResponseDto promptResponseDto = promptService.translateText2Prompt(PromptRequestDto.builder()
+                .title(requestDto.getTitle())
+                .content(requestDto.getContent())
+                .build());
+
+        Resource resource = createVideo(promptResponseDto);
+
+        return ShortsResponseDto.builder()
+                .title(promptResponseDto.getTitle())
+                .content(promptResponseDto.getContent())
+                .korPrompt(promptResponseDto.getKorPrompt())
+                .engPrompt(promptResponseDto.getEngPrompt())
+                .resource(resource)
+                .build();
+    }
+
+    @Override
+    public BookDetailResponseDto getShortsByBookId(Long bookId) throws IOException {
+        Book book = bookRepository.findById(bookId).orElseThrow(() -> new BookNotFoundException(bookId));
+        PromptResponseDto promptResponseDto = promptService.translateText2Prompt(PromptRequestDto.builder()
+                .title(book.getTitle())
+                .content(book.getSummary())
+                .build());
+
+        Resource resource = createVideo(promptResponseDto);
+        return null;
+//        return ShortsResponseDto.builder()
+//                .title(promptResponseDto.getTitle())
+//                .content(promptResponseDto.getContent())
+//                .korPrompt(promptResponseDto.getKorPrompt())
+//                .engPrompt(promptResponseDto.getEngPrompt())
+//                .resource(resource)
+//                .build();
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private String[] dividePrompt(String initPrompt) {
+        String[] splitPrompts = initPrompt.split(", ");
+        int elemNumPerPrompt = (int) Math.ceil((double) splitPrompts.length / PROMPT_DIVIDE_NUM);
+
+        String[] sentences = new String[PROMPT_DIVIDE_NUM];
+        for (int i = 0; i < PROMPT_DIVIDE_NUM; i++) {
+            StringBuilder sb = new StringBuilder();
+
+            int initIndex = i * elemNumPerPrompt;
+            int exitIndex = (i + 1) * elemNumPerPrompt;
+            for (int j = initIndex; j < Math.min(exitIndex, splitPrompts.length); j++)
+                sb.append(splitPrompts[j]).append(", ");
+            sentences[i] = sb.toString();
+        }
+        return sentences;
+    }
+
+    private Resource createVideo(PromptResponseDto promptResponseDto) throws IOException {
+        String[] sentences = promptResponseDto.getEngPrompt().split(", ");
+
+        List<String> encodedImages = new ArrayList<>();
+        for (String sentence : sentences) {
+            DiffusionResponseDto diffusionResponseDto = createImages(sentence);
+            encodedImages.addAll(diffusionResponseDto.getImages());
+        }
+
+        // 동영상 파일을 임시 디렉토리에 저장
+        Path tempDir = Files.createTempDirectory("outputs");
+        String videoFileName = UUID.randomUUID() + ".mp4";
+        String videoFilePath = tempDir.resolve(videoFileName).toString();
+
+        List<byte[]> decodedImages = decodeImages(encodedImages);
+        for (byte[] decodedImage : decodedImages) {
+            String imageFileName = UUID.randomUUID() + ".jpg";
+            Path imagePath = tempDir.resolve(imageFileName);
+            Files.write(imagePath, decodedImage);
+        }
+
+        // ffmpeg를 사용하여 이미지로부터 동영상 생성
+        try (FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(videoFilePath, VIDEO_WIDTH, VIDEO_HEIGHT)) {
+            recorder.setFrameRate(FRAME_RATE);
+            recorder.setVideoCodec(org.bytedeco.ffmpeg.global.avcodec.AV_CODEC_ID_H264);
+            recorder.setFormat("mp4");
+            recorder.start();
+
+            createVideo(decodedImages, recorder);
+            recorder.stop();
+        }
+
+        // 생성된 동영상에 자막추가 처리
+        // addSubtitlesToVideo(videoFilePath, videoFilePath, subtitleText, 0, 20000);
+
+        // 생성된 동영상 파일을 S3에 저장
+        File videoFile = new File(videoFilePath);
+        if (videoFile.exists()) {
+            String s3Key = "shorts/" + videoFileName;
+            amazonS3.putObject(new PutObjectRequest(bucketName, s3Key, videoFile));
+            log.info("Uploaded video to S3: {}", s3Key);
+        } else {
+            log.error("Video file does not exist: {}", videoFilePath);
+        }
+
+        // S3에 업로드된 동영상 파일의 주소를, Book Entity의 shortsUrl 필드에 업데이트
+
+        // 임시 파일 및 디렉토리 삭제
+        try (Stream<Path> walk = Files.walk(tempDir)) {
+            walk.sorted(Comparator.reverseOrder())
+                    .map(Path::toFile)
+                    .forEach(file -> {
+                        if (!file.delete()) {
+                            log.error("Failed to delete {}", file.getAbsolutePath());
+                        }
+                    });
+        }
+
+        return new FileSystemResource(videoFile);
+    }
+
+    private DiffusionResponseDto createImages(String prompt) {
+        /* Request Stable Diffusion */
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+
+        String url = "http://222.107.238.44:7860/sdapi/v1/txt2img";
+        DiffusionRequestDto diffusionRequestDto = new DiffusionRequestDto().updatePrompt(prompt);
+        HttpEntity<DiffusionRequestDto> request = new HttpEntity<>(diffusionRequestDto, httpHeaders);
+        ResponseEntity<DiffusionResponseDto> response = restTemplate.postForEntity(url, request, DiffusionResponseDto.class);
+
+        if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+            return response.getBody();
+        } else if (response.getStatusCode().is4xxClientError()) {
+            log.error("Client error while creating images with prompt '{}': {}", prompt, response.toString());
+            throw new HttpClientErrorException(response.getStatusCode(), "Client error: " + response.toString());
+        } else if (response.getStatusCode().is5xxServerError()) {
+            log.error("Server error while creating images with prompt '{}': {}", prompt, response.toString());
+            throw new HttpServerErrorException(response.getStatusCode(), "Server error: " + response.toString());
+        } else {
+            log.error("Unexpected response status while creating images with prompt '{}': {}", prompt, response.getStatusCode());
+            throw new RuntimeException("Unexpected response status: " + response.getStatusCode());
+        }
+    }
+
+    private List<byte[]> decodeImages(List<String> base64Images) {
+        List<byte[]> decodedImages = new ArrayList<>();
+        for (String base64Image : base64Images) {
+            byte[] imageBytes = Base64.getDecoder().decode(base64Image);
+            decodedImages.add(imageBytes);
+        }
+        return decodedImages;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     @Override
     public void createImages(PromptRequestDto promptRequestDto) throws IOException {
-        PromptResponseDto promptResponseDto = promptService.convertText2Prompt(promptRequestDto);
+        PromptResponseDto promptResponseDto = promptService.translateText2Prompt(promptRequestDto);
 
         String url = "http://222.107.238.44:7860/sdapi/v1/txt2img";
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
 
-        ShortsRequestDto shortsRequestDto = new ShortsRequestDto();
-        shortsRequestDto = shortsRequestDto.updatePrompt(promptResponseDto.getEngPrompt());
+        DiffusionRequestDto diffusionRequestDto = new DiffusionRequestDto();
+        diffusionRequestDto = diffusionRequestDto.updatePrompt(promptResponseDto.getEngPrompt());
 
-        HttpEntity<ShortsRequestDto> request = new HttpEntity<>(shortsRequestDto, httpHeaders);
-        ResponseEntity<ShortsResponseDto> response = restTemplate.postForEntity(url, request, ShortsResponseDto.class);
+        HttpEntity<DiffusionRequestDto> request = new HttpEntity<>(diffusionRequestDto, httpHeaders);
+        ResponseEntity<DiffusionResponseDto> response = restTemplate.postForEntity(url, request, DiffusionResponseDto.class);
 
         if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-            ShortsResponseDto responseBody = response.getBody();
+            DiffusionResponseDto responseBody = response.getBody();
             List<byte[]> decodedImages = decodeImages(responseBody.getImages());
 
             // 이미지 데이터와 줄거리를 매개변수로 넣으면 동영상파일이 리턴됨
@@ -79,7 +246,7 @@ public class ShortsServiceImpl implements ShortsService {
                 recorder.setFormat("mp4");
                 recorder.start();
 
-                createShorts(decodedImages, recorder);
+                createVideo(decodedImages, recorder);
                 recorder.stop();
             }
 
@@ -118,16 +285,9 @@ public class ShortsServiceImpl implements ShortsService {
     }
 
 
-    private List<byte[]> decodeImages(List<String> base64Images) {
-        List<byte[]> decodedImages = new ArrayList<>();
-        for (String base64Image : base64Images) {
-            byte[] imageBytes = Base64.getDecoder().decode(base64Image);
-            decodedImages.add(imageBytes);
-        }
-        return decodedImages;
-    }
 
-    private static void createShorts(List<byte[]> decodedImages, FFmpegFrameRecorder recorder) {
+
+    private static void createVideo(List<byte[]> decodedImages, FFmpegFrameRecorder recorder) {
         try (Java2DFrameConverter frameConverter = new Java2DFrameConverter()) {
             for (byte[] imageBytes : decodedImages) {
                 BufferedImage image = ImageIO.read(new ByteArrayInputStream(imageBytes));
@@ -138,6 +298,8 @@ public class ShortsServiceImpl implements ShortsService {
             log.error(e.getMessage());
         }
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public static String addSubtitlesToVideo(String inputVideoPath, String outputVideoPath, String subtitleText,
                                              long startTimeMillis, long endTimeMillis) throws Exception {
