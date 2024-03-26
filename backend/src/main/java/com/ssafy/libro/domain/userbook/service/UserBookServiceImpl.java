@@ -85,8 +85,7 @@ public class UserBookServiceImpl implements UserBookService{
     @Override
     @Transactional
     public UserBookDetailResponseDto mappingUserBook(UserBookMappingRequestDto requestDto) {
-        User user = userRepository.findById(requestDto.getUserId())
-                .orElseThrow(() -> new UserNotFoundException(requestDto.getUserId()));
+        User user = userService.loadUser();
         Book book = bookRepository.findById(requestDto.getBookId())
                 .orElseThrow(() -> new BookNotFoundException(requestDto.getBookId()));
         UserBook userBook = requestDto.toEntity();
