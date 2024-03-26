@@ -4,32 +4,17 @@ import {zodResolver} from "@hookform/resolvers/zod"
 import {useForm} from "react-hook-form"
 import {z} from "zod"
 
-import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from "@/components/ui/form"
-
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
+import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage,} from "@/components/ui/form"
 
 import {Input} from "@/components/ui/input"
 import {toast} from "@/components/ui/use-toast"
 import {Button} from "@/components/ui/button";
 import {Editor} from "@/components/ui/quill";
-import {useState} from "react";
-
-interface Categories {
-    [key: string]: string;
-}
+import React, {useState} from "react";
+import {useMutation, useQueryClient} from "@tanstack/react-query";
+import {writeClub} from "@/lib/club";
+import {useParams, useRouter} from "next/navigation";
+import BackBar from "@/components/layout/backbar";
 
 
 const FormSchema = z.object({
@@ -42,11 +27,32 @@ const FormSchema = z.object({
 export default function InputForm() {
     const [contents, setContents] = useState<string>(''); // content 상태를 상위 컴포넌트에서 관리
 
+    const queryClient = useQueryClient();
+    const router = useRouter();
+    const params = useParams()
+
+    const {isPending, isError, error, mutate, data} = useMutation({
+        mutationFn: (param) => writeClub(param),
+        onSuccess: (data, variables, context) => {
+            toast({
+                title: "데이터를 정상적으로 저장하였습니다.",
+            });
+            queryClient.invalidateQueries(['clubList']);
+            queryClient.invalidateQueries(['myclubList']);
+            router.push(`/club/${data.clubId}`);
+        },
+        onError: () => {
+            toast({
+                title: "에러가 발생하여 데이터를 저장할 수 없습니다.",
+            });
+        },
+    })
+
+
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
         defaultValues: {
             title: "",
-            category: "",
         },
     })
 
@@ -55,10 +61,13 @@ export default function InputForm() {
     };
 
     function onSubmit(data: z.infer<typeof FormSchema>) {
-        const results : Object = {
-            contents:  contents,
-            ...data
+        const results: ClubWrite = {
+            description: contents,
+            name: data.title,
+            userId: 1
         }
+
+        mutate(results);
 
         toast({
             title: "You submitted the following values:",
@@ -71,39 +80,16 @@ export default function InputForm() {
     }
 
     return (
+
+        <>
+            <BackBar title="커뮤니티 만들기"/>
+
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                     <div className="flex justify-end">
                         <Button type="submit">Submit</Button>
                     </div>
 
-<<<<<<< HEAD:frontend/src/app/club/[id]/board/edit/page.tsx
-
-                    <FormField
-                        control={form.control}
-                        name="category"
-                        render={({field}) => (
-                            <FormItem className="w-2/3">
-                                <FormLabel>카테고리</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder={categories[field.value] ||  "Select a verified email to display"}/>
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        {/* {Object.entries(categories).map(([key, value]) => (
-                                            <SelectItem value={key}>{value}</SelectItem>
-                                        ))} */}
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage/>
-                            </FormItem>
-                        )}
-                    />
-
-=======
->>>>>>> 55a0b39f3553c861606869d1a2f90045eee16636:frontend/src/app/club/write/page.tsx
                     <FormField
                         control={form.control}
                         name="title"
@@ -133,5 +119,6 @@ export default function InputForm() {
                     />
                 </form>
             </Form>
+        </>
     );
 }
