@@ -1,6 +1,6 @@
 interface ChatMessage {
-    profileImageUrl: string;
-    userName: string;
+    profile: string;
+    name: string;
     message: string;
-    regitseredTime: string;
+    createdTime: string;
 }

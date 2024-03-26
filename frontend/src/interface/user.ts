@@ -1,6 +1,7 @@
 interface UserProfile {
-    profileImageUrl: string;
-    userName: string;
-    userNo: number;
-    date: string;
+    profile: string;
+    name: string;
+    userId: number;
+    createdDate: string;
+    role: String;
 }

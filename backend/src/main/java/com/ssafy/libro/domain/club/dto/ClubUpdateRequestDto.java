@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 public class ClubUpdateRequestDto {
     private String name;
     private String description;
-    private String userId;
+    private Long userId;
 
     public Club toEntitiy(){
         return Club.builder()

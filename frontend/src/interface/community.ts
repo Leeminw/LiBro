@@ -1,13 +1,35 @@
-interface CommunityInform {
+interface ClubInform {
+    clubId: number;
     clubName: string;
-    registeredTime: string;
-    memberType: string;
+    createdDate: string;
+    memberType?: string;
     memberCount ?: number
 }
 
-interface CommunityItemInform {
+interface ClubItemInform {
     clubName: string;
-    registeredTime: string;
-    clubOwner: string;
-    clubId: string;
+    createdDate: string;
+    clubOwnerName: string;
+    clubId: number;
+    isAdmin?: boolean | null | undefined;
 }
+
+interface ClubSearch {
+    sortOrder?: string;
+    keyword?: string;
+    clubId?: number;
+}
+
+interface ClubWrite {
+    name: string,
+    description: string;
+    userId: number;
+}
+
+
+interface ClubJoin {
+    userId: number;
+}
+
+
+

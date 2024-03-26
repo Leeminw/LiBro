@@ -24,6 +24,12 @@ public class UserGroupController {
         return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(clubResponseDto));
     }
 
+    @GetMapping("/summary/{clubId}")
+    public ResponseEntity<?> getClubSummary(@PathVariable("clubId") Long clubId) {
+        ClubSummaryResponseDto clubSummary = userGroupService.getClubSummary(clubId);
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(clubSummary));
+    }
+
     @GetMapping("/list")
     public ResponseEntity<?> getClubList(ClubListDetailRequestDto dto) {
         Slice<ClubListDetailResponseDto> clubs = userGroupService.getClubList(dto);
@@ -38,7 +44,7 @@ public class UserGroupController {
 
     @DeleteMapping("/{clubId}/members/{memberId}")
     public ResponseEntity<?> deleteClubMember(@PathVariable("clubId") Long clubId, @PathVariable("memberId") Long memberId) {
-        userGroupService.deleteClubMember(clubId, memberId);
+        userGroupService.leaveClub(clubId, memberId);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success("동아리 회원이 탈퇴되었습니다."));
     }
 
@@ -46,12 +52,6 @@ public class UserGroupController {
     public ResponseEntity<?> joinClub(@PathVariable("clubId") Long clubId, @RequestBody ClubJoinClubRequestDto dto) {
         userGroupService.joinClub(clubId, dto);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success("클럽에 가입되었습니다."));
-    }
-
-    @DeleteMapping("/{clubId}/members/{memberId}/leave")
-    public ResponseEntity<?> leaveClub(@PathVariable("clubId") Long clubId, @PathVariable("memberId") Long memberId) {
-        userGroupService.leaveClub(clubId, memberId);
-        return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success("클럽에서 탈퇴되었습니다."));
     }
 
     @GetMapping("/myClubList")
@@ -63,6 +63,6 @@ public class UserGroupController {
     @GetMapping("/hasPermission/{clubId}/{userId}")
     public ResponseEntity<?> getClubMemberShip(@PathVariable("clubId") Long clubId, @PathVariable("userId") Long userId) {
         ClubMemberShipResponseDto result  = userGroupService.getClubMemberShip(clubId, userId);
-        return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success("클럽에 가입되었습니다.", Map.of("data", result)));
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success("클럽에 가입되었습니다.", result));
     }
 }

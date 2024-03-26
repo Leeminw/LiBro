@@ -7,7 +7,7 @@ import {Button} from '@/components/ui/button';
 
 
 interface ClubListProps {
-    clubs: CommunityItemInform[];
+    clubs: ClubItemInform[];
 }
 
 const ClubList: React.FC<ClubListProps> = ({clubs}) => {
@@ -26,10 +26,10 @@ const ClubList: React.FC<ClubListProps> = ({clubs}) => {
                         <div className="text-lg font-bold">{club.clubName}</div>
                         <div className="flex items-center space-x-2 mb-4">
                             <CalendarIcon className="w-4 h-4 text-gray-500"/>
-                            <span className="text-sm text-gray-500">{club.registeredTime}</span>
+                            <span className="text-sm text-gray-500">{club.createdDate}</span>
                         </div>
                         <div className="mb-4 flex justify-between">
-                            {club.clubOwner}
+                            {club.clubOwnerName}
                         </div>
                         <div className="flex">
                             <Button className="bg-[#7f5af0] text-white"
