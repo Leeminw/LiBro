@@ -4,32 +4,17 @@ import {zodResolver} from "@hookform/resolvers/zod"
 import {useForm} from "react-hook-form"
 import {z} from "zod"
 
-import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from "@/components/ui/form"
-
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
+import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage,} from "@/components/ui/form"
 
 import {Input} from "@/components/ui/input"
 import {toast} from "@/components/ui/use-toast"
 import {Button} from "@/components/ui/button";
 import {Editor} from "@/components/ui/quill";
-import {useState} from "react";
-
-interface Categories {
-    [key: string]: string;
-}
+import React, {useEffect, useState} from "react";
+import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
+import {deleteClub, getClubDetail, updateClub} from "@/lib/club";
+import {useParams, useRouter} from "next/navigation";
+import BackBar from "@/components/layout/backbar";
 
 const FormSchema = z.object({
     title: z.string().refine(value => value.trim() !== "", {
@@ -39,78 +24,143 @@ const FormSchema = z.object({
 
 
 export default function InputForm() {
+    const queryClient = useQueryClient();
+    const router = useRouter();
+    const params = useParams();
+
+    const clubId = params.id;
+
     const [contents, setContents] = useState<string>(''); // content 상태를 상위 컴포넌트에서 관리
 
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
-        defaultValues: {
-            title: "11111",
-        },
     });
+
+
+    const {
+        isLoading,
+        isFetching,
+        data: club,
+        isError: isFetchingError,
+        error: FetchingError,
+        refetch,
+        isSuccess
+    } = useQuery({
+        queryKey: ['club', clubId],
+        queryFn: () => getClubDetail(clubId)
+    });
+
+    const {isPending: isEditPending, isError: isEditError, mutate: updateMutation} = useMutation({
+        mutationFn: (param) => updateClub(clubId, param),
+        onSuccess: (data, variables, context) => {
+            toast({
+                title: "데이터를 정상적으로 수정 하였습니다.",
+            });
+            queryClient.invalidateQueries(['club', clubId])
+            router.push(`/club/${clubId}`);
+        },
+        onError: (data, variables, context) => {
+            console.log(data)
+
+            toast({
+                title: "에러가 발생하여 데이터를 저장할 수 없습니다.",
+            });
+        },
+    })
+
+    const {isPending: isDeletePending, isError: isDeleteEror, error: delteError, mutate: deleteMutation} = useMutation({
+        mutationFn: () => deleteClub(clubId),
+        onSuccess: (data, variables, context) => {
+            toast({
+                title: "클럽을 정상적으로 삭제 하였습니다.",
+            });
+            queryClient.invalidateQueries(['myclubList']);
+            queryClient.invalidateQueries(['clubList']);
+            router.push(`/club`);
+        },
+        onError: (data, variables, context) => {
+            toast({
+                title: "에러가 발생하여 클럽을 삭제 할 수 없습니다.",
+            });
+        },
+    })
 
     const handleContentChange = (content: string) => {
         setContents(content); // content가 변경될 때마다 상태를 업데이트
+
     };
-
     function onSubmit(data: z.infer<typeof FormSchema>) {
-        const results: Object = {
-            contents: contents,
-            ...data
+
+        const results: ClubWrite = {
+            description: contents,
+            name: data.title,
+            userId: 1,
         }
+        console.log(results)
+        updateMutation(results);
 
-        toast({
-            title: "You submitted the following values:",
-            description: (
-                <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-                    <code className="text-white">{JSON.stringify(results, null, 2)}</code>
-                </pre>
-            ),
-        });
     }
-
     const handleDelete = (data: z.infer<typeof FormSchema>) => {
+        deleteMutation(clubId)
+
         toast({
             title: "삭제 당했어용",
             description: "",
         });
+
     };
 
+    useEffect(() => {
+        if (isSuccess) {
+            form.setValue("title", club.clubName);
+            setContents(club.description);
+
+            return () => {
+            };
+        }
+    }, [isSuccess]);
+
     return (
-        <Form {...form}>
-            <form className="space-y-6">
-                <div className="flex justify-end">
-                    <Button onClick={form.handleSubmit(handleDelete)}>Delete</Button>
-                    <Button onClick={form.handleSubmit(onSubmit)}>Submit</Button>
-                </div>
+        <>
+            <BackBar title="커뮤니티 수정하기"/>
+            {/*<div className="pt-24"/>*/}
 
-                <FormField
-                    control={form.control}
-                    name="title"
-                    render={({field}) => (
-                        <FormItem className="w-2/3">
-                            <FormLabel>커뮤니티명</FormLabel>
-                            <FormControl>
-                                <Input placeholder="커뮤니티의 이름을 입력해주세요." {...field} />
-                            </FormControl>
-                            <FormMessage/>
-                        </FormItem>
-                    )}
-                />
+            <Form {...form}>
+                <form className="space-y-6">
+                    <div className="flex justify-end">
+                        <Button onClick={form.handleSubmit(handleDelete)}>Delete</Button>
+                        <Button onClick={form.handleSubmit(onSubmit)}>Submit</Button>
+                    </div>
 
-                <FormField
-                    control={form.control}
-                    name="contents"
-                    render={({field}) => (
-                        <FormItem>
-                            <FormLabel>커뮤니티 설명</FormLabel>
-                            <FormControl>
-                                <Editor contents={contents} onChange={handleContentChange}/>
-                            </FormControl>
-                            <FormMessage/>
-                        </FormItem>
-                    )}
-                />
-            </form>
-        </Form>
+                    <FormField
+                        control={form.control}
+                        name="title"
+                        render={({field}) => (
+                            <FormItem className="w-2/3">
+                                <FormLabel>커뮤니티명</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="커뮤니티의 이름을 입력해주세요." {...field} />
+                                </FormControl>
+                                <FormMessage/>
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="contents"
+                        render={({field}) => (
+                            <FormItem>
+                                <FormLabel>커뮤니티 설명</FormLabel>
+                                <FormControl>
+                                    <Editor contents={contents} onChange={handleContentChange}/>
+                                </FormControl>
+                                <FormMessage/>
+                            </FormItem>
+                        )}
+                    />
+                </form>
+            </Form>
+        </>
     );
 }
