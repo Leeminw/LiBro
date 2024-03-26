@@ -18,6 +18,10 @@ import {
 
 import { userBooks } from "@/lib/axios-userBook"
 import { useSearchParams } from "next/navigation"
+import { Book } from "lucide-react"
+import { list } from "postcss"
+import instance from "@/lib/interceptor"
+
 interface User {
     profileUrl: string
     id: string,
@@ -28,8 +32,9 @@ interface User {
     bookRate: number,
 }
 
-interface Book {
+interface BookData {
     userBookId: number;
+    isbn : string; 
     image: string;
     title: string;
     publisher: string;
@@ -39,10 +44,29 @@ interface Book {
   }
 // userBookId >> 넘기면 누르면 db조회
 interface ModalProps {
-    book: number;
+    userBook: UserBook;
     onClose: () => void;
 }
+interface UserBook {
+    book: BookData;
+    userBookId: number;
+    userId: number;
+    bookId: number;
+    type: string;
+    rating: number | null;
+    ratingComment: string | null;
+    ratingSpoiler: boolean | null ;
+    createdDate: string;
+    updateDate: string;
+    commentList: Comment[] | null;
+}
 
+interface Comment {
+    id: number;
+    content: string;
+    createdDate: string;
+    updatedDate: string;
+}
 interface Review {
     review?: string;
     rating?: number;
@@ -70,9 +94,7 @@ const Library = () => {
     const numberOfRows = 3; // 총 행의 수
 
 
-    const [books, setBooks] = useState([
-        { id: 1, isbn: 0, image: 'book1.svg', title: '니모를 찾아서', publisher: '바다출판사', createdDate: '2023-01-04', author: '한명진', complete: true},
-    ]);
+    const [books, setBooks] = useState([]);
     
 
     // 검색어를 업데이트하는 함수입니다.
@@ -89,7 +111,7 @@ const Library = () => {
     // 검색과 정렬이 모두 반영되어야 하므로, useEffect를 사용해 두 상태의 변화를 감지합니다.
     useEffect(() => {
         // 먼저, 검색 적용
-        let updatedBooks = books.filter(book =>
+        let updatedBooks = books.filter((book : BookData) =>
             book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
             book.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
             book.publisher.toLowerCase().includes(searchTerm.toLowerCase())
@@ -98,16 +120,16 @@ const Library = () => {
         // 그 다음, 정렬 적용
         switch(arrange) {
             case '책 제목 순':
-                updatedBooks.sort((a, b) => a.title.localeCompare(b.title, 'ko'));
+                updatedBooks.sort((a : BookData, b :BookData) => a.title.localeCompare(b.title, 'ko'));
                 break;
             case '저자명 순':
-                updatedBooks.sort((a, b) => a.author.localeCompare(b.author, 'ko'));
+                updatedBooks.sort((a : BookData, b :BookData) => a.author.localeCompare(b.author, 'ko'));
                 break;
             case '출판사 순':
-                updatedBooks.sort((a, b) => a.publisher.localeCompare(b.publisher, 'ko'));
+                updatedBooks.sort((a : BookData, b :BookData) => a.publisher.localeCompare(b.publisher, 'ko'));
                 break;
             case '최근 발행 순':
-                updatedBooks.sort((a, b) => new Date(b.createdDate).getTime() - new Date(a.createdDate).getTime());
+                updatedBooks.sort((a : BookData, b :BookData) => new Date(b.createdDate).getTime() - new Date(a.createdDate).getTime());
                 break;
             // 기본 정렬 로직 또는 기본값 설정이 필요할 경우 추가
         }
@@ -128,7 +150,8 @@ const Library = () => {
                 publisher: item.bookDetailResponseDto.publisher,
                 createdDate: item.bookDetailResponseDto.createdDate,
                 author: item.bookDetailResponseDto.author,
-                complete: item.isComplete
+                complete: item.isComplete,
+                isbn : item.bookDetailResponseDto.isbn
             });
             console.log("changed data : " , processedData)
             setBooks(processedData)
@@ -202,376 +225,396 @@ const Library = () => {
 
 // 
     // // 모달 상태와 선택된 책 정보를 관리하기 위한 상태 추가
-    // const [isModalOpen, setIsModalOpen] = useState(false);
-    // const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedBook, setSelectedBook] = useState<UserBook | null>(null);
 
     // // 모달을 여는 함수
-    // const openModal = (userBookId: number) => {
-    //     setSelectedBook(book);
-    //     setIsModalOpen(true);
-    // };
+    const openModal = async (book: BookData) => {
+        console.log("userbookId", book.userBookId)
+        const {data} = await instance.get(
+            "/api/v1/userbook/detail/" + book.userBookId
+        );
+        const selectedUserBook: UserBook = {
+            book:book,
+            ...data.data
+        };
+        console.log(selectedUserBook)
+        setSelectedBook(selectedUserBook);
+        setIsModalOpen(true);
+    };
 
     // // 모달을 닫는 함수
-    // const closeModal = () => {
-    //     setIsModalOpen(false);
-    //     setSelectedBook(null);
-    // };
+    const closeModal = () => {
+        setIsModalOpen(false);
+        setSelectedBook(null);
+    };
 
-    // const [rating, setRating] = useState(0); // 별점 상태 초기화
-    // const [isSpoiler, setIsSpoiler] = useState(false); // 스포일러 체크박스 상태
-    // const [review, setReview] = useState('');
-    // const [savedReview, setSavedReview] = useState<{ [key: number]: Review }>({});
-    // const [savedRating, setSavedRating] = useState(0); // 저장된 별점 상태 추가
+    const [rating, setRating] = useState(0); // 별점 상태 초기화
+    const [isSpoiler, setIsSpoiler] = useState(false); // 스포일러 체크박스 상태
+    const [review, setReview] = useState('');
+    const [savedReview, setSavedReview] = useState<{ [key: number]: Review }>({});
+    const [savedRating, setSavedRating] = useState(0); // 저장된 별점 상태 추가
 
-    // const BookModal = ({ book, onClose }: ModalProps) => {
-    //     if (!book) return null;
+    const BookModal = ({ userBook, onClose }: ModalProps) => {
+        if (!userBook) return null;
         
-    //     const renderStars = () => {
-    //         let stars = [];
-    //         for (let i = 1; i <= 5; i++) {
-    //             stars.push(
-    //                 <button
-    //                     key={i}
-    //                     onClick={() => setRating(i)} // 클릭 시 별점 상태 업데이트
-    //                     className={`w-8 h-8 mx-0.5 ${rating >= i ? "fill-current text-[#FFCA28]" : "text-black"}`}
-    //                 >
-    //                     {rating >= i ? (
-    //                         <StarFillIcon className="w-full h-full" />
-    //                     ) : (
-    //                         <StarEmptyIcon className="w-full h-full" />
-    //                     )}
-    //                 </button>
-    //             );
-    //         }
-    //         return stars;
-    //     };
+        const renderStars = () => {
+            let stars = [];
+            for (let i = 1; i <= 5; i++) {
+                stars.push(
+                    <button
+                        key={i}
+                        onClick={() => setRating(i)} // 클릭 시 별점 상태 업데이트
+                        className={`w-8 h-8 mx-0.5 ${rating >= i ? "fill-current text-[#FFCA28]" : "text-black"}`}
+                    >
+                        {rating >= i ? (
+                            <StarFillIcon className="w-full h-full" />
+                        ) : (
+                            <StarEmptyIcon className="w-full h-full" />
+                        )}
+                    </button>
+                );
+            }
+            return stars;
+        };
 
-    //     // 책의 독서 시작
-    //     const startReading = () => {
-    //         if (selectedBook) {
-    //         const updatedBooks = books.map(book => {
-    //             if (book.id === selectedBook.id) {
-    //             return { ...book, readstartdate: new Date().toISOString(), complete: false };
-    //             }
-    //             return book;
-    //         });
-    //         setBooks(updatedBooks);
-    //         setSelectedBook({ ...selectedBook, readstartdate: new Date().toISOString(), complete: false });
-    //         }
-    //     };
+        // 책의 독서 시작
+        const startReading = () => {
+            // if (selectedBook) {
+            // const updatedBooks = books.map(book => {
+            //     if (book.id === selectedBook.id) {
+            //     return { ...book, readstartdate: new Date().toISOString(), complete: false };
+            //     }
+            //     return book;
+            // });
+            // setBooks(updatedBooks);
+            // setSelectedBook({ ...selectedBook, readstartdate: new Date().toISOString(), complete: false });
+            // }
+        };
 
-    //     // 독서 포기
-    //     const giveUpReading = () => {
-    //         if (selectedBook) {
-    //         const updatedBooks = books.map(book => {
-    //             if (book.id === selectedBook.id) {
-    //             return { ...book, readstartdate: 'null', complete: false };
-    //             }
-    //             return book;
-    //         });
-    //         setBooks(updatedBooks);
-    //         setSelectedBook({ ...selectedBook, readstartdate: 'null', complete: false });
-    //         }
-    //     };
+        // 독서 포기
+        const giveUpReading = () => {
+            // if (selectedBook) {
+            // const updatedBooks = books.map(book => {
+            //     if (book.id === selectedBook.id) {
+            //     return { ...book, readstartdate: 'null', complete: false };
+            //     }
+            //     return book;
+            // });
+            // setBooks(updatedBooks);
+            // setSelectedBook({ ...selectedBook, readstartdate: 'null', complete: false });
+            // }
+        };
 
-    //     // 독서 완료
-    //     const completeReading = () => {
-    //         if (selectedBook) {
-    //         const updatedBooks = books.map(book => {
-    //             if (book.id === selectedBook.id) {
-    //             return { ...book, readcompletedate: new Date().toISOString(), complete: true };
-    //             }
-    //             return book;
-    //         });
-    //         setBooks(updatedBooks);
-    //         setSelectedBook({ ...selectedBook, readcompletedate: new Date().toISOString(), complete: true });
-    //         }
-    //     };
+        // 독서 완료
+        const completeReading = () => {
+            // if (selectedBook) {
+            // const updatedBooks = books.map(book => {
+            //     if (book.id === selectedBook.id) {
+            //     return { ...book, readcompletedate: new Date().toISOString(), complete: true };
+            //     }
+            //     return book;
+            // });
+            // setBooks(updatedBooks);
+            // setSelectedBook({ ...selectedBook, readcompletedate: new Date().toISOString(), complete: true });
+            // }
+        };
 
-    //     const Header = () => {
-    //         return (
-    //           <div className="relative h-24">
-    //             {/* 블러 처리된 배경 이미지 */}
-    //             <div className="absolute inset-0 bg-cover bg-center blur-sm " 
-    //                  style={{ backgroundImage: `url(${book.image})` }}>
-    //             </div>
-    //             <div className="absolute inset-0 bg-black opacity-30">
-    //                 {/* 이 div는 검은색 반투명 오버레이 역할을 합니다. */}
-    //             </div>
+        const Header = () => {
+            return (
+              <div className="relative h-24">
+                {/* 블러 처리된 배경 이미지 */}
+                <div className="absolute inset-0 bg-cover bg-center blur-sm " 
+                     style={{ backgroundImage: `url(${userBook.book.image})` }}>
+                </div>
+                <div className="absolute inset-0 bg-black opacity-30">
+                    {/* 이 div는 검은색 반투명 오버레이 역할을 합니다. */}
+                </div>
         
-    //             {/* 선명한 책 이미지와 정보 */}
-    //             <div className="relative flex items-start">
-    //                 <Image src={book.image} alt="Book Cover" width={70} height={105} className="h-auto rounded shadow-lg my-6 ml-6" />
-    //                 <div className="ml-4 mt-8">
-    //                     <h2 className="text-white text-md font-bold">{book.name}</h2>
-    //                     <div className="flex items-center mt-2">
-    //                         <p className="text-xs text-gray-300">저자 {book.author} |</p>
-    //                         <p className="text-xs text-gray-300 ml-1">출판사 {book.publisher}</p>
-    //                     </div>
-    //                     <div className="flex mt-6">
-    //                         <Link href='/detail' className="text-[#9268EB] text-xs">도서 정보 보기 {'>'}</Link>
-    //                     </div>
-    //                     <Button className="absolute right-0 top-0 text-white" variant="ghost" onClick={onClose}>
-    //                         <Image src="x-white.svg" alt='search' width={20} height={20}/>
-    //                     </Button>
-    //                 </div>
-    //             </div>
-    //           </div>
-    //         );
-    //     };
+                {/* 선명한 책 이미지와 정보 */}
+                <div className="relative flex items-start">
+                    <Image src={userBook.book.image} alt="Book Cover" width={70} height={105} className="h-auto rounded shadow-lg my-6 ml-6" />
+                    <div className="ml-4 mt-8">
+                        <h2 className="text-white text-md font-bold">{userBook.book.title}</h2>
+                        <div className="flex items-center mt-2">
+                            <p className="text-xs text-gray-300">저자 {userBook.book.author} |</p>
+                            <p className="text-xs text-gray-300 ml-1">출판사 {userBook.book.publisher}</p>
+                        </div>
+                        <div className="flex mt-6">
+                            <Link href={`/detail?isbn=${userBook.book.isbn}`} className="text-[#9268EB] text-xs">도서 정보 보기 {'>'}</Link>
+                        </div>
+                        <Button className="absolute right-0 top-0 text-white" variant="ghost" onClick={onClose}>
+                            <Image src="x-white.svg" alt='search' width={20} height={20}/>
+                        </Button>
+                    </div>
+                </div>
+              </div>
+            );
+        };
 
-    //     const Record = () => {
-    //         return (
-    //             <div className="mx-6 mt-10">
-    //                 <h1 className="text-xl font-bold mb-3">독서 기록</h1>
-    //                 <div className="flex justify-start items-center">
-    //                     <Button className="flex justify-start items-center font-bold text-xs text-gray-500 bg-white border border-gray-300 shadow-lg w-full ">
-    //                     {selectedBook && (selectedBook.readstartdate === null || selectedBook.readstartdate === 'null') ? (
-    //                         <p>독서 기록이 없습니다.</p>
-    //                     ) : (
-    //                         selectedBook && selectedBook.complete ? (
-    //                             selectedBook.readcompletedate ? (
-    //                                 <p>{`${new Date(selectedBook.readcompletedate).getFullYear()}년 ${new Date(selectedBook.readcompletedate).getMonth() + 1}월 ${new Date(selectedBook.readcompletedate).getDate()}일 독서 완료`}</p>
-    //                             ) : (
-    //                                 <p>독서 완료 날짜 정보가 없습니다.</p>
-    //                             )
-    //                         ) : (
-    //                             selectedBook && selectedBook.readstartdate ? (
-    //                                 <p>{`${new Date(selectedBook.readstartdate).getFullYear()}년 ${new Date(selectedBook.readstartdate).getMonth() + 1}월 ${new Date(selectedBook.readstartdate).getDate()}일부터 독서 중`}</p>
-    //                             ) : (
-    //                                 <p>독서 시작 날짜 정보가 없습니다.</p>
-    //                             )
-    //                         )
-    //                     )}
-    //                     </Button>
-    //                 </div>
-    //             </div>
-    //         )
-    //     }
+        const Record = () => {
+            return (
+                <div className="mx-6 mt-10">
+                    <h1 className="text-xl font-bold mb-3">독서 기록</h1>
+                    <div className="flex justify-start items-center">
+                        <Button className="flex justify-start items-center font-bold text-xs text-gray-500 bg-white border border-gray-300 shadow-lg w-full ">
+                        {/* {selectedBook && (selectedBook.readstartdate === null || selectedBook.readstartdate === 'null') ? (
+                            <p>독서 기록이 없습니다.</p>
+                        ) : (
+                            selectedBook && selectedBook.complete ? (
+                                selectedBook.readcompletedate ? (
+                                    <p>{`${new Date(selectedBook.readcompletedate).getFullYear()}년 ${new Date(selectedBook.readcompletedate).getMonth() + 1}월 ${new Date(selectedBook.readcompletedate).getDate()}일 독서 완료`}</p>
+                                ) : (
+                                    <p>독서 완료 날짜 정보가 없습니다.</p>
+                                )
+                            ) : (
+                                selectedBook && selectedBook.readstartdate ? (
+                                    <p>{`${new Date(selectedBook.readstartdate).getFullYear()}년 ${new Date(selectedBook.readstartdate).getMonth() + 1}월 ${new Date(selectedBook.readstartdate).getDate()}일부터 독서 중`}</p>
+                                ) : (
+                                    <p>독서 시작 날짜 정보가 없습니다.</p>
+                                )
+                            )
+                        )} */}
+                        </Button>
+                    </div>
+                </div>
+            )
+        }
 
-    // const Review = () => {
+    const Review = () => {
 
-    //     const displaySavedRatingStars = (rating: number) => {
-    //         let stars = [];
-    //         for (let i = 1; i <= 5; i++) {
-    //             stars.push(
-    //                 <span key={i}>
-    //                     {rating >= i ? (
-    //                         <StarFillIcon className="w-4 h-4 text-[#FFCA28]" /> // 채워진 별
-    //                     ) : (
-    //                         <StarEmptyIcon className="w-4 h-4 text-gray-400" /> // 빈 별
-    //                     )}
-    //                 </span>
-    //             );
-    //         }
-    //         return stars;
-    //     };
+        const displaySavedRatingStars = (rating: number) => {
+            let stars = [];
+            for (let i = 1; i <= 5; i++) {
+                stars.push(
+                    <span key={i}>
+                        {rating >= i ? (
+                            <StarFillIcon className="w-4 h-4 text-[#FFCA28]" /> // 채워진 별
+                        ) : (
+                            <StarEmptyIcon className="w-4 h-4 text-gray-400" /> // 빈 별
+                        )}
+                    </span>
+                );
+            }
+            return stars;
+        };
 
-    //     const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    //         setIsSpoiler(event.target.checked); // 체크박스 상태 업데이트
-    //     };
+        const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+            setIsSpoiler(event.target.checked); // 체크박스 상태 업데이트
+        };
 
-    //     const saveReview = () => {
-    //         if (!selectedBook) return;
-    //         // 현재 선택된 책의 ID를 사용하여 리뷰, 별점, 스포일러 여부, 저장 시간 저장
-    //         const timestamp = new Date(); // 현재 시간
-    //         setSavedReview(prevReview => ({
-    //             ...prevReview,
-    //             [selectedBook.id]: { review, rating, isSpoiler, timestamp }
-    //         }));
-    //         // 저장 후 입력 필드 초기화
-    //         setReview('');
-    //         setRating(0);
-    //         setIsSpoiler(false);
-    //     };
+        const saveReview = () => {
+            // if (!selectedBook) return;
+            // // 현재 선택된 책의 ID를 사용하여 리뷰, 별점, 스포일러 여부, 저장 시간 저장
+            // const timestamp = new Date(); // 현재 시간
+            // setSavedReview(prevReview => ({
+            //     ...prevReview,
+            //     [selectedBook.id]: { review, rating, isSpoiler, timestamp }
+            // }));
+            // // 저장 후 입력 필드 초기화
+            // setReview('');
+            // setRating(0);
+            // setIsSpoiler(false);
+        };
 
-    //     const currentSavedReview = selectedBook ? savedReview[selectedBook.id] || {} : {};
+        const currentSavedReview = selectedBook ? savedReview[selectedBook.userBookId] || {} : {};
 
-    //     // 'YYYY/MM/DD 오후 HH:mm' 형식의 문자열로 시간을 변환하는 함수
-    //     const formatTimestamp = (timestamp: Date | undefined) => {
-    //         if (!timestamp) return 'Invalid date';
+        // 'YYYY/MM/DD 오후 HH:mm' 형식의 문자열로 시간을 변환하는 함수
+        const formatTimestamp = (timestamp: Date | undefined) => {
+            if (!timestamp) return 'Invalid date';
             
-    //         let year = timestamp.getFullYear().toString();
-    //         let month = (timestamp.getMonth() + 1).toString().padStart(2, '0');
-    //         let day = timestamp.getDate().toString().padStart(2, '0');
-    //         let hour = timestamp.getHours();
-    //         let minute = timestamp.getMinutes().toString().padStart(2, '0');
+            let year = timestamp.getFullYear().toString();
+            let month = (timestamp.getMonth() + 1).toString().padStart(2, '0');
+            let day = timestamp.getDate().toString().padStart(2, '0');
+            let hour = timestamp.getHours();
+            let minute = timestamp.getMinutes().toString().padStart(2, '0');
             
-    //         let ampm = hour >= 12 ? '오후' : '오전';
-    //         hour = hour % 12;
-    //         hour = hour ? hour : 12; // 시간이 0이면 12로 변경
-    //         let strHour = hour.toString().padStart(1, '0');
+            let ampm = hour >= 12 ? '오후' : '오전';
+            hour = hour % 12;
+            hour = hour ? hour : 12; // 시간이 0이면 12로 변경
+            let strHour = hour.toString().padStart(1, '0');
         
-    //         return `${year}/${month}/${day} ${ampm} ${strHour}:${minute}`;
-    //     };
+            return `${year}/${month}/${day} ${ampm} ${strHour}:${minute}`;
+        };
         
 
-    //     return (
-    //         <div className="mx-6 mt-4">
-    //             <h1 className="mb-3 text-xl font-bold">나의 평점</h1>
-    //             {!currentSavedReview.review && (
-    //                 <>
-    //                     <div className="flex items-start justify-between mb-1">
-    //                         <div className="mr-2 text-m font-bold">
-    //                             {renderStars()}
-    //                         </div>
-    //                         <div className="flex">
-    //                             <Input
-    //                                 type="checkbox"
-    //                                 id="spoilerCheckbox"
-    //                                 checked={isSpoiler}
-    //                                 onChange={handleCheckboxChange}
-    //                                 className="w-3 h-3 text-blue-600 bg-gray-100 rounded border-gray-300 focus:ring-blue-500"
-    //                             />
-    //                             <label htmlFor="spoilerCheckbox" className="ml-2 text-xs font-bold">스포일러 포함</label>
-    //                         </div>
-    //                     </div>  
-    //                     <div className="flex items-center text-sm">
-    //                         <textarea
-    //                             value={review}
-    //                             onChange={(e) => setReview(e.target.value)}
-    //                             placeholder="리뷰를 입력하세요."
-    //                             className="w-5/6 p-2 mr-2 border rounded"
-    //                         />
-    //                         <Button onClick={saveReview} className="bg-[#9268EB] rounded-md p-0.5 w-12 h-12">
-    //                             <Image src='mdi_pencil.svg' alt='pencil' width={30} height={30} />
-    //                         </Button>
-    //                     </div>
-    //                 </>
-    //             )}
-    //             {/* 저장된 리뷰 보여주기 */}
-    //             {currentSavedReview.review && (
-    //                 <div className="rounded border border-gray-300 shadow-lg p-4">
-    //                     <div className="flex justify-between">
-    //                         <div className="flex mb-1">
-    //                             <div className="text-sm font-bold mr-2">@{user.nickName} </div>
-    //                             <div className="text-sm">{currentSavedReview.timestamp ? formatTimestamp(currentSavedReview.timestamp) : '날짜 정보 없음'}</div>
-    //                         </div>
-    //                         <Button className="bg-white text-xs text-gray-400 p-1 rounded-md h-6">수정하기</Button>
-    //                     </div>   
+        return (
+            <div className="mx-6 mt-4">
+                <h1 className="mb-3 text-xl font-bold">나의 평점</h1>
+                {!currentSavedReview.review && (
+                    <>
+                        <div className="flex items-start justify-between mb-1">
+                            <div className="mr-2 text-m font-bold">
+                                {renderStars()}
+                            </div>
+                            <div className="flex">
+                                <Input
+                                    type="checkbox"
+                                    id="spoilerCheckbox"
+                                    checked={isSpoiler}
+                                    onChange={handleCheckboxChange}
+                                    className="w-3 h-3 text-blue-600 bg-gray-100 rounded border-gray-300 focus:ring-blue-500"
+                                />
+                                <label htmlFor="spoilerCheckbox" className="ml-2 text-xs font-bold">스포일러 포함</label>
+                            </div>
+                        </div>  
+                        <div className="flex items-center text-sm">
+                            <textarea
+                                value={review}
+                                onChange={(e) => setReview(e.target.value)}
+                                placeholder="리뷰를 입력하세요."
+                                className="w-5/6 p-2 mr-2 border rounded"
+                            />
+                            <Button onClick={saveReview} className="bg-[#9268EB] rounded-md p-0.5 w-12 h-12">
+                                <Image src='mdi_pencil.svg' alt='pencil' width={30} height={30} />
+                            </Button>
+                        </div>
+                    </>
+                )}
+                {/* 저장된 리뷰 보여주기 */}
+                {currentSavedReview.review && (
+                    <div className="rounded border border-gray-300 shadow-lg p-4">
+                        <div className="flex justify-between">
+                            <div className="flex mb-1">
+                                <div className="text-sm font-bold mr-2">@{user.nickName} </div>
+                                <div className="text-sm">{currentSavedReview.timestamp ? formatTimestamp(currentSavedReview.timestamp) : '날짜 정보 없음'}</div>
+                            </div>
+                            <Button className="bg-white text-xs text-gray-400 p-1 rounded-md h-6">수정하기</Button>
+                        </div>   
 
-    //                     <div className="flex items-center mb-1">{currentSavedReview.rating !== undefined ? displaySavedRatingStars(currentSavedReview.rating) : '평점 정보 없음'}</div>
-    //                     <div className="text-sm mb-1">{currentSavedReview.review}</div>
-    //                     {/* 여기에 별점과 스포일러 여부도 표시 */}
-    //                     {currentSavedReview.isSpoiler && <div className="text-red-500">스포일러 포함</div>}
-    //                 </div>
-    //             )}
-    //         </div>  
-    //     );
-    // };
-
-    //     const Sentence = () => {
-
-    //         const [api, setApi] = useState<CarouselApi>()
-    //         const [current, setCurrent] = useState(0)
-    //         const [count, setCount] = useState(0)
-    //         const [inputs, setInputs] = useState(['']); // 입력한 텍스트를 저장할 배열 상태를 추가
-    //         const [currentInput, setCurrentInput] = useState('');
-
-    //         useEffect(() => {
-    //             if (!api) {
-    //             return
-    //             }
-            
-    //             setCount(api.scrollSnapList().length)
-    //             setCurrent(api.selectedScrollSnap() + 1)
-            
-    //             api.on("select", () => {
-    //             setCurrent(api.selectedScrollSnap() + 1)
-    //             })
-    //         }, [api])
-
-    //         const handleSave = () => {
-    //             const newInputs = [currentInput, ...inputs]; // 현재 입력한 텍스트를 inputs 배열에 추가
-    //             setInputs(newInputs);
-    //             setCurrentInput(''); // 입력 상태 초기화
-    //             setCount(count+1)
-    //         };
-        
-    //         const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    //             setCurrentInput(e.target.value); // 입력 필드의 변경사항을 currentInput 상태에 반영
-    //         };
+                        <div className="flex items-center mb-1">{currentSavedReview.rating !== undefined ? displaySavedRatingStars(currentSavedReview.rating) : '평점 정보 없음'}</div>
+                        <div className="text-sm mb-1">{currentSavedReview.review}</div>
+                        {/* 여기에 별점과 스포일러 여부도 표시 */}
+                        {currentSavedReview.isSpoiler && <div className="text-red-500">스포일러 포함</div>}
+                    </div>
+                )}
+            </div>  
+        );
+    };
     
-    //         return (
-    //             <div className="mx-6 mt-4 mb-2">
-    //                 <div className="flex justify-between">
-    //                     <h1 className="mb-3 text-xl font-bold">감명깊은 글귀</h1>
-    //                     <Button onClick={handleSave} className="bg-[#9268EB] text-md text-white font-bold p-3 rounded-md h-8">저장</Button>
-    //                 </div>
-        
-    //                 <div className="flex items-center justify-center">
-    //                     <Carousel setApi={setApi} className="w-5/6">
-    //                         <CarouselContent>
-    //                             {inputs.map((input, index) => (
-    //                                 <CarouselItem key={index}>
-    //                                     <Card>
-    //                                         <CardContent className="flex items-center justify-center p-3 h-24 text-xs">
-    //                                             <textarea 
-    //                                                 placeholder="여기에 글귀를 입력하세요" 
-    //                                                 className="flex w-full p-2 justify-center items-center text-center h-full resize-none"
-    //                                                 rows={4}
-    //                                                 value={index === inputs.length - 1 ? currentInput : input}
-    //                                                 onChange={handleInputChange}
-    //                                             />
-    //                                         </CardContent>
-    //                                     </Card>
-    //                                 </CarouselItem>
-    //                             ))}
-    //                         </CarouselContent>
-    //                         <CarouselPrevious />
-    //                         <CarouselNext />
-    //                     </Carousel>
-    //                 </div>
-    //                 <div className="py-2 text-center text-xs text-muted-foreground">
-    //                     {current} / {count}
-    //                 </div>
-    //             </div>
-    //         );
-    //     }
+        const Sentence = () => {
 
-    //         const ButtonComponent = () => {
+            const [api, setApi] = useState<CarouselApi>()
+            const [current, setCurrent] = useState(0)
+            const [count, setCount] = useState(0)
+            const [inputs, setInputs] = useState(userBook.commentList ? userBook.commentList : []); // 입력한 텍스트를 저장할 배열 상태를 추가
+            const [currentInput, setCurrentInput] = useState('');
+
+            useEffect(() => {
+                if (!api) {
+                return
+                }
+            
+                setCount(api.scrollSnapList().length)
+                setCurrent(api.selectedScrollSnap() + 1)
+            
+                api.on("select", () => {
+                setCurrent(api.selectedScrollSnap() + 1)
+                })
+            }, [api])
+
+            const handleSave = async () => {
+                // const response = await instance.post(
+                //     "/api/v1/comment", {
+                //         userBookId: selectedBook?.userBookId,
+                //         content : currentInput   
+                //     }
+                // )
+                const updateList = await instance.get(
+                    "/api/v1/comment/userbook/" + selectedBook?.userBookId
+                )
+                console.log(updateList)
+                const commentList: Comment[] = updateList.data.data
                 
-    //             if (!selectedBook || selectedBook.readstartdate === 'null' || selectedBook.readstartdate === null) {
-    //                 // 독서 기록이 없을 때
-    //                 return (
-    //                     <div className="flex justify-center"> 
-    //                         <button className="w-full p-1.5 mx-6 text-center bg-[#9268EB] rounded-md" onClick={startReading}>
-    //                             <div className=" text-white  ">독서 기록 시작하기</div>
-    //                         </button>
-    //                     </div>
-    //                 );
-    //             } else if (selectedBook.complete) {
-    //                 // 독서 완료일 때
-    //                 return (
-    //                     <div className="flex justify-center"> 
-    //                         <button className="w-full p-1.5 mx-6 text-center bg-[#9268EB] rounded-md" onClick={startReading}>
-    //                             <div className=" text-white  ">독서 기록 다시 시작하기</div>
-    //                         </button>
-    //                     </div>
-    //                 );
-    //             } else {
-    //                 // 독서 중일 때
-    //                 return (
-    //                     <div className="flex justify-center mx-6"> 
-    //                         <button className="w-full bg-[#F87171] text-white p-1.5 rounded-md mr-4" onClick={giveUpReading}>독서 포기</button>
-    //                         <button className="w-full bg-[#9268EB] text-white p-1.5  rounded-md" onClick={completeReading }>완독</button>
-    //                     </div>
-    //                 );
-    //             }
-    //         };
+                setInputs(commentList);
+                setCurrentInput(''); // 입력 상태 초기화
+                setCount(commentList.length)
+            };
         
-    //     return (
-    //         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-    //             <div className="bg-white rounded-md w-1/2 h-3/4 overflow-y-auto">
-    //                 <Header />
-    //                 <Record />
-    //                 <Review />
-    //                 <Sentence />
-    //                 <ButtonComponent/>
-    //             </div>
-    //         </div>
-    //     );
-    // };
+            const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+                setCurrentInput(e.target.value); // 입력 필드의 변경사항을 currentInput 상태에 반영
+            };
+
+            return (
+                <div className="mx-6 mt-4 mb-2">
+                    <div className="flex justify-between">
+                        <h1 className="mb-3 text-xl font-bold">감명깊은 글귀</h1>
+                        <Button onClick={handleSave} className="bg-[#9268EB] text-md text-white font-bold p-3 rounded-md h-8">저장</Button>
+                    </div>
+        
+                    <div className="flex items-center justify-center">
+                        <Carousel setApi={setApi} className="w-5/6">
+                            <CarouselContent>
+                                {inputs?.map((input, index) => (
+                                    <CarouselItem key={index}>
+                                        <Card>
+                                            <CardContent className="flex items-center justify-center p-3 h-24 text-xs">
+                                                <textarea 
+                                                    placeholder="여기에 글귀를 입력하세요" 
+                                                    className="flex w-full p-2 justify-center items-center text-center h-full resize-none"
+                                                    rows={4}
+                                                    value={index === inputs.length ? currentInput : input.content}
+                                                    onChange={handleInputChange}
+                                                />
+                                            </CardContent>
+                                        </Card>
+                                    </CarouselItem>
+                                ))}
+                            </CarouselContent>
+                            <CarouselPrevious />
+                            <CarouselNext />
+                        </Carousel>
+                    </div>
+                    <div className="py-2 text-center text-xs text-muted-foreground">
+                        {current} / {count}
+                    </div>
+                </div>
+            );
+        }
+
+            const ButtonComponent = () => {
+                
+                if (!selectedBook || selectedBook.readstartdate === 'null' || selectedBook.readstartdate === null) {
+                    // 독서 기록이 없을 때
+                    return (
+                        <div className="flex justify-center"> 
+                            <button className="w-full p-1.5 mx-6 text-center bg-[#9268EB] rounded-md" onClick={startReading}>
+                                <div className=" text-white  ">독서 기록 시작하기</div>
+                            </button>
+                        </div>
+                    );
+                } else if (selectedBook.complete) {
+                    // 독서 완료일 때
+                    return (
+                        <div className="flex justify-center"> 
+                            <button className="w-full p-1.5 mx-6 text-center bg-[#9268EB] rounded-md" onClick={startReading}>
+                                <div className=" text-white  ">독서 기록 다시 시작하기</div>
+                            </button>
+                        </div>
+                    );
+                } else {
+                    // 독서 중일 때
+                    return (
+                        <div className="flex justify-center mx-6"> 
+                            <button className="w-full bg-[#F87171] text-white p-1.5 rounded-md mr-4" onClick={giveUpReading}>독서 포기</button>
+                            <button className="w-full bg-[#9268EB] text-white p-1.5  rounded-md" onClick={completeReading }>완독</button>
+                        </div>
+                    );
+                }
+            };
+        
+        return (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+                <div className="bg-white rounded-md w-1/2 h-3/4 overflow-y-auto">
+                    <Header />
+                    <Record />
+                    <Review />
+                    <Sentence />
+                    <ButtonComponent/>
+                </div>
+            </div>
+        );
+    };
 // 여기까지
     return (
         <div className="bg-white h-full pt-12 overflow-auto ">
@@ -616,12 +659,11 @@ const Library = () => {
                 <div className="p-1">
                     
                     <div className="grid grid-cols-4 " >
-                        {currentBooks.map((book, index) => (
+                        {currentBooks.map((book : BookData, index) => (
                             <div key={index} className="group relative my-2 pt-2 pb-2 px-2 shadow border-b-4 border-white"
                                 onMouseEnter={() => setHoveredBook(index)}
                                 onMouseLeave={() => setHoveredBook(-99)}
-                                // onClick={() => openModal(book)}
-                                >
+                                onClick={() => openModal(book)}>
                                 <div className={`w-full h-full ${book.complete ? 'ring ring-green-400' : ''}`}> {/* overflow-hidden 추가 */}
                                     <Image src={book.image} alt={`Book ${index + 1}`} width={100} height={150} layout="responsive" /> {/* object-cover 추가 */}
                                 </div>
@@ -632,7 +674,7 @@ const Library = () => {
                                             <p className="text-white text-sm mx-2 my-6 ">{book.title}</p>
                                         </div>
                                         <div className="absolute top-12 left-0  flex justify-start">
-                                            <p className="text-white text-sm mx-2 my-6 ">{book.complete ? '' : `진행률: `}</p>
+                                            <p className="text-white text-sm mx-2 my-6 ">{book.complete ? '' : ``}</p>
                                         </div>
                                         {/* <div className="absolute top-16 left-0 flex justify-start">
                                             <p className="text-white text-sm mx-2 my-6 ">{book.complete ? '' : `${book.currentpage} / ${book.finalpage}`}</p>
@@ -649,7 +691,7 @@ const Library = () => {
                         ))}
                     </div>
 
-                    {/* {isModalOpen && selectedBook && <BookModal book={selectedBook} onClose={closeModal} />} */}
+                    {isModalOpen && selectedBook && <BookModal userBook={selectedBook} onClose={closeModal} />}
                     
                     <nav>
                         <ul className='pagination flex items-center justify-center'>
