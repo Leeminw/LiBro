@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { AvatarImage, AvatarFallback, Avatar } from "@/components/ui/avatar"
 import { Input } from "@/components/ui/input"
@@ -130,7 +130,6 @@ const Mypage = () => {
 
   useEffect(() => {
     // 책 평점 계산 후 상태 업데이트
-    console.log(rateOneBooks)
     const newRate1Books = parseFloat((rateOneBooks / user.registeredBooks * 100).toFixed(0));
     const newRate2Books = parseFloat((rateTwoBooks / user.registeredBooks * 100).toFixed(0));
     const newRate3Books = parseFloat((rateThreeBooks / user.registeredBooks * 100).toFixed(0));
@@ -159,7 +158,7 @@ const Mypage = () => {
   const DAY_OF_WEEK = 7;
   const DAY_LIST = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 
-  const useCalendar = () => {
+  const UseCalendar = () => {
     const [currentDate, setCurrentDate] = useState(new Date());
     currentDate.setDate(currentDate.getDate() - currentDate.getDay());
     const totalMonthDays = getDaysInMonth(currentDate);
@@ -211,7 +210,7 @@ const Mypage = () => {
   };
 
   const Cal = ({}: calProps) => {
-    const calendar = useCalendar();
+    const calendar = UseCalendar();
     const CALENDER_RESULT_LIST = calendar.weekCalendarList;
     const { currentDate } = calendar; // 현재 날짜를 currentDate에서 구조 분해 할당합니다.
 

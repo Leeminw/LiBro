@@ -16,6 +16,7 @@ import {
     type CarouselApi,
   } from "@/components/ui/carousel"
 
+import { userBooks } from "@/lib/axios-userBook"
 import { useSearchParams } from "next/navigation"
 interface User {
     profileUrl: string
@@ -56,8 +57,8 @@ interface Review {
 
 
 const Library = () => {
+
     const isbn = useSearchParams().get("isbn");
-    console.log(isbn)
     const [user, setUser] = useState<User>({
         profileUrl: "https://github.com/shadcn.png",
         id: '',
@@ -140,7 +141,33 @@ const Library = () => {
         setProcessedBooks(updatedBooks);
     }, [searchTerm, arrange, books]);
     
+    // 등록 책 전체 조회
+    useEffect(() => {
+        userBooks.books()
+        .then((response) => {
+            // console.log(response.data)
+            setBooks(response.data)
+        })
+        .catch((error) => {
+            console.log(error)
+        })
+    }, [])
 
+    // 모달 열릴 시 특정 등록 책 조회
+    useEffect(() => { 
+        if (isModalOpen) {
+            userBooks.bookDetail()
+              .then((response) => {
+                // 요청이 성공적으로 완료되면 데이터를 상태에 저장
+              console.log(response.data);
+            })
+              .catch((error) => {
+                // 요청이 실패하면 에러 처리
+              console.error('There was an error!', error);
+            });
+        }
+    })
+    
     // 현재 페이지에 보여줄 책들을 계산합니다.
     const indexOfLastBook = currentPage * booksPerPage;
     const indexOfFirstBook = indexOfLastBook - booksPerPage;
@@ -206,7 +233,7 @@ const Library = () => {
 
     const BookModal = ({ book, onClose }: ModalProps) => {
         if (!book) return null;
-
+        
         const renderStars = () => {
             let stars = [];
             for (let i = 1; i <= 5; i++) {
