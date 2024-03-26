@@ -19,20 +19,27 @@ import {useRouter} from "next/navigation";
 import {QueryClient, useMutation} from "@tanstack/react-query";
 import {deletePost, editPost} from "@/lib/club";
 import {toast} from "@/components/ui/use-toast";
+import useUserState from "@/lib/login-state";
 
 interface GroupOwner {
     profileUrl: string | null,
     nickName: string,
     boardId?: number | null
     groupId?: number | null
+    writerId? : number | null
 }
 
 export default function Writer(props: GroupOwner) {
-    const {profileUrl, nickName, boardId, groupId} = props;
+    const {profileUrl, nickName, boardId, groupId, writerId} = props;
 
     const router = useRouter();
 
     const queryClient = new QueryClient();
+
+    const { getUserInfo } = useUserState();
+    const userId = getUserInfo().id;
+
+    console.log(userId, writerId);
 
     const {isPending, isError, error, mutate, data} = useMutation({
         mutationFn: (param) => deletePost(param),
@@ -67,22 +74,24 @@ export default function Writer(props: GroupOwner) {
                 </Avatar>
                 <span className="font-medium">{nickName}</span>
             </div>
+            {
+                (userId == writerId) && (<DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button className="ml-auto w-8 h-8 rounded-full" size="icon" variant="ghost">
+                            <MoreHorizontalIcon className="w-4 h-4"/>
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={handleEditClick}>
+                            수정
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleDeleteClick}>
+                            삭제
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>)
+            }
 
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button className="ml-auto w-8 h-8 rounded-full" size="icon" variant="ghost">
-                        <MoreHorizontalIcon className="w-4 h-4"/>
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={handleEditClick}>
-                        수정
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleDeleteClick}>
-                        삭제
-                    </DropdownMenuItem>
-                </DropdownMenuContent>
-            </DropdownMenu>
         </div>
     );
 }

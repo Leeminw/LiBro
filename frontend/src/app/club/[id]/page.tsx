@@ -9,16 +9,19 @@ import {getClubMemberShip, getClubSummary} from "@/lib/club";
 import {Skeleton} from "@/components/ui/skeleton";
 import React from "react";
 import BackBar from "@/components/layout/backbar";
+import useUserState from "@/lib/login-state";
 
 export default function CommunityPostPage({params}: { params: { id: number }; }) {
     const clubId = params.id;
+    const { getUserInfo } = useUserState();
+    const userId = getUserInfo().id;
 
 
     const results = useQueries({
         queries: [
             {
-                queryKey: ['membership', clubId, 1],
-                queryFn: () => getClubMemberShip(clubId, 1),
+                queryKey: ['membership', clubId, userId],
+                queryFn: () => getClubMemberShip(clubId, userId),
                 staleTime: Infinity
             },
             {

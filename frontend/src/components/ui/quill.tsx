@@ -70,7 +70,7 @@ export function Editor(props: EditorProps) {
             theme="snow"
             value={value || ""}
             onChange={handleChange}
-            style={{ height: "270px", marginBottom: "40px" }}
+            style={{ height: "30vh", marginBottom: "40px" }}
             modules={modules}
             formats={formats}
         />

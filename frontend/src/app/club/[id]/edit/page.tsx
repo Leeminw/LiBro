@@ -15,6 +15,7 @@ import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {deleteClub, getClubDetail, updateClub} from "@/lib/club";
 import {useParams, useRouter} from "next/navigation";
 import BackBar from "@/components/layout/backbar";
+import useUserState from "@/lib/login-state";
 
 const FormSchema = z.object({
     title: z.string().refine(value => value.trim() !== "", {
@@ -35,6 +36,9 @@ export default function InputForm() {
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
     });
+
+    const { getUserInfo } = useUserState();
+    const userId = getUserInfo().id;
 
 
     const {
@@ -94,7 +98,7 @@ export default function InputForm() {
         const results: ClubWrite = {
             description: contents,
             name: data.title,
-            userId: 1,
+            userId: userId,
         }
         console.log(results)
         updateMutation(results);

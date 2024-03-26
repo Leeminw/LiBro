@@ -9,7 +9,8 @@ import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger
 import {Button} from "@/components/ui/button";
 import {MoreHorizontalIcon} from "lucide-react";
 import React from "react";
-import dateView from "@/lib/dayjs";
+import {dateView} from "@/lib/dayjs";
+import useUserState from "@/lib/login-state";
 
 interface CommentProps {
     comment: Comment;
@@ -17,11 +18,15 @@ interface CommentProps {
 }
 
 export default function Comments(props: CommentProps) {
-    const {picture, content, createdDate, name, id} = props.comment;
+    const {picture, content, createdDate, name, id, writerId} = props.comment;
     const {id: clubId, boardId} = props.params;
     const queryClient = useQueryClient();
     const [isEditing, setIsEditing] = useState(false);
     const [editedContent, setEditedContent] = useState(content);
+
+    const {getUserInfo} = useUserState();
+    const userId = getUserInfo().id;
+
 
     const deleteMutation = useMutation({
         mutationFn: (param) => deleteComment(param),
@@ -64,10 +69,10 @@ export default function Comments(props: CommentProps) {
     };
 
     const saveEditHandler = () => {
-        const editedComment : CommentWrite = {
+        const editedComment: CommentWrite = {
             content: editedContent,
-            boardId : boardId,
-            userId : 1
+            boardId: boardId,
+            userId: userId
         }
 
         updateMutation.mutate(editedComment)
@@ -93,24 +98,27 @@ export default function Comments(props: CommentProps) {
                     </div>
                 </div>
                 <div>
-                    {isEditing ? (
-                        <>
-                            <Button className="mr-2" onClick={cancelEditHandler}>취소</Button>
-                            <Button onClick={saveEditHandler}>저장</Button>
-                        </>
-                    ) : (
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button className="ml-auto w-8 h-8 rounded-full" size="icon" variant="ghost">
-                                    <MoreHorizontalIcon className="w-4 h-4"/>
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={editHandler}>수정</DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => deleteMutation.mutate(id)}>삭제</DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    )}
+                    {
+                        (userId === writerId) ? isEditing ? (
+                                <>
+                                    <Button className="mr-2" onClick={cancelEditHandler}>취소</Button>
+                                    <Button onClick={saveEditHandler}>저장</Button>
+                                </>
+                            ) : (
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button className="ml-auto w-8 h-8 rounded-full" size="icon" variant="ghost">
+                                            <MoreHorizontalIcon className="w-4 h-4"/>
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                        <DropdownMenuItem onClick={editHandler}>수정</DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => deleteMutation.mutate(id)}>삭제</DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            )
+                            : null
+                    }
                 </div>
             </div>
             <div className="px-6 py-4">

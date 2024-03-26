@@ -16,6 +16,7 @@ import {Editor} from "@/components/ui/quill";
 import {editPost, getCategoryList, getPostDetail} from "@/lib/club";
 import {QueryClient, useMutation, useQueries} from "@tanstack/react-query";
 import {useRouter} from "next/navigation";
+import useUserState from "@/lib/login-state";
 
 
 const FormSchema = z.object({
@@ -32,6 +33,9 @@ const queryClient = new QueryClient()
 export default function InputForm({params}: { params: { id: number, boardId: number } }) {
     const {id: clubId, boardId} = params;
     const router = useRouter();
+
+    const { getUserInfo } = useUserState();
+    const userId = getUserInfo().id;
 
     const results = useQueries({
         queries: [
@@ -95,7 +99,7 @@ export default function InputForm({params}: { params: { id: number, boardId: num
             content: contents,
             title: data["title"],
             boardId: parseInt(data["category"]),
-            userId: 1
+            userId: userId
         };
 
         mutate(results)

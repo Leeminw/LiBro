@@ -10,11 +10,15 @@ import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {getClubDetail, joinClub} from "@/lib/club";
 import {toast} from "@/components/ui/use-toast";
 import {useRouter} from "next/navigation";
+import useUserState from "@/lib/login-state";
 
 export default function CommunityPostPage({params}: { params: { id: number } }) {
     const clubId = params.id;
     const queryClient = useQueryClient();
     const router = useRouter();
+    const { getUserInfo } = useUserState();
+    const userId = getUserInfo().id;
+    const isMember = userId !== 0;
 
     const {isLoading, isSuccess: isFetchingSuccess, isError: isFetchingError, data: club} = useQuery({
         queryFn: () => getClubDetail(clubId),
@@ -22,7 +26,7 @@ export default function CommunityPostPage({params}: { params: { id: number } }) 
     });
 
     const {isPending, isError, error, mutate, isSuccess} = useMutation({
-        mutationFn: () => joinClub(clubId, {userId: 1}),
+        mutationFn: () => joinClub(clubId, {userId: userId}),
         onSuccess: (data, variables, context) => {
             toast({
                 title: "클럽에 정상적으로 가입되었습니다.",
@@ -67,12 +71,18 @@ export default function CommunityPostPage({params}: { params: { id: number } }) 
                 />
             </ScrollArea>
             <div className="sticky bottom-24 right-4 flex justify-end">
-                <Button
-                    className="bg-[#9268EB] text-white px-6 py-2 rounded w-full"
-                    onClick={() => mutate()}
-                >
-                    가입하기
-                </Button>
+                {isMember ? (
+                    <Button
+                        className="bg-[#9268EB] text-white px-6 py-2 rounded w-full"
+                        onClick={() => mutate()}>
+                        가입하기
+                    </Button>
+                ) : (
+                    <Button
+                        className="bg-[#9268EB] text-white px-6 py-2 rounded w-full">
+                        클럽에 가입을 위해서는 로그인이 필요합니다.
+                    </Button>
+                )}
             </div>
         </>
     );

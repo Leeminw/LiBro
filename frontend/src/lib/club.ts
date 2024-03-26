@@ -1,12 +1,6 @@
 import axios, {AxiosRequestConfig} from "axios"
 // import queryInstance from '@/lib/interceptor'
 // import mutationInstance from "@/lib/interceptor-json";
-import useUserState from "@/lib/login-state"
-
-const {userInfo, setUserInfo, deleteUserInfo, isLogin, getUserInfo} = useUserState(state => state);
-
-const {} = getUserInfo();
-
 
 const baseURL = 'http://localhost:8080/api'
 
