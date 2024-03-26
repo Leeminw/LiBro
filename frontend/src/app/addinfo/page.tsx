@@ -33,12 +33,10 @@ import SubHeader from "@/components/SubHeader";
 const UserInfo = () => {
   const [pageLoad, setPageLoad] = useState<boolean>(false);
   const [stage, setStage] = useState<number>(1);
-  const [name, setName] = useState<string>("");
   const [headerText, setHeaderText] = useState<string>("닉네임을 입력하세요.");
   const [gender, setGender] = useState<string>(""); // 성별 상태 추가
-  const [age, setAge] = useState<string>(); // 나이 상태 추가
-
-  const [selectedValues, setSelectedValues] = useState<string[]>([]);
+  const [age, setAge] = useState<string>(""); // 나이 상태 추가
+  const [selectedValues, setSelectedValues] = useState<string[]>([""]);
 
   useEffect(() => {
     setPageLoad(true);
@@ -131,14 +129,14 @@ const UserInfo = () => {
     nickname: z.string().min(2, {
       message: "닉네임은 2글자 이상으로 입력해주세요.",
     }),
-    gender: z.string().min(1, {
-      message: "성별을 입력해주세요.",
+    gender: z.string({
+      required_error: "성별을 입력해주세요.",
     }),
     age: z.string({
       required_error: "나이를 입력해주세요.",
     }),
-    interest: z.string({
-      required_error: "관심분야를 선택해주세요.",
+    interest: z.array(z.string()).nonempty({
+      message: "관심분야를 선택해주세요.",
     }),
   });
 
@@ -146,9 +144,9 @@ const UserInfo = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       nickname: "",
-      gender: "",
-      age: "",
-      interest: "",
+      gender: gender,
+      age: age,
+      interest: selectedValues,
     },
   });
 
@@ -199,9 +197,8 @@ const UserInfo = () => {
                       <FormLabel>성별</FormLabel>
                       <Select onValueChange={(value) => setGender(value)}>
                         <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="성별"  />
-                            <SelectContent {...field}>{gender}</SelectContent>
+                          <SelectTrigger {...field}>
+                            <SelectValue placeholder="성별" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent position="popper">
@@ -209,6 +206,7 @@ const UserInfo = () => {
                           <SelectItem value="f">여성</SelectItem>
                         </SelectContent>
                       </Select>
+                      <FormMessage />
                     </FormItem>
                   </div>
                 )}
@@ -220,10 +218,16 @@ const UserInfo = () => {
                   <div className="w-1/2">
                     <FormItem>
                       <FormLabel>연령대</FormLabel>
-                      <Select onValueChange={(value) => setAge(value)}>
+                      <Select
+                        onValueChange={(value) => {
+                          setAge(value);
+                          console.log(value);
+                        }}
+                        defaultValue={field.value}
+                      >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="나이" {...field} />
+                            <SelectValue placeholder="나이" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent position="popper">
@@ -236,6 +240,7 @@ const UserInfo = () => {
                           <SelectItem value="70">70대</SelectItem>
                         </SelectContent>
                       </Select>
+                      <FormMessage />
                     </FormItem>
                   </div>
                 )}
@@ -274,6 +279,7 @@ const UserInfo = () => {
                       <FormDescription className="text-xs">
                         최소 한 개 이상 선택해주세요.
                       </FormDescription>
+                      <FormMessage />
                     </FormItem>
                   </div>
                 )}
