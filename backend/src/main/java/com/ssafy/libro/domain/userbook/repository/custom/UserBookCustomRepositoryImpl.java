@@ -33,7 +33,8 @@ public class UserBookCustomRepositoryImpl implements UserBookCustomRepository{
                 .from(userBook)
                 .leftJoin(userBook.book,book).fetchJoin()
                 .where(userBook.user.eq(user)
-                        .and(userBook.isDeleted.eq(false)))
+                        .and((userBook.isDeleted.eq(false)).or(userBook.isDeleted.isNull()))
+                )
                 .fetch();
 
         return Optional.of(bookList);
@@ -49,7 +50,7 @@ public class UserBookCustomRepositoryImpl implements UserBookCustomRepository{
                 .leftJoin(userBook.book, book).fetchJoin()
                 .where(userBook.user.eq(user)
                         .and(userBookHistory.startDate.between(startDate,endDate))
-                        .and(userBook.isDeleted.eq(false))
+                        .and((userBook.isDeleted.eq(false)).or(userBook.isDeleted.isNull()))
                 )
                 .fetch();
 
@@ -65,7 +66,7 @@ public class UserBookCustomRepositoryImpl implements UserBookCustomRepository{
                 .leftJoin(userBook.userBookHistoryList, userBookHistory)
                 .leftJoin(userBook.book,book).fetchJoin()
                 .where(userBook.isOnRead.eq(true)
-                        .and(userBook.isDeleted.eq(false))
+                        .and((userBook.isDeleted.eq(false)).or(userBook.isDeleted.isNull()))
                 ).fetch();
 
         return Optional.of(userBookList);
@@ -79,7 +80,7 @@ public class UserBookCustomRepositoryImpl implements UserBookCustomRepository{
                 .leftJoin(userBook.user, QUser.user)
                 .leftJoin(userBook.book, QBook.book).fetchJoin()
                 .where(userBook.user.eq(user)
-                        .and(userBook.isDeleted.eq(false))
+                        .and((userBook.isDeleted.eq(false)).or(userBook.isDeleted.isNull()))
                         .and(userBook.isComplete.eq(true))
                 )
                 .fetch();
@@ -92,7 +93,7 @@ public class UserBookCustomRepositoryImpl implements UserBookCustomRepository{
                 .select(userBook.count())
                 .from(userBook)
                 .leftJoin(userBook.book, QBook.book)
-                .where(userBook.book.eq(book).and(userBook.isDeleted.eq(false)))
+                .where(userBook.book.eq(book).and((userBook.isDeleted.eq(false)).or(userBook.isDeleted.isNull())))
                 .fetchFirst();
         return Optional.of(result);
     }
@@ -104,7 +105,7 @@ public class UserBookCustomRepositoryImpl implements UserBookCustomRepository{
                 .from(userBook)
                 .leftJoin(userBook.book, QBook.book)
                 .where(userBook.book.eq(book)
-                        .and(userBook.isDeleted.eq(false))
+                        .and((userBook.isDeleted.eq(false)).or(userBook.isDeleted.isNull()))
                         .and(userBook.isComplete.eq(true))
                 )
                 .fetchFirst();
@@ -118,7 +119,7 @@ public class UserBookCustomRepositoryImpl implements UserBookCustomRepository{
                 .from(userBook)
                 .leftJoin(userBook.user, QUser.user)
                 .where(userBook.user.eq(user)
-                        .and(userBook.isDeleted.eq(false)))
+                        .and((userBook.isDeleted.eq(false)).or(userBook.isDeleted.isNull())))
                 .fetchFirst();
         return Optional.of(result);
     }
@@ -130,7 +131,7 @@ public class UserBookCustomRepositoryImpl implements UserBookCustomRepository{
                 .from(userBook)
                 .leftJoin(userBook.user, QUser.user)
                 .where(userBook.user.eq(user)
-                        .and(userBook.isDeleted.eq(false))
+                        .and((userBook.isDeleted.eq(false)).or(userBook.isDeleted.isNull()))
                         .and(userBook.isComplete.eq(true))
                 )
                 .fetchFirst();
