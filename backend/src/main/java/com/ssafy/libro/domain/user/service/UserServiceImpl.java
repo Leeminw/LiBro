@@ -5,7 +5,9 @@ import com.ssafy.libro.domain.user.entity.User;
 import com.ssafy.libro.domain.user.exception.UserNotFoundException;
 import com.ssafy.libro.domain.user.repository.UserRepository;
 import com.ssafy.libro.global.util.entity.Response;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,9 +18,10 @@ import java.util.Map;
 
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class UserServiceImpl implements UserService {
     private final Response response;
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
     @Override
     public User loadUser() {
@@ -38,15 +41,19 @@ public class UserServiceImpl implements UserService {
         return null;
     }
 
-    @Override
+
     @Transactional
+    @Override
     public boolean joinUser(UserJoinRequestDto requestDto) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated()) {
             Object principal = authentication.getPrincipal();
             if (principal instanceof User) {
                 User user = (User) principal;
+                userRepository.findUserById(user.getId())
+                        .orElseThrow(() -> new EntityNotFoundException("User Not Found with "+user.getId()));
                 user.updateUserJoin(requestDto);
+                userRepository.save(user);
                 return true;
             }
         }

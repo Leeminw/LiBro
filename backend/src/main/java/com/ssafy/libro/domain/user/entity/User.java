@@ -81,7 +81,6 @@ public class User {
         return this.role.getKey();
     }
 
-
     public void updateUserJoin(UserJoinRequestDto user) {
         this.nickname = user.getNickname();
         this.gender = user.getGender();

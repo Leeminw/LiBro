@@ -38,7 +38,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseData.failure("회원 정보 로드 실패"));
     }
 
-    @PostMapping("/join")
+    @PutMapping("/join")
     public ResponseEntity<?> joinUser(@RequestBody UserJoinRequestDto requestDto) {
         userService.joinUser(requestDto);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success("회원가입 성공"));

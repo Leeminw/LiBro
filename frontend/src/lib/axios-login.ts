@@ -37,15 +37,15 @@ const LoginApi = {
       const response = await instance.get("/api/user/test");
       return response.data;
     } catch (error) {
-      console.log(error);
       return Promise.reject("expired");
     }
   },
-  addInfo: async () => {
+  addInfo: async (value: JoinUser) => {
     try {
-      const response = await instance.put("/api/user/join");
+      const response = await instance.put("/api/user/join", value);
       return response.data;
     } catch (error) {
+      console.log(error);
       return Promise.reject(error);
     }
   },

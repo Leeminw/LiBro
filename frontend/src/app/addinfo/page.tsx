@@ -6,7 +6,9 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/use-toast";
 import { LoginApi } from "@/lib/axios-login";
+import { useSearchParams, useRouter } from "next/navigation";
 import {
   SelectValue,
   SelectTrigger,
@@ -34,39 +36,15 @@ const UserInfo = () => {
   const [pageLoad, setPageLoad] = useState<boolean>(false);
   const [stage, setStage] = useState<number>(1);
   const [headerText, setHeaderText] = useState<string>("닉네임을 입력하세요.");
-  const [gender, setGender] = useState<string>(""); // 성별 상태 추가
-  const [age, setAge] = useState<string>(""); // 나이 상태 추가
-  const [selectedValues, setSelectedValues] = useState<string[]>([""]);
+  const [selectedValues, setSelectedValues] = useState<string[]>([]);
+  const accessToken = useSearchParams().get("accessToken");
+  const refreshToken = useSearchParams().get("refreshToken");
+  const router = useRouter();
+  const { toast } = useToast();
 
   useEffect(() => {
     setPageLoad(true);
   }, []);
-
-  const handleChange = (
-    newValue: MultiValue<ColourOption>,
-    actionMeta: ActionMeta<ColourOption>
-  ) => {
-    if (newValue) {
-      // 선택된 항목들에서 value만 추출하여 저장합니다.
-      const values = newValue.map((option) => option.value);
-      setSelectedValues(values);
-    } else {
-      setSelectedValues([]);
-    }
-  };
-
-  // 성별과 나이가 모두 선택되었는지 확인하는 함수 추가
-  const checkAndAdvanceStage = () => {
-    if (stage === 1) {
-      setHeaderText("성별과 연령대를 선택해주세요.");
-      setStage(2);
-    } else {
-      if (gender !== "" && age !== "") {
-        setHeaderText("관심분야를 선택하세요.");
-        setStage(3);
-      }
-    }
-  };
 
   const colourStyles: StylesConfig<ColourOption, true> = {
     control: (styles) => ({ ...styles, backgroundColor: "white" }),
@@ -124,8 +102,8 @@ const UserInfo = () => {
     }),
   };
 
-  // 임시
   const formSchema = z.object({
+    id: z.number(),
     nickname: z.string().min(2, {
       message: "닉네임은 2글자 이상으로 입력해주세요.",
     }),
@@ -135,23 +113,60 @@ const UserInfo = () => {
     age: z.string({
       required_error: "나이를 입력해주세요.",
     }),
-    interest: z.array(z.string()).nonempty({
-      message: "관심분야를 선택해주세요.",
-    }),
+    interest: z.array(z.string()),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      id: 0,
       nickname: "",
-      gender: gender,
-      age: age,
-      interest: selectedValues,
+      interest: [],
     },
   });
 
+  const handleChange = (
+    newValue: MultiValue<ColourOption>,
+    actionMeta: ActionMeta<ColourOption>
+  ) => {
+    if (newValue) {
+      // 선택된 항목들에서 value만 추출하여 저장합니다.
+      const values = newValue.map((option) => option.value);
+      setSelectedValues(values);
+    } else {
+      setSelectedValues([]);
+    }
+  };
+
+  // 성별과 나이가 모두 선택되었는지 확인하는 함수 추가
+  const checkAndAdvanceStage = () => {
+    if (stage === 1) {
+      setHeaderText("성별과 연령대를 선택해주세요.");
+      setStage(2);
+    } else {
+      setHeaderText("관심분야를 선택하세요.");
+      setStage(3);
+    }
+  };
+
   const onSubmit = (values: z.infer<typeof formSchema>) => {
+    values.interest = selectedValues;
     console.log(values);
+    localStorage.setItem("accessToken", accessToken ? accessToken : "");
+    localStorage.setItem("refreshToken", refreshToken ? refreshToken : "");
+    LoginApi.addInfo(values)
+      .then(() => {
+        router.push(`/login/loading?accessToken=${accessToken}&refreshToken=${refreshToken}`);
+      })
+      .catch((error) => {
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        router.push("/login");
+        toast({
+          title: "회원가입 실패",
+          description: "다시 로그인을 시도해주세요.",
+        });
+      });
   };
 
   return (
@@ -195,7 +210,7 @@ const UserInfo = () => {
                   <div className="w-1/2 mr-2">
                     <FormItem>
                       <FormLabel>성별</FormLabel>
-                      <Select onValueChange={(value) => setGender(value)}>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger {...field}>
                             <SelectValue placeholder="성별" />
@@ -218,13 +233,7 @@ const UserInfo = () => {
                   <div className="w-1/2">
                     <FormItem>
                       <FormLabel>연령대</FormLabel>
-                      <Select
-                        onValueChange={(value) => {
-                          setAge(value);
-                          console.log(value);
-                        }}
-                        defaultValue={field.value}
-                      >
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="나이" />
@@ -247,62 +256,43 @@ const UserInfo = () => {
               />
             </div>
             <div
-              className={`flex flex-col transition-all duration-500 delay-500 ${
+              className={`flex flex-col py-3 transition-all duration-500 delay-500 ${
                 stage === 3 ? "opacity-100" : "opacity-0 hidden"
               }`}
             >
-              <FormField
-                control={form.control}
-                name="interest"
-                render={({ field }) => (
-                  <div>
-                    <FormItem>
-                      <FormLabel>관심분야</FormLabel>
-                      <FormControl>
-                        <Input
-                          className="hidden"
-                          {...field}
-                          value={selectedValues}
-                        ></Input>
-                      </FormControl>
-                      <SelectMenu
-                        id="interest"
-                        closeMenuOnSelect={false}
-                        placeholder="관심분야 선택"
-                        isMulti={true}
-                        options={colourOptions}
-                        styles={colourStyles}
-                        onChange={() => {
-                          handleChange;
-                        }}
-                      />
-                      <FormDescription className="text-xs">
-                        최소 한 개 이상 선택해주세요.
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  </div>
-                )}
+              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                관심분야 선택
+              </label>
+              <SelectMenu
+                className="mt-3 mb-2"
+                id="interest"
+                closeMenuOnSelect={false}
+                placeholder="관심분야 선택"
+                isMulti={true}
+                options={colourOptions}
+                styles={colourStyles}
+                onChange={handleChange}
               />
             </div>
 
-            {stage === 3 ? (
+            {stage === 3 && (
               <Button
                 type="submit"
                 className="mb-6 bg-[#9268EB] text-white px-6 py-2 rounded w-full"
               >
                 확인
               </Button>
-            ) : (
-              <Button
-                className="mb-6 bg-[#9268EB] text-white px-6 rounded w-full"
-                onClick={checkAndAdvanceStage}
-              >
-                다음
-              </Button>
             )}
           </form>
         </Form>
+      )}
+      {stage !== 3 && pageLoad && (
+        <Button
+          className="my-6 bg-[#9268EB] text-white px-6 rounded w-full"
+          onClick={checkAndAdvanceStage}
+        >
+          다음
+        </Button>
       )}
     </div>
   );

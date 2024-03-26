@@ -1,5 +1,4 @@
 import axios from "axios";
-import useUserState from "@/lib/login-state";
 const instance = axios.create({
   baseURL: "http://localhost:8080",
 });
@@ -7,9 +6,11 @@ const instance = axios.create({
 const apiclient = axios.create({
   baseURL: "http://localhost:8080",
 });
+
 instance.interceptors.request.use(
   (config) => {
     config.headers["Authorization"] = `Bearer ${localStorage.getItem("accessToken")}`;
+    console.log("request : ", config);
     return config;
   },
   (error) => {
@@ -20,9 +21,11 @@ instance.interceptors.request.use(
 
 instance.interceptors.response.use(
   async (response) => {
+    console.log("response : ", response);
     return response;
   },
   async (error) => {
+    console.log("resonse error : ", error);
     if (error.response.status === 401) {
       try {
         const response = await apiclient.post(
