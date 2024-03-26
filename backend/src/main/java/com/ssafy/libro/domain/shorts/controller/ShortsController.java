@@ -34,18 +34,6 @@ public class ShortsController {
     private final PromptServiceImpl promptService;
     private final ShortsServiceImpl shortsService;
 
-    @GetMapping("/api/v1/shorts")
-    public ResponseEntity<?> getShortsByBookId(@RequestParam("book-id") Long bookId) throws IOException {
-        BookDetailResponseDto bookResponseDto = bookService.getBook(bookId);
-        PromptRequestDto promptRequestDto = PromptRequestDto.builder()
-                .title(bookResponseDto.getTitle())
-                .content(bookResponseDto.getSummary())
-                .build();
-        PromptResponseDto promptResponseDto = promptService.translateText2Prompt(promptRequestDto);
-
-        return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(bookResponseDto));
-    }
-
     @PostMapping("/api/v1/shorts/create")
     public ResponseEntity<?> createShorts(@RequestBody ShortsRequestDto requestDto) throws IOException {
         ShortsResponseDto responseDto = shortsService.createShorts(requestDto);
@@ -53,14 +41,22 @@ public class ShortsController {
         return ResponseEntity.status(HttpStatus.OK)
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .body(ResponseData.success(responseDto));
+                .body(responseDto.getResource());
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    @GetMapping("/api/v1/shorts/create/test")
-    public ResponseEntity<?> createShortsTest() {
-        shortsService.createShorts();
-        return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success("쇼츠영상 S3 주소가 들어갈 예정"));
+    @GetMapping("/api/v1/shorts")
+    public ResponseEntity<?> getShortsByBookId(@RequestParam("book-id") Long bookId) throws IOException {
+        BookDetailResponseDto bookResponseDto = bookService.getBook(bookId);
+        ShortsRequestDto shortsRequestDto = ShortsRequestDto.builder()
+                .title(bookResponseDto.getTitle())
+                .content(bookResponseDto.getSummary())
+                .build();
+        ShortsResponseDto responseDto = shortsService.createShorts(shortsRequestDto);
+        String filename = responseDto.getResource().getFilename();
+        return ResponseEntity.status(HttpStatus.OK)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(responseDto.getResource());
     }
 
 }
