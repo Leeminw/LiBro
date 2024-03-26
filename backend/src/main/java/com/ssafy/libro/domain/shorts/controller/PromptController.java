@@ -20,7 +20,13 @@ public class PromptController {
 
     @PostMapping("/api/v1/prompt/translate")
     public ResponseEntity<?> translatePrompt(@RequestBody PromptRequestDto requestDto) throws IOException {
-        PromptResponseDto responseDto = promptService.convertText2Prompt(requestDto);
+        PromptResponseDto responseDto = promptService.translateText2Prompt(requestDto);
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(responseDto));
+    }
+
+    @PostMapping("/api/v1/prompt/tokenize")
+    public ResponseEntity<?> tokenizePrompt(@RequestBody PromptRequestDto requestDto) throws IOException {
+        PromptResponseDto responseDto = promptService.tokenizeText2Prompt(requestDto);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(responseDto));
     }
 
