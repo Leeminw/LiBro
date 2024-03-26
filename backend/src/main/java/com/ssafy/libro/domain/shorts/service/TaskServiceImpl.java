@@ -124,10 +124,10 @@ public class TaskServiceImpl implements TaskService {
             if (taskJpaRepository.existsByIsbn(book.getIsbn()))
                 continue;
 
-            PromptResponseDto prompts = promptService.convertText2Prompt(
+            PromptResponseDto prompts = promptService.tokenizeText2Prompt(
                     PromptRequestDto.builder()
                             .title(book.getTitle())
-                            .summary(book.getSummary())
+                            .content(book.getSummary())
                             .build()
             );
 
