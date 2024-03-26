@@ -7,8 +7,7 @@ import java.io.IOException;
 
 public interface PromptService {
 
-    String translateText2Text(String text, String sourceLang, String targetLang) throws IOException;
-
-    PromptResponseDto convertText2Prompt(PromptRequestDto requestDto) throws IOException;
+    PromptResponseDto tokenizeText2Prompt(PromptRequestDto requestDto) throws IOException;
+    PromptResponseDto translateText2Prompt(PromptRequestDto requestDto) throws IOException;
 
 }
