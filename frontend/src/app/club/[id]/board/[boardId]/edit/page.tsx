@@ -61,13 +61,13 @@ export default function InputForm({params}: { params: { id: number, boardId: num
     // const post = fetchedPost.data
 
     const {isPending, isError, error, mutate, data} = useMutation({
-        mutationFn: (param) => editPost(boardId, param),
+        mutationFn: (param:PostWrite) => editPost(boardId, param),
         onSuccess: (data, variables, context) => {
             toast({
                 title: "데이터를 정상적으로 수정 하였습니다.",
             });
-            queryClient.invalidateQueries(['boardDetail', boardId])
-            queryClient.invalidateQueries(['articleList']);
+            queryClient.invalidateQueries({queryKey : ['boardDetail', boardId]});
+            queryClient.invalidateQueries({queryKey : ['articleList']});
             router.push(`/club/${clubId}/board/${boardId}`);
         },
         onError: (data, variables, context) => {
