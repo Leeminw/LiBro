@@ -43,13 +43,13 @@ public class User {
     private String nickname;
 
     @Column
-    private char gender;
+    private Character gender;
 
     @Column
-    private int age;
+    private Integer age;
 
     @Column
-    private boolean isDeleted;
+    private Boolean isDeleted;
 
     @CreationTimestamp
     @Column

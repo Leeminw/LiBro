@@ -156,6 +156,7 @@ const UserInfo = () => {
     localStorage.setItem("refreshToken", refreshToken ? refreshToken : "");
     LoginApi.addInfo(values)
       .then(() => {
+        
         router.push(`/login/loading?accessToken=${accessToken}&refreshToken=${refreshToken}`);
       })
       .catch((error) => {
