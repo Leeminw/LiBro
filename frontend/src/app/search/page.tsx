@@ -8,13 +8,13 @@ const SearchPage = () => {
     <>
       <SubHeader title="도서 검색" backArrow={true} />
       <div className="pt-24 h-full max-h-screen flex items-center relative flex-wrap overflow-y-scroll scrollbar-hide">
-        <div className="w-full h-32 bg-white rounded-lg mx-4 my-2 flex flex-col relative overflow-hidden">
-          <div className="ml-4 my-2 w-full select-none font-semibold text-gray-900">
+        <div className="w-full min-h-24 h-fit pb-4 bg-white rounded-lg mx-4 my-2 flex flex-col relative overflow-hidden">
+          <div className="ml-4 mt-3 mb-2 w-full select-none font-semibold text-gray-900">
             최근 검색어
           </div>
-          <div className="w-full h-full px-4">
+          <div className="w-full px-4 space-y-1">
             {Array.from({length:10},(_, index)=>(
-              <Badge className="mx-1" key={index}>테스트 {index}</Badge>
+              <Badge className="mx-1 cursor-pointer" key={index}>테스트 {index}</Badge>
             ))
             }
           </div>
