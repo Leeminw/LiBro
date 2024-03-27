@@ -2,7 +2,6 @@ package com.ssafy.libro.domain.article.dto;
 
 import com.ssafy.libro.domain.article.entity.Article;
 import lombok.Getter;
-import lombok.ToString;
 
 import java.time.LocalDateTime;
 
@@ -17,7 +16,7 @@ public class ArticleDetailResponseDto {
     private String name;
     private String picture;
     private Long boardId;
-    private Long commentCount;
+    private Long writerId;
 
 
     public ArticleDetailResponseDto(Article article){
@@ -30,6 +29,7 @@ public class ArticleDetailResponseDto {
         this.name = article.getUser().getName();
         this.picture = article.getUser().getProfile();
         this.boardId = article.getBoard().getId();
+        this.writerId = article.getUser().getId();
     }
 
 }
