@@ -103,7 +103,7 @@ export const getCommentList = async (
 }
 
 export const getPostList = async (
-    clubId: number,
+    clubId: number | null,
     params?: PostSearch
 ) => {
     let axiosParams: AxiosRequestConfig | undefined;
