@@ -59,6 +59,7 @@ interface UserBook {
     createdDate: string;
     updateDate: string;
     commentList: Comment[] | null;
+    history: History | null;
 }
 
 interface Comment {
@@ -67,11 +68,18 @@ interface Comment {
     createdDate: string;
     updatedDate: string;
 }
+interface History {
+    userBookHistoryId : number;
+    startDate : string;
+    endDate : string;
+}
 interface Review {
     review?: string;
     rating?: number;
     isSpoiler?: boolean;
     timestamp?: Date;
+    historyList : History [] | null;
+
 }
 
 
@@ -234,9 +242,13 @@ const Library = () => {
         const {data} = await instance.get(
             "/api/v1/userbook/detail/" + book.userBookId
         );
+        const historyList : History[] = data.data.historyList
+        
+        
         const selectedUserBook: UserBook = {
             book:book,
-            ...data.data
+            ...data.data,
+            history: historyList ? historyList[historyList.length-1] : null
         };
         console.log(selectedUserBook)
         setSelectedBook(selectedUserBook);
@@ -279,45 +291,55 @@ const Library = () => {
         };
 
         // 책의 독서 시작
-        const startReading = () => {
-            // if (selectedBook) {
-            // const updatedBooks = books.map(book => {
-            //     if (book.id === selectedBook.id) {
-            //     return { ...book, readstartdate: new Date().toISOString(), complete: false };
-            //     }
-            //     return book;
-            // });
-            // setBooks(updatedBooks);
-            // setSelectedBook({ ...selectedBook, readstartdate: new Date().toISOString(), complete: false });
-            // }
+        const startReading = async (userBookId: number) => {
+            const now :Date = new Date();
+            const localDateTimeString: string = now.toISOString();
+            const response = await instance.post(
+                '/api/v1/bookhistory', {
+                    userBookId : userBookId,
+                    startDate : localDateTimeString
+                }
+            )
+            console.log("read start")
+            setBookHistory(response.data.data)
+            
         };
 
         // 독서 포기
-        const giveUpReading = () => {
-            // if (selectedBook) {
-            // const updatedBooks = books.map(book => {
-            //     if (book.id === selectedBook.id) {
-            //     return { ...book, readstartdate: 'null', complete: false };
-            //     }
-            //     return book;
-            // });
-            // setBooks(updatedBooks);
-            // setSelectedBook({ ...selectedBook, readstartdate: 'null', complete: false });
-            // }
+        const giveUpReading = async (bookHistory : History) => {
+            // console.log(bookHistory.userBookHistoryId)
+            try {
+                
+                const response = await instance.delete(
+                    '/api/v1/bookhistory/'+bookHistory.userBookHistoryId
+                )
+                const currentResponse = await instance.get(
+                    '/api/v1/bookhistory/recent/' + userBook.userBookId
+                )
+                
+                setBookHistory(currentResponse.data.data)
+                
+            }
+            catch (error) {
+                console.log("error" , error)
+                setBookHistory(null);
+            }
         };
 
         // 독서 완료
-        const completeReading = () => {
-            // if (selectedBook) {
-            // const updatedBooks = books.map(book => {
-            //     if (book.id === selectedBook.id) {
-            //     return { ...book, readcompletedate: new Date().toISOString(), complete: true };
-            //     }
-            //     return book;
-            // });
-            // setBooks(updatedBooks);
-            // setSelectedBook({ ...selectedBook, readcompletedate: new Date().toISOString(), complete: true });
-            // }
+        const completeReading = async (bookHistory : History) => {
+           console.log(bookHistory)
+           // 완료 표시 
+           const response  = await instance.get(
+                '/api/v1/bookhistory/complete/' + bookHistory.userBookHistoryId
+           )
+            // 가장 최근 도서기록 가져오기
+           const currentResponse = await instance.get(
+                '/api/v1/bookhistory/recent/' + userBook.userBookId
+           ) 
+           console.log(currentResponse.data)
+           setBookHistory(currentResponse.data.data)
+
         };
 
         const Header = () => {
@@ -358,29 +380,29 @@ const Library = () => {
                     <h1 className="text-xl font-bold mb-3">독서 기록</h1>
                     <div className="flex justify-start items-center">
                         <Button className="flex justify-start items-center font-bold text-xs text-gray-500 bg-white border border-gray-300 shadow-lg w-full ">
-                        {/* {selectedBook && (selectedBook.readstartdate === null || selectedBook.readstartdate === 'null') ? (
-                            <p>독서 기록이 없습니다.</p>
-                        ) : (
-                            selectedBook && selectedBook.complete ? (
-                                selectedBook.readcompletedate ? (
-                                    <p>{`${new Date(selectedBook.readcompletedate).getFullYear()}년 ${new Date(selectedBook.readcompletedate).getMonth() + 1}월 ${new Date(selectedBook.readcompletedate).getDate()}일 독서 완료`}</p>
-                                ) : (
-                                    <p>독서 완료 날짜 정보가 없습니다.</p>
-                                )
-                            ) : (
-                                selectedBook && selectedBook.readstartdate ? (
-                                    <p>{`${new Date(selectedBook.readstartdate).getFullYear()}년 ${new Date(selectedBook.readstartdate).getMonth() + 1}월 ${new Date(selectedBook.readstartdate).getDate()}일부터 독서 중`}</p>
-                                ) : (
-                                    <p>독서 시작 날짜 정보가 없습니다.</p>
-                                )
-                            )
-                        )} */}
+                        {bookHistory ? 
+                        (bookHistory.endDate ? <p> {extractDate(bookHistory.startDate) + ' ~ ' + extractDate(bookHistory.endDate)}   </p> 
+                        : <p> {extractDate(bookHistory.startDate)} 부터 독서중 </p> ) 
+                        : <p>독서 기록이 없습니다.</p>}
                         </Button>
                     </div>
                 </div>
             )
         }
-
+        function extractDate(dateString: string ): string {
+            const matchResult = dateString.match(/^(\d{4})-(\d{2})-(\d{2})/);
+            if (!matchResult) {
+              throw new Error("잘못된 형식의 날짜 문자열입니다.");
+            }
+          
+            const [, yearStr, monthStr, dayStr] = matchResult;
+            const year = parseInt(yearStr, 10);
+            const month = parseInt(monthStr, 10);
+            const day = parseInt(dayStr, 10);
+            
+            return  `${year}년 ${month}월 ${day}일`; 
+            
+          }     
     const Review = () => {
 
         const displaySavedRatingStars = (rating: number) => {
@@ -512,7 +534,7 @@ const Library = () => {
                 setCurrent(api.selectedScrollSnap() + 1)
                 })
             }, [api])
-
+            // 감명받은 글귀 저장하기 
             const handleSave = async () => {
                 const response = await instance.post(
                     "/api/v1/comment", {
@@ -583,33 +605,35 @@ const Library = () => {
                 </div>
             );
         }
-
-            const ButtonComponent = () => {
+        const [bookHistory,setBookHistory] = useState(userBook.history)
+        const ButtonComponent = () => {
                 
-                if (!selectedBook || selectedBook.readstartdate === 'null' || selectedBook.readstartdate === null) {
+                if (!bookHistory || bookHistory.endDate) {
                     // 독서 기록이 없을 때
                     return (
                         <div className="flex justify-center"> 
-                            <button className="w-full p-1.5 mx-6 text-center bg-[#9268EB] rounded-md" onClick={startReading}>
+                            <button className="w-full p-1.5 mx-6 text-center bg-[#9268EB] rounded-md" onClick={() => startReading(userBook.userBookId)}>
                                 <div className=" text-white  ">독서 기록 시작하기</div>
                             </button>
                         </div>
                     );
-                } else if (selectedBook.complete) {
-                    // 독서 완료일 때
-                    return (
-                        <div className="flex justify-center"> 
-                            <button className="w-full p-1.5 mx-6 text-center bg-[#9268EB] rounded-md" onClick={startReading}>
-                                <div className=" text-white  ">독서 기록 다시 시작하기</div>
-                            </button>
-                        </div>
-                    );
-                } else {
-                    // 독서 중일 때
+                } 
+                //     // 독서 완료 or 포기 버튼
+                // else if (!bookHistory.endDate) {
+                //     return (
+                //         <div className="flex justify-center"> 
+                //             <button className="w-full p-1.5 mx-6 text-center bg-[#9268EB] rounded-md" onClick={startReading}>
+                //                 <div className=" text-white  ">독서 기록 다시 시작하기</div>
+                //             </button>
+                //         </div>
+                //     );
+                // } 
+                else if (!bookHistory.endDate) {
+                //     // 독서 중일 때
                     return (
                         <div className="flex justify-center mx-6"> 
-                            <button className="w-full bg-[#F87171] text-white p-1.5 rounded-md mr-4" onClick={giveUpReading}>독서 포기</button>
-                            <button className="w-full bg-[#9268EB] text-white p-1.5  rounded-md" onClick={completeReading }>완독</button>
+                            <button className="w-full bg-[#F87171] text-white p-1.5 rounded-md mr-4" onClick={() => giveUpReading(bookHistory)}>독서 포기</button>
+                            <button className="w-full bg-[#9268EB] text-white p-1.5  rounded-md" onClick={() => completeReading(bookHistory) }>완독</button>
                         </div>
                     );
                 }
