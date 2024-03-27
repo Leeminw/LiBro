@@ -514,21 +514,20 @@ const Library = () => {
             }, [api])
 
             const handleSave = async () => {
-                // const response = await instance.post(
-                //     "/api/v1/comment", {
-                //         userBookId: selectedBook?.userBookId,
-                //         content : currentInput   
-                //     }
-                // )
+                const response = await instance.post(
+                    "/api/v1/comment", {
+                        userBookId: selectedBook?.userBookId,
+                        content : currentInput   
+                    }
+                )
                 const updateList = await instance.get(
                     "/api/v1/comment/userbook/" + selectedBook?.userBookId
                 )
-                console.log(updateList)
-                const commentList: Comment[] = updateList.data.data
+                const commentList = updateList.data.data
                 
                 setInputs(commentList);
                 setCurrentInput(''); // 입력 상태 초기화
-                setCount(commentList.length)
+                setCount(commentList.length+1)
             };
         
             const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -545,7 +544,7 @@ const Library = () => {
                     <div className="flex items-center justify-center">
                         <Carousel setApi={setApi} className="w-5/6">
                             <CarouselContent>
-                                {inputs?.map((input, index) => (
+                                {inputs.map((input, index) => (
                                     <CarouselItem key={index}>
                                         <Card>
                                             <CardContent className="flex items-center justify-center p-3 h-24 text-xs">
@@ -553,13 +552,26 @@ const Library = () => {
                                                     placeholder="여기에 글귀를 입력하세요" 
                                                     className="flex w-full p-2 justify-center items-center text-center h-full resize-none"
                                                     rows={4}
-                                                    value={index === inputs.length ? currentInput : input.content}
-                                                    onChange={handleInputChange}
+                                                    value={input.content}
+                                                    disabled = {true}
                                                 />
                                             </CardContent>
                                         </Card>
                                     </CarouselItem>
                                 ))}
+                                <CarouselItem >
+                                        <Card>
+                                            <CardContent className="flex items-center justify-center p-3 h-24 text-xs">
+                                                <textarea 
+                                                    placeholder="여기에 글귀를 입력하세요" 
+                                                    className="flex w-full p-2 justify-center items-center text-center h-full resize-none"
+                                                    rows={4}
+                                                    value={currentInput}
+                                                    onChange={handleInputChange}
+                                                />
+                                            </CardContent>
+                                        </Card>
+                                    </CarouselItem>
                             </CarouselContent>
                             <CarouselPrevious />
                             <CarouselNext />
