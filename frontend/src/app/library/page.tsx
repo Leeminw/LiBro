@@ -53,6 +53,7 @@ interface UserBook {
     userId: number;
     bookId: number;
     type: string;
+    isCompleted :boolean | null;
     rating: number | null;
     ratingComment: string | null;
     ratingSpoiler: boolean | null ;
@@ -81,7 +82,6 @@ interface Review {
     historyList : History [] | null;
 
 }
-
 
 const Library = () => {
 
@@ -256,39 +256,36 @@ const Library = () => {
     };
 
     // // 모달을 닫는 함수
-    const closeModal = () => {
+    const closeModal = async () => {
+        // 완독 갱신
+        await userBooks.books()
+        .then((response) => {
+            console.log(response.data)
+            const processedData = response.data.map((item:any) => item ={
+                userBookId: item.userBookId,
+                image: item.bookDetailResponseDto.thumbnail,
+                title: item.bookDetailResponseDto.title,
+                publisher: item.bookDetailResponseDto.publisher,
+                createdDate: item.bookDetailResponseDto.createdDate,
+                author: item.bookDetailResponseDto.author,
+                complete: item.isComplete,
+                isbn : item.bookDetailResponseDto.isbn
+            });
+            console.log("changed data : " , processedData)
+            setBooks(processedData)
+        })
+        .catch((error) => {
+            console.log(error)
+        })
+
+
         setIsModalOpen(false);
         setSelectedBook(null);
     };
 
-    const [rating, setRating] = useState(0); // 별점 상태 초기화
-    const [isSpoiler, setIsSpoiler] = useState(false); // 스포일러 체크박스 상태
-    const [review, setReview] = useState('');
-    const [savedReview, setSavedReview] = useState<{ [key: number]: Review }>({});
-    const [savedRating, setSavedRating] = useState(0); // 저장된 별점 상태 추가
-
     const BookModal = ({ userBook, onClose }: ModalProps) => {
         if (!userBook) return null;
         
-        const renderStars = () => {
-            let stars = [];
-            for (let i = 1; i <= 5; i++) {
-                stars.push(
-                    <button
-                        key={i}
-                        onClick={() => setRating(i)} // 클릭 시 별점 상태 업데이트
-                        className={`w-8 h-8 mx-0.5 ${rating >= i ? "fill-current text-[#FFCA28]" : "text-black"}`}
-                    >
-                        {rating >= i ? (
-                            <StarFillIcon className="w-full h-full" />
-                        ) : (
-                            <StarEmptyIcon className="w-full h-full" />
-                        )}
-                    </button>
-                );
-            }
-            return stars;
-        };
 
         // 책의 독서 시작
         const startReading = async (userBookId: number) => {
@@ -339,6 +336,7 @@ const Library = () => {
            ) 
            console.log(currentResponse.data)
            setBookHistory(currentResponse.data.data)
+           userBook.isCompleted = true;
 
         };
 
@@ -404,6 +402,28 @@ const Library = () => {
             
           }     
     const Review = () => {
+        const [review, setReview] = useState(userBook.ratingComment? userBook.ratingComment : '');
+        const [rating, setRating] = useState(userBook.rating? userBook.rating : 0); // 별점 상태 초기화
+        const [isSpoiler, setIsSpoiler] = useState(userBook.ratingSpoiler? userBook.ratingSpoiler : false); // 스포일러 체크박스 상태
+        const renderStars = () => {
+            let stars = [];
+            for (let i = 1; i <= 5; i++) {
+                stars.push(
+                    <button
+                        key={i}
+                        onClick={() => setRating(i)} // 클릭 시 별점 상태 업데이트
+                        className={`w-8 h-8 mx-0.5 ${rating >= i ? "fill-current text-[#FFCA28]" : "text-black"}`}
+                    >
+                        {rating >= i ? (
+                            <StarFillIcon className="w-full h-full" />
+                        ) : (
+                            <StarEmptyIcon className="w-full h-full" />
+                        )}
+                    </button>
+                );
+            }
+            return stars;
+        };
 
         const displaySavedRatingStars = (rating: number) => {
             let stars = [];
@@ -425,21 +445,46 @@ const Library = () => {
             setIsSpoiler(event.target.checked); // 체크박스 상태 업데이트
         };
 
-        const saveReview = () => {
-            // if (!selectedBook) return;
-            // // 현재 선택된 책의 ID를 사용하여 리뷰, 별점, 스포일러 여부, 저장 시간 저장
-            // const timestamp = new Date(); // 현재 시간
-            // setSavedReview(prevReview => ({
-            //     ...prevReview,
-            //     [selectedBook.id]: { review, rating, isSpoiler, timestamp }
-            // }));
-            // // 저장 후 입력 필드 초기화
-            // setReview('');
-            // setRating(0);
-            // setIsSpoiler(false);
+        const saveReview = async(userBook : UserBook) => {
+            if(!userBook.isCompleted){
+                console.log("432번째줄 토스트 추가좀.. ")
+                // toast({
+                //     title: "완독 x",
+                //     description: "완독해야 적을 수 있음!",
+                //   });
+                return;
+            }
+            console.log("save button")
+            const ratingData = {
+                userBookId:userBook.userBookId,
+                rating : rating,
+                ratingComment : review,
+                ratingSpoiler : isSpoiler
+            }
+            console.log(ratingData)
+            const response = await instance.post(
+                '/api/v1/userbook/rating', ratingData
+            )
+            // user book 갱신
+            
+            const {data} = await instance.get(
+                "/api/v1/userbook/detail/" + userBook.userBookId
+            );
+            const historyList : History[] = data.data.historyList
+            
+            
+            const selectedUserBook: UserBook = {
+                book:selectedBook?.book,
+                ...data.data,
+                history: historyList ? historyList[historyList.length-1] : null
+            };
+            setSelectedBook(selectedUserBook);
+            
+            
+
+
         };
 
-        const currentSavedReview = selectedBook ? savedReview[selectedBook.userBookId] || {} : {};
 
         // 'YYYY/MM/DD 오후 HH:mm' 형식의 문자열로 시간을 변환하는 함수
         const formatTimestamp = (timestamp: Date | undefined) => {
@@ -463,7 +508,9 @@ const Library = () => {
         return (
             <div className="mx-6 mt-4">
                 <h1 className="mb-3 text-xl font-bold">나의 평점</h1>
-                {!currentSavedReview.review && (
+                { // 리뷰가 없을때
+                    (!userBook.rating && !userBook.ratingComment) ?
+                
                     <>
                         <div className="flex items-start justify-between mb-1">
                             <div className="mr-2 text-m font-bold">
@@ -487,29 +534,30 @@ const Library = () => {
                                 placeholder="리뷰를 입력하세요."
                                 className="w-5/6 p-2 mr-2 border rounded"
                             />
-                            <Button onClick={saveReview} className="bg-[#9268EB] rounded-md p-0.5 w-12 h-12">
+                            <Button onClick={()=>saveReview(userBook)} className="bg-[#9268EB] rounded-md p-0.5 w-12 h-12">
                                 <Image src='mdi_pencil.svg' alt='pencil' width={30} height={30} />
                             </Button>
                         </div>
                     </>
-                )}
-                {/* 저장된 리뷰 보여주기 */}
-                {currentSavedReview.review && (
-                    <div className="rounded border border-gray-300 shadow-lg p-4">
-                        <div className="flex justify-between">
-                            <div className="flex mb-1">
-                                <div className="text-sm font-bold mr-2">@{user.nickName} </div>
-                                <div className="text-sm">{currentSavedReview.timestamp ? formatTimestamp(currentSavedReview.timestamp) : '날짜 정보 없음'}</div>
-                            </div>
-                            <Button className="bg-white text-xs text-gray-400 p-1 rounded-md h-6">수정하기</Button>
-                        </div>   
+                    : 
+                    //  리뷰 입력 완료
+                    <>
+                        <div className="rounded border border-gray-300 shadow-lg p-4">
+                         <div className="flex justify-between">
+                             <div className="flex mb-1">
+                                 <div className="text-sm font-bold mr-2">@{user.nickName} </div>
+                             </div>
+                             <Button className="bg-white text-xs text-gray-400 p-1 rounded-md h-6">수정하기</Button>
+                         </div>   
 
-                        <div className="flex items-center mb-1">{currentSavedReview.rating !== undefined ? displaySavedRatingStars(currentSavedReview.rating) : '평점 정보 없음'}</div>
-                        <div className="text-sm mb-1">{currentSavedReview.review}</div>
-                        {/* 여기에 별점과 스포일러 여부도 표시 */}
-                        {currentSavedReview.isSpoiler && <div className="text-red-500">스포일러 포함</div>}
-                    </div>
-                )}
+                         <div className="flex items-center mb-1">{'평점 : ' + userBook.rating}</div>
+                         <div className="text-sm mb-1">{'리뷰 내용 : ' + userBook.ratingComment}</div>
+                             {/* 여기에 별점과 스포일러 여부도 표시 */}
+                            {userBook.ratingSpoiler && <div className="text-red-500">스포일러 포함</div>}
+                        </div>
+                    </>    
+                }
+
             </div>  
         );
     };
@@ -571,7 +619,6 @@ const Library = () => {
                                         <Card>
                                             <CardContent className="flex items-center justify-center p-3 h-24 text-xs">
                                                 <textarea 
-                                                    placeholder="여기에 글귀를 입력하세요" 
                                                     className="flex w-full p-2 justify-center items-center text-center h-full resize-none"
                                                     rows={4}
                                                     value={input.content}
