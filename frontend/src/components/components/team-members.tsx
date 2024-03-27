@@ -1,46 +1,43 @@
 'use client'
 
-import React, { useState } from "react";
-import {
-    Avatar,
-    AvatarFallback,
-    AvatarImage,
-} from "@/components/ui/avatar";
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
+import React from "react";
+import {Avatar, AvatarFallback, AvatarImage,} from "@/components/ui/avatar";
+import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
 import {Button} from "@/components/ui/button";
 import {MoreHorizontalIcon} from "lucide-react";
 import {useRouter} from "next/navigation";
 import {QueryClient, useMutation} from "@tanstack/react-query";
-import {deletePost, editPost} from "@/lib/club";
+import {deletePost} from "@/lib/club";
 import {toast} from "@/components/ui/use-toast";
+import useUserState from "@/lib/login-state";
 
 interface GroupOwner {
     profileUrl: string | null,
     nickName: string,
     boardId?: number | null
     groupId?: number | null
+    writerId? : number | null
 }
 
 export default function Writer(props: GroupOwner) {
-    const {profileUrl, nickName, boardId, groupId} = props;
+    const {profileUrl, nickName, boardId, groupId, writerId} = props;
 
     const router = useRouter();
 
     const queryClient = new QueryClient();
 
+    const { getUserInfo } = useUserState();
+    const userId = getUserInfo().id;
+
+    console.log(userId, writerId);
+
     const {isPending, isError, error, mutate, data} = useMutation({
-        mutationFn: (param) => deletePost(param),
+        mutationFn: (param: number) => deletePost(param),
         onSuccess: (data, variables, context) => {
             toast({
                 title: "데이터를 정상적으로 삭제 하였습니다.",
             });
-            queryClient.invalidateQueries(['articleList']);
+            queryClient.invalidateQueries({queryKey: ['articleList']});
             router.push(`/club/${groupId}`);
         },
         onError: (data, variables, context) => {
@@ -55,7 +52,7 @@ export default function Writer(props: GroupOwner) {
     };
 
     const handleDeleteClick = () => {
-        mutate(boardId)
+        mutate(boardId as number)
     };
 
     return (
@@ -67,22 +64,24 @@ export default function Writer(props: GroupOwner) {
                 </Avatar>
                 <span className="font-medium">{nickName}</span>
             </div>
+            {
+                (userId == writerId) && (<DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button className="ml-auto w-8 h-8 rounded-full" size="icon" variant="ghost">
+                            <MoreHorizontalIcon className="w-4 h-4"/>
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={handleEditClick}>
+                            수정
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleDeleteClick}>
+                            삭제
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>)
+            }
 
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button className="ml-auto w-8 h-8 rounded-full" size="icon" variant="ghost">
-                        <MoreHorizontalIcon className="w-4 h-4"/>
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={handleEditClick}>
-                        수정
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleDeleteClick}>
-                        삭제
-                    </DropdownMenuItem>
-                </DropdownMenuContent>
-            </DropdownMenu>
         </div>
     );
 }

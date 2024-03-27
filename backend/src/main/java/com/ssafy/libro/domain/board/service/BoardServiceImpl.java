@@ -13,7 +13,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 @Service
 @RequiredArgsConstructor
@@ -54,7 +53,9 @@ public class BoardServiceImpl implements BoardService {
 
     @Override
     public void deleteBoard(Long boardId) {
-        Board board = boardRepository.findById(boardId).orElse(null);
+        Board board = boardRepository.findById(boardId).orElseThrow(
+                () -> new BoardNotFoundException(boardId)
+        );
         boardRepository.delete(board);
     }
 }

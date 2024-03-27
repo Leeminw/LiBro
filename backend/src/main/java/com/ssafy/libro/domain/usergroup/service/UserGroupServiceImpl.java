@@ -1,12 +1,12 @@
 package com.ssafy.libro.domain.usergroup.service;
 
+import com.ssafy.libro.domain.club.entity.Club;
+import com.ssafy.libro.domain.club.exception.ClubNotFoundException;
 import com.ssafy.libro.domain.club.repository.ClubRepository;
 import com.ssafy.libro.domain.user.entity.User;
 import com.ssafy.libro.domain.user.exception.UserNotFoundException;
 import com.ssafy.libro.domain.user.repository.UserRepository;
 import com.ssafy.libro.domain.usergroup.dto.*;
-import com.ssafy.libro.domain.club.entity.*;
-import com.ssafy.libro.domain.club.exception.*;
 import com.ssafy.libro.domain.usergroup.entity.ClubRole;
 import com.ssafy.libro.domain.usergroup.entity.UserGroup;
 import com.ssafy.libro.domain.usergroup.exception.AlreadyJoinedException;
@@ -87,11 +87,11 @@ public class UserGroupServiceImpl implements UserGroupService {
                 () -> new UserNotFoundException(memberId)
         );
 
-        userGroupRepository.findByClubAndUser(club, user).orElseThrow(
+        UserGroup userGroup = userGroupRepository.findByClubAndUser(club, user).orElseThrow(
                 () -> new NotFoundJoinException(club, user)
         );
 
-        userGroupRepository.deleteByClubAndUser(club, user);
+        userGroup.leaveClub();
     }
 
     @Override

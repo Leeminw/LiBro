@@ -41,7 +41,7 @@ public class Board {
     private Club club;
 
     @OneToMany(mappedBy = "board", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    List<Article> articles = new ArrayList<>();
+    private List<Article> articles ;
 
     public void update(BoardUpdateRequestDto dto){
         this.name= dto.getName();
