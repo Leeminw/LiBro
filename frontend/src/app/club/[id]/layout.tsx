@@ -1,16 +1,17 @@
 'use client'
 
-import React, {useEffect, useState} from "react";
+import React from "react";
 import {getClubMemberShip} from "@/lib/club";
 import useUserState from "@/lib/login-state";
-import {useRouter} from "next/router";
 import {useQuery} from "@tanstack/react-query";
 
-export default function writePageLayout({children, join, params}: {
+export default function Layout({children, join, params}: {
     children: React.ReactNode;
     join: React.ReactNode;
     params: { id: number }
 }) {
+
+
     const clubId = params.id;
     const {id: userId} = useUserState().getUserInfo();
 
