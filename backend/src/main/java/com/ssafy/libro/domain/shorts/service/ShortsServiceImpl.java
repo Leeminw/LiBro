@@ -205,7 +205,7 @@ public class ShortsServiceImpl implements ShortsService {
             List<byte[]> subtitledImages = createSubtitledImages(decodedImages, sentences);
             recordImagesToVideo(subtitledImages, recorder);
         } catch (FrameRecorder.Exception e) {
-            log.error("Error while generating video: {}", e.getMessage());
+            log.error("Error while generating video with subtitle: {}", e.getMessage());
             throw new IOException("Error generating video", e);
         }
 
@@ -227,20 +227,18 @@ public class ShortsServiceImpl implements ShortsService {
         String[] subtitles = sentences.split(",");
         int cntSubtitledImages = lcm(decodedImages.size(), subtitles.length);
 
-        List<byte[]> newDecodedImages = new ArrayList<>();
-        for (int i = 0; i < cntSubtitledImages; i++) {
-            newDecodedImages.add(decodedImages.get(i % decodedImages.size()));
-        }
-
-        List<String> newSubtitles = new ArrayList<>();
-        for (int i = 0; i < cntSubtitledImages; i++) {
-            newSubtitles.add(subtitles[i % subtitles.length]);
-        }
+        // 이미지와 자막의 반복 비율을 계산합니다.
+        int imageRepeatRate = cntSubtitledImages / decodedImages.size();
+        int subtitleRepeatRate = cntSubtitledImages / subtitles.length;
 
         List<byte[]> subtitledImages = new ArrayList<>();
         for (int i = 0; i < cntSubtitledImages; i++) {
-            BufferedImage originalImage = ImageIO.read(new ByteArrayInputStream(newDecodedImages.get(i)));
-            BufferedImage overlayImage = overlayTextOnImage(originalImage, newSubtitles.get(i));
+            // 적절한 이미지와 자막을 선택합니다.
+            int imageIndex = (i / imageRepeatRate) % decodedImages.size();
+            int subtitleIndex = (i / subtitleRepeatRate) % subtitles.length;
+
+            BufferedImage originalImage = ImageIO.read(new ByteArrayInputStream(decodedImages.get(imageIndex)));
+            BufferedImage overlayImage = overlayTextOnImage(originalImage, subtitles[subtitleIndex]);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ImageIO.write(overlayImage, "png", baos);
             subtitledImages.add(baos.toByteArray());
