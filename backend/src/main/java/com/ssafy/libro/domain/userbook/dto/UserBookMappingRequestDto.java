@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserBookMappingRequestDto {
-    private Long userId;
     private Long bookId;
     private String type;
 

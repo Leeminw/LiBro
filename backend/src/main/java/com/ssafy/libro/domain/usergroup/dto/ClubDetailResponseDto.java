@@ -8,10 +8,11 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 public class ClubDetailResponseDto {
-    private Long id;
-    private String name;
+    private Long clubId;
+    private String clubName;
     private String description;
     private LocalDateTime createdDate;
-    private String userName;
+    private String clubOwnerName;
     private String profile;
+    private Long memberCount;
 }

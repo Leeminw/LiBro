@@ -1,11 +1,10 @@
 import React from 'react';
 import {Card, CardContent,} from '@/components/ui/card'; // your-component-library에 실제로 사용하는 라이브러리 명을 입력해야 합니다.
 import {CalendarIcon} from "lucide-react"
-import {Button} from '@/components/ui/button';
 
 // 클럽 정보를 담은 객체의 타입 정의
 interface ClubListProps {
-    clubs: CommunityItemInform[];
+    clubs: ClubItemInform[];
 }
 
 const ClubList: React.FC<ClubListProps> = ({clubs}) => {
@@ -23,10 +22,10 @@ const ClubList: React.FC<ClubListProps> = ({clubs}) => {
                         <div className="text-lg font-bold">{club.clubName}</div>
                         <div className="flex items-center space-x-2 mb-4">
                             <CalendarIcon className="w-4 h-4 text-gray-500"/>
-                            <span className="text-sm text-gray-500">{club.registeredTime}</span>
+                            <span className="text-sm text-gray-500">{club.createdDate}</span>
                         </div>
                         <div className="flex justify-between">
-                            {club.clubOwner}
+                            {club.clubOwnerName}
                         </div>
                     </CardContent>
                 </Card>

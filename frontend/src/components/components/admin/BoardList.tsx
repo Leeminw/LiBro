@@ -1,19 +1,17 @@
 'use client'
 
-import { useState } from 'react';
-import { Button } from "@/components/ui/button";
-import { FileEditIcon, TrashIcon, CheckIcon, XIcon } from "lucide-react";
+import {useState} from 'react';
+import {useMutation, useQuery} from '@tanstack/react-query'; // Import React Query hooks
+import {Button} from "@/components/ui/button";
+import {CheckIcon, FileEditIcon, TrashIcon, XIcon} from "lucide-react";
 import {ScrollArea} from "@/components/ui/scroll-area";
+import {useParams} from "next/navigation";
+import {deleteCategory, getCategoryList, updateCategory, writeCategory} from "@/lib/club";
+import {toast} from "@/components/ui/use-toast";
 
-interface CategoryItemProps {
-    category: Category;
-    onEditStart: (id: number, newTitle: string) => void;
-    onDelete: (id: number) => void;
-}
-
-function CategoryItem({ category, onEditStart, onDelete }: CategoryItemProps) {
+function CategoryItem({category, onEditStart, onDelete}) {
     const [editing, setEditing] = useState(false);
-    const [inputValue, setInputValue] = useState(category.name);
+    const [inputValue, setInputValue] = useState(category.name); // Change category.name to category.title
 
     const handleEditStart = () => {
         setEditing(true);
@@ -26,10 +24,10 @@ function CategoryItem({ category, onEditStart, onDelete }: CategoryItemProps) {
 
     const handleEditCancel = () => {
         setEditing(false);
-        setInputValue(category.name);
+        setInputValue(category.title); // Change category.name to category.title
     };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (e) => {
         setInputValue(e.target.value);
     };
 
@@ -51,7 +49,8 @@ function CategoryItem({ category, onEditStart, onDelete }: CategoryItemProps) {
                 </>
             ) : (
                 <>
-                    <h2 className="text-lg cursor-pointer" onClick={handleEditStart}>{category.name}</h2>
+                    <h2 className="text-lg cursor-pointer"
+                        onClick={handleEditStart}>{category.name}</h2> {/* Change category.name to category.title */}
                     <div className="flex items-center space-x-2">
                         <FileEditIcon className="text-gray-600 cursor-pointer" onClick={handleEditStart} />
                         <TrashIcon className="text-gray-600 cursor-pointer" onClick={() => onDelete(category.id)} />
@@ -62,27 +61,78 @@ function CategoryItem({ category, onEditStart, onDelete }: CategoryItemProps) {
     );
 }
 
-interface CategoryListProps {
-    props: Category[];
-}
+export default function CategoryList() {
 
-export default function CategoryList({ props }: CategoryListProps) {
+    const params = useParams();
+    const clubId = parseInt(params.id);
+    // const queryClient = useQueryClient();
+
+    const {data: todos, isLoading, isError, refetch} = useQuery({
+        queryKey: ['categories', clubId],
+        queryFn: () => getCategoryList(clubId)
+    });
+
+    const addCategoryMutation = useMutation({
+        // 변경시 사용할 네트워크 요청코드 입니다.
+        mutationFn: (param) => writeCategory(param),
+        onSuccess: (data, variables, context) => {
+            toast({
+                title: "데이터를 정상적으로 저장하였습니다.",
+            });
+            refetch();
+        },
+
+        onError: (data, variables, context) => {
+            toast({
+                title: "에러가 발생하여 데이터를 저장할 수 없습니다.",
+            });
+        }
+    });
+    const updateCategoryMutation = useMutation({
+        // 변경시 사용할 네트워크 요청코드 입니다.
+        mutationFn: (param) => updateCategory(param),
+        onSuccess: (data, variables, context) => {
+            toast({
+                title: "게시판을 정상적으로 수정 하였습니다.",
+            });
+            refetch();
+        },
+
+        onError: (data, variables, context) => {
+            toast({
+                title: "에러가 발생하여 게시파을 수정 할 수 없습니다.",
+            });
+        }
+    });
+    const deleteCategoryMutation = useMutation({
+        // 변경시 사용할 네트워크 요청코드 입니다.
+        mutationFn: (param) => deleteCategory(param),
+        onSuccess: (data, variables, context) => {
+            toast({
+                title: "게시판을 정상적으로 삭제 하였습니다.",
+            });
+            refetch();
+        },
+
+        onError: (data, variables, context) => {
+            toast({
+                title: "에러가 발생하여 게시판을 삭제 할 수 없습니다.",
+            });
+        }
+    });
+
     const [addingTodo, setAddingCategory] = useState(false);
     const [newTodoTitle, setNewCategory] = useState('');
-    const [todos, setTodos] = useState(props); // setTodos 추가
-    const [showAddBoard, setShowAddBoard] = useState(!(todos && todos.length > 0));
 
     const handleAddTodo = () => {
         setAddingCategory(true);
     };
 
-    const handleConfirmAddTodo = () => {
+    const handleConfirmAddTodo = async () => {
         if (newTodoTitle.trim() !== '') {
-            const newTodo = {
-                id: todos.length + 1,
-                title: newTodoTitle
-            };
-            setTodos([...todos, newTodo]);
+            const newVar: CategoryWrite = {name: newTodoTitle, clubId: clubId};
+            console.log(newVar)
+            await addCategoryMutation.mutateAsync(newVar);
             setAddingCategory(false);
             setNewCategory('');
         }
@@ -93,18 +143,13 @@ export default function CategoryList({ props }: CategoryListProps) {
         setNewCategory('');
     };
 
-    const handleEditStart = (id: number, newTitle: string) => {
-        const updatedTodos = todos.map(todo => {
-            if (todo.id === id) {
-                return { ...todo, title: newTitle };
-            }
-            return todo;
-        });
-        setTodos(updatedTodos);
+    const handleEditStart = async (id, newTitle) => {
+        const newVar: CategoryUpdate = {name: newTitle, clubId: clubId, boardId: id};
+        await updateCategoryMutation.mutateAsync(newVar);
     };
 
-    const handleDeleteTodo = (id: number) => {
-        setTodos(todos.filter(todo => todo.id !== id));
+    const handleDeleteTodo = async (id) => {
+        await deleteCategoryMutation.mutateAsync(id);
     };
 
     return (
@@ -113,9 +158,12 @@ export default function CategoryList({ props }: CategoryListProps) {
                 <Button onClick={handleAddTodo} className="bg-purple-600 text-white">추가</Button>
             </div>
 
-
             <ScrollArea className="flex flex-col bg-white h-[calc(90vh-120px)]">
-                {todos && todos.length > 0 ? (
+                {isLoading ? (
+                    <div>Loading...</div>
+                ) : isError ? (
+                    <div>Error fetching data</div>
+                ) : todos && todos.length > 0 ? (
                     todos.map(todo => (
                         <CategoryItem
                             key={todo.id}
@@ -125,12 +173,9 @@ export default function CategoryList({ props }: CategoryListProps) {
                         />
                     ))
                 ) : (
-                    // todos가 없으면 새로운 보드 추가 화면 표시
-                    showAddBoard ? (
-                        <div className="flex items-center justify-center h-full">
-                            <h2 className="text-2xl text-gray-500">게시판을 추가하세요.</h2>
-                        </div>
-                    ) : null
+                    <div className="flex items-center justify-center h-full">
+                        <h2 className="text-2xl text-gray-500">게시판을 추가하세요.</h2>
+                    </div>
                 )}
                 {addingTodo && (
                     <div className="flex items-center justify-between p-4">
