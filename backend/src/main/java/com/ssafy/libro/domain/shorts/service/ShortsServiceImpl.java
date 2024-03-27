@@ -164,9 +164,9 @@ public class ShortsServiceImpl implements ShortsService {
         Path outputPath = Paths.get("outputs");
         Files.createDirectories(outputPath);
 
-//        File videoFile = generateVideoFromImages(decodedImages, outputPath);
-        File subtitledVideoFile = generateSubtitledVideoFromImages(decodedImages, sentences, outputPath);
-        byte[] videoBytes = Files.readAllBytes(subtitledVideoFile.toPath());
+        File videoFile = generateVideoFromImages(decodedImages, outputPath);
+//        File subtitledVideoFile = generateSubtitledVideoFromImages(decodedImages, sentences, outputPath);
+        byte[] videoBytes = Files.readAllBytes(videoFile.toPath());
 
 //        uploadVideoToS3(videoFile);
         cleanUpTemporaryDirectory(outputPath);
