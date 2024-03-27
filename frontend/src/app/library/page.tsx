@@ -18,6 +18,10 @@ import {
 
 import { userBooks } from "@/lib/axios-userBook"
 import { useSearchParams } from "next/navigation"
+import { Book } from "lucide-react"
+import { list } from "postcss"
+import instance from "@/lib/interceptor"
+
 interface User {
     profileUrl: string
     id: string,
@@ -28,33 +32,56 @@ interface User {
     bookRate: number,
 }
 
-interface Book {
-    id: number;
+interface BookData {
+    userBookId: number;
+    isbn : string; 
     image: string;
-    name: string;
+    title: string;
     publisher: string;
-    date: string;
+    createdDate: string;
     author: string;
-    readstartdate: string | null;
-    readcompletedate: string | null;
     complete: boolean;
-    readrate: string;
-    currentpage: number, 
-    finalpage: number
   }
-
+// userBookId >> 넘기면 누르면 db조회
 interface ModalProps {
-    book: Book;
+    userBook: UserBook;
     onClose: () => void;
 }
+interface UserBook {
+    book: BookData;
+    userBookId: number;
+    userId: number;
+    bookId: number;
+    type: string;
+    isCompleted :boolean | null;
+    rating: number | null;
+    ratingComment: string | null;
+    ratingSpoiler: boolean | null ;
+    createdDate: string;
+    updateDate: string;
+    commentList: Comment[] | null;
+    history: History | null;
+}
 
+interface Comment {
+    id: number;
+    content: string;
+    createdDate: string;
+    updatedDate: string;
+}
+interface History {
+    userBookHistoryId : number;
+    startDate : string;
+    endDate : string;
+}
 interface Review {
     review?: string;
     rating?: number;
     isSpoiler?: boolean;
     timestamp?: Date;
-}
+    historyList : History [] | null;
 
+}
 
 const Library = () => {
 
@@ -75,29 +102,7 @@ const Library = () => {
     const numberOfRows = 3; // 총 행의 수
 
 
-    const [books, setBooks] = useState([
-        { id: 1, isbn: 0, image: 'book1.svg', name: '니모를 찾아서', publisher: '바다출판사', date: '2023-01-04', author: '한명진', readstartdate: '2023-02-12', readcompletedate: '2023-03-14', complete: true, readrate: '100%', currentpage: 484, finalpage: 484},
-        { id: 2, image: 'book2.svg', name: '우주 탐험', publisher: '별빛출판사', date: '2023-02-15', author: '김우주', readstartdate: '2023-02-12', readcompletedate: '2023-03-14', complete: false, readrate: '42%', currentpage: 203, finalpage: 484},
-        { id: 3, image: 'book3.svg', name: '코딩의 정석', publisher: '코드출판사', date: '2023-03-20', author: '이코더', readstartdate: 'null', readcompletedate: 'null', complete: false, readrate: '0%', currentpage: 0, finalpage: 484},
-        { id: 4, image: 'book4.svg', name: '식물의 비밀', publisher: '자연출판사', date: '2023-04-10', author: '박식물', readstartdate: 'null', readcompletedate: 'null', complete: false, readrate: '0%', currentpage: 0, finalpage: 484},
-        { id: 5, image: 'book5.svg', name: '역사 속으로', publisher: '시간여행출판사', date: '2023-05-05', author: '정역사', readstartdate: 'null', readcompletedate: 'null', complete: true, readrate: '0%', currentpage: 0, finalpage: 484},
-        { id: 6, image: 'book1.svg', name: '꿈꾸는 다락방', publisher: '희망출판사', date: '2023-06-20', author: '이꿈꾸', readstartdate: '2023-02-12', readcompletedate: '2023-03-14', complete: false, readrate: '12%', currentpage: 58, finalpage: 484},
-        { id: 7, image: 'book2.svg', name: '자연 속으로', publisher: '대지출판사', date: '2023-07-05', author: '박자연', readstartdate: '2023-02-12', readcompletedate: '2023-03-14', complete: true, readrate: '100%', currentpage: 484, finalpage: 484},
-        { id: 8, image: 'book3.svg', name: '우주의 미래', publisher: '과학출판사', date: '2023-07-18', author: '최우주', readstartdate: 'null', readcompletedate: 'null', complete: false, readrate: '0%', currentpage: 0, finalpage: 484},
-        { id: 9, image: 'book4.svg', name: '인간 본성의 법칙', publisher: '심리출판사', date: '2023-08-01', author: '정인간', readstartdate: '2023-02-12', readcompletedate: '2023-03-14', complete: false, readrate: '70%', currentpage: 339, finalpage: 484},
-        { id: 10, image: 'book5.svg', name: '시간의 역사', publisher: '역사출판사', date: '2023-08-15', author: '홍시간', readstartdate: '2023-02-12', readcompletedate: '2023-03-14', complete: false, readrate: '82%', currentpage: 397, finalpage: 484},
-        { id: 11, image: 'book1.svg', name: '빛의 세계', publisher: '과학출판사', date: '2023-09-01', author: '김빛', readstartdate: '2023-02-12', readcompletedate: '2023-03-14', complete: false, readrate: '65%', currentpage: 315, finalpage: 484},
-        { id: 12, image: 'book2.svg', name: '컴퓨터 과학의 정석', publisher: '기술출판사', date: '2023-09-17', author: '이컴퓨터', readstartdate: '2023-02-12', readcompletedate: '2023-03-14', complete: false, readrate: '45%', currentpage: 216, finalpage: 484},
-        { id: 13, image: 'book3.svg', name: '심리학 입문', publisher: '심리출판사', date: '2023-10-02', author: '박심리', readstartdate: '2023-02-12', readcompletedate: '2023-03-14', complete: false, readrate: '32%', currentpage: 156, finalpage: 484},
-        { id: 14, image: 'book4.svg', name: '음악의 숨결', publisher: '소리출판사', date: '2023-12-05', author: '이음악', readstartdate: '2023-02-12', readcompletedate: '2023-03-14', complete: false, readrate: '23%', currentpage: 111, finalpage: 484},
-        { id: 15, image: 'book5.svg', name: '컴퓨터와 함께하는 하루', publisher: '기술출판사', date: '2023-07-20', author: '박컴퓨터', readstartdate: '2023-02-12', readcompletedate: '2023-03-14', complete: false, readrate: '12%', currentpage: 59, finalpage: 484},
-        { id: 16, image: 'book1.svg', name: '시간을 거슬러', publisher: '시간여행출판사', date: '2023-08-11', author: '정시간', readstartdate: '2023-02-12', readcompletedate: '2023-03-14', complete: false, readrate: '11%', currentpage: 54, finalpage: 484},
-        { id: 17, image: 'book2.svg', name: '지구 너머의 삶', publisher: '외계출판사', date: '2023-09-30', author: '한외계', readstartdate: '2023-02-12', readcompletedate: '2023-03-14', complete: false, readrate: '12%', currentpage: 59, finalpage: 484},
-        { id: 19, image: 'book4.svg', name: '세계사의 이해', publisher: '역사출판사', date: '2023-10-18', author: '최역사', readstartdate: '2023-02-12', readcompletedate: '2023-03-14', complete: false, readrate: '1%', currentpage: 5, finalpage: 484},
-        { id: 20, image: 'book5.svg', name: '미술의 이해', publisher: '예술출판사', date: '2023-11-01', author: '김미술', readstartdate: '2023-02-12', readcompletedate: '2023-03-14', complete: true, readrate: '100%', currentpage: 484, finalpage: 484},
-        { id: 21, image: 'book1.svg', name: '미래의 문', publisher: '내일출판사', date: '2023-06-01', author: '김미래', readstartdate: '2023-02-12', readcompletedate: '2023-03-14', complete: false, readrate: '3%', currentpage: 16, finalpage: 484},
-        { id: 22, image: 'book2.svg', name: '별에서 온 그대', publisher: '우주출판사', date: '2023-06-15', author: '별하늘', readstartdate: '2023-02-12', readcompletedate: '2023-03-14', complete: true, readrate: '100%', currentpage: 484, finalpage: 484},
-    ]);
+    const [books, setBooks] = useState([]);
     
 
     // 검색어를 업데이트하는 함수입니다.
@@ -114,8 +119,8 @@ const Library = () => {
     // 검색과 정렬이 모두 반영되어야 하므로, useEffect를 사용해 두 상태의 변화를 감지합니다.
     useEffect(() => {
         // 먼저, 검색 적용
-        let updatedBooks = books.filter(book =>
-            book.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        let updatedBooks = books.filter((book : BookData) =>
+            book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
             book.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
             book.publisher.toLowerCase().includes(searchTerm.toLowerCase())
         );
@@ -123,16 +128,16 @@ const Library = () => {
         // 그 다음, 정렬 적용
         switch(arrange) {
             case '책 제목 순':
-                updatedBooks.sort((a, b) => a.name.localeCompare(b.name, 'ko'));
+                updatedBooks.sort((a : BookData, b :BookData) => a.title.localeCompare(b.title, 'ko'));
                 break;
             case '저자명 순':
-                updatedBooks.sort((a, b) => a.author.localeCompare(b.author, 'ko'));
+                updatedBooks.sort((a : BookData, b :BookData) => a.author.localeCompare(b.author, 'ko'));
                 break;
             case '출판사 순':
-                updatedBooks.sort((a, b) => a.publisher.localeCompare(b.publisher, 'ko'));
+                updatedBooks.sort((a : BookData, b :BookData) => a.publisher.localeCompare(b.publisher, 'ko'));
                 break;
             case '최근 발행 순':
-                updatedBooks.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+                updatedBooks.sort((a : BookData, b :BookData) => new Date(b.createdDate).getTime() - new Date(a.createdDate).getTime());
                 break;
             // 기본 정렬 로직 또는 기본값 설정이 필요할 경우 추가
         }
@@ -145,28 +150,40 @@ const Library = () => {
     useEffect(() => {
         userBooks.books()
         .then((response) => {
-            // console.log(response.data)
-            setBooks(response.data)
+            console.log(response.data)
+            const processedData = response.data.map((item:any) => item ={
+                userBookId: item.userBookId,
+                image: item.bookDetailResponseDto.thumbnail,
+                title: item.bookDetailResponseDto.title,
+                publisher: item.bookDetailResponseDto.publisher,
+                createdDate: item.bookDetailResponseDto.createdDate,
+                author: item.bookDetailResponseDto.author,
+                complete: item.isComplete,
+                isbn : item.bookDetailResponseDto.isbn
+            });
+            console.log("changed data : " , processedData)
+            setBooks(processedData)
         })
         .catch((error) => {
             console.log(error)
         })
     }, [])
-
+    
     // 모달 열릴 시 특정 등록 책 조회
-    useEffect(() => { 
-        if (isModalOpen) {
-            userBooks.bookDetail()
-              .then((response) => {
-                // 요청이 성공적으로 완료되면 데이터를 상태에 저장
-              console.log(response.data);
-            })
-              .catch((error) => {
-                // 요청이 실패하면 에러 처리
-              console.error('There was an error!', error);
-            });
-        }
-    })
+    // useEffect(() => { 
+    //     if (isModalOpen) {
+    //         userBooks.bookDetail()
+    //           .then((response) => {
+    //             // 요청이 성공적으로 완료되면 데이터를 상태에 저장
+    //           console.log(response.data);
+    //           // todo userBookId를 넘겨서 조회하면되고.
+    //         })
+    //           .catch((error) => {
+    //             // 요청이 실패하면 에러 처리
+    //           console.error('There was an error!', error);
+    //         });
+    //     }
+    // })
     
     // 현재 페이지에 보여줄 책들을 계산합니다.
     const indexOfLastBook = currentPage * booksPerPage;
@@ -209,31 +226,185 @@ const Library = () => {
     // hover 제어
     const [hoveredBook, setHoveredBook] = useState(0);
 
-    // 모달 상태와 선택된 책 정보를 관리하기 위한 상태 추가
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedBook, setSelectedBook] = useState<Book | null>(null);
 
-    // 모달을 여는 함수
-    const openModal = (book: Book) => {
-        setSelectedBook(book);
+// 모달시작 
+
+// 
+
+// 
+    // // 모달 상태와 선택된 책 정보를 관리하기 위한 상태 추가
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedBook, setSelectedBook] = useState<UserBook | null>(null);
+
+    // // 모달을 여는 함수
+    const openModal = async (book: BookData) => {
+        console.log("userbookId", book.userBookId)
+        const {data} = await instance.get(
+            "/api/v1/userbook/detail/" + book.userBookId
+        );
+        const historyList : History[] = data.data.historyList
+        
+        
+        const selectedUserBook: UserBook = {
+            book:book,
+            ...data.data,
+            history: historyList ? historyList[historyList.length-1] : null
+        };
+        console.log(selectedUserBook)
+        setSelectedBook(selectedUserBook);
         setIsModalOpen(true);
     };
 
-    // 모달을 닫는 함수
-    const closeModal = () => {
+    // // 모달을 닫는 함수
+    const closeModal = async () => {
+        // 완독 갱신
+        await userBooks.books()
+        .then((response) => {
+            console.log(response.data)
+            const processedData = response.data.map((item:any) => item ={
+                userBookId: item.userBookId,
+                image: item.bookDetailResponseDto.thumbnail,
+                title: item.bookDetailResponseDto.title,
+                publisher: item.bookDetailResponseDto.publisher,
+                createdDate: item.bookDetailResponseDto.createdDate,
+                author: item.bookDetailResponseDto.author,
+                complete: item.isComplete,
+                isbn : item.bookDetailResponseDto.isbn
+            });
+            console.log("changed data : " , processedData)
+            setBooks(processedData)
+        })
+        .catch((error) => {
+            console.log(error)
+        })
+
+
         setIsModalOpen(false);
         setSelectedBook(null);
     };
 
-    const [rating, setRating] = useState(0); // 별점 상태 초기화
-    const [isSpoiler, setIsSpoiler] = useState(false); // 스포일러 체크박스 상태
-    const [review, setReview] = useState('');
-    const [savedReview, setSavedReview] = useState<{ [key: number]: Review }>({});
-    const [savedRating, setSavedRating] = useState(0); // 저장된 별점 상태 추가
-
-    const BookModal = ({ book, onClose }: ModalProps) => {
-        if (!book) return null;
+    const BookModal = ({ userBook, onClose }: ModalProps) => {
+        if (!userBook) return null;
         
+
+        // 책의 독서 시작
+        const startReading = async (userBookId: number) => {
+            const now :Date = new Date();
+            const localDateTimeString: string = now.toISOString();
+            const response = await instance.post(
+                '/api/v1/bookhistory', {
+                    userBookId : userBookId,
+                    startDate : localDateTimeString
+                }
+            )
+            console.log("read start")
+            setBookHistory(response.data.data)
+            
+        };
+
+        // 독서 포기
+        const giveUpReading = async (bookHistory : History) => {
+            // console.log(bookHistory.userBookHistoryId)
+            try {
+                
+                const response = await instance.delete(
+                    '/api/v1/bookhistory/'+bookHistory.userBookHistoryId
+                )
+                const currentResponse = await instance.get(
+                    '/api/v1/bookhistory/recent/' + userBook.userBookId
+                )
+                
+                setBookHistory(currentResponse.data.data)
+                
+            }
+            catch (error) {
+                console.log("error" , error)
+                setBookHistory(null);
+            }
+        };
+
+        // 독서 완료
+        const completeReading = async (bookHistory : History) => {
+           console.log(bookHistory)
+           // 완료 표시 
+           const response  = await instance.get(
+                '/api/v1/bookhistory/complete/' + bookHistory.userBookHistoryId
+           )
+            // 가장 최근 도서기록 가져오기
+           const currentResponse = await instance.get(
+                '/api/v1/bookhistory/recent/' + userBook.userBookId
+           ) 
+           console.log(currentResponse.data)
+           setBookHistory(currentResponse.data.data)
+           userBook.isCompleted = true;
+
+        };
+
+        const Header = () => {
+            return (
+              <div className="relative h-24">
+                {/* 블러 처리된 배경 이미지 */}
+                <div className="absolute inset-0 bg-cover bg-center blur-sm " 
+                     style={{ backgroundImage: `url(${userBook.book.image})` }}>
+                </div>
+                <div className="absolute inset-0 bg-black opacity-30">
+                    {/* 이 div는 검은색 반투명 오버레이 역할을 합니다. */}
+                </div>
+        
+                {/* 선명한 책 이미지와 정보 */}
+                <div className="relative flex items-start">
+                    <Image src={userBook.book.image} alt="Book Cover" width={70} height={105} className="h-auto rounded shadow-lg my-6 ml-6" />
+                    <div className="ml-4 mt-8">
+                        <h2 className="text-white text-md font-bold">{userBook.book.title}</h2>
+                        <div className="flex items-center mt-2">
+                            <p className="text-xs text-gray-300">저자 {userBook.book.author} |</p>
+                            <p className="text-xs text-gray-300 ml-1">출판사 {userBook.book.publisher}</p>
+                        </div>
+                        <div className="flex mt-6">
+                            <Link href={`/detail?isbn=${userBook.book.isbn}`} className="text-[#9268EB] text-xs">도서 정보 보기 {'>'}</Link>
+                        </div>
+                        <Button className="absolute right-0 top-0 text-white" variant="ghost" onClick={onClose}>
+                            <Image src="x-white.svg" alt='search' width={20} height={20}/>
+                        </Button>
+                    </div>
+                </div>
+              </div>
+            );
+        };
+
+        const Record = () => {
+            return (
+                <div className="mx-6 mt-10">
+                    <h1 className="text-xl font-bold mb-3">독서 기록</h1>
+                    <div className="flex justify-start items-center">
+                        <Button className="flex justify-start items-center font-bold text-xs text-gray-500 bg-white border border-gray-300 shadow-lg w-full ">
+                        {bookHistory ? 
+                        (bookHistory.endDate ? <p> {extractDate(bookHistory.startDate) + ' ~ ' + extractDate(bookHistory.endDate)}   </p> 
+                        : <p> {extractDate(bookHistory.startDate)} 부터 독서중 </p> ) 
+                        : <p>독서 기록이 없습니다.</p>}
+                        </Button>
+                    </div>
+                </div>
+            )
+        }
+        function extractDate(dateString: string ): string {
+            const matchResult = dateString.match(/^(\d{4})-(\d{2})-(\d{2})/);
+            if (!matchResult) {
+              throw new Error("잘못된 형식의 날짜 문자열입니다.");
+            }
+          
+            const [, yearStr, monthStr, dayStr] = matchResult;
+            const year = parseInt(yearStr, 10);
+            const month = parseInt(monthStr, 10);
+            const day = parseInt(dayStr, 10);
+            
+            return  `${year}년 ${month}월 ${day}일`; 
+            
+          }     
+    const Review = () => {
+        const [review, setReview] = useState(userBook.ratingComment? userBook.ratingComment : '');
+        const [rating, setRating] = useState(userBook.rating? userBook.rating : 0); // 별점 상태 초기화
+        const [isSpoiler, setIsSpoiler] = useState(userBook.ratingSpoiler? userBook.ratingSpoiler : false); // 스포일러 체크박스 상태
         const renderStars = () => {
             let stars = [];
             for (let i = 1; i <= 5; i++) {
@@ -253,111 +424,6 @@ const Library = () => {
             }
             return stars;
         };
-
-        // 책의 독서 시작
-        const startReading = () => {
-            if (selectedBook) {
-            const updatedBooks = books.map(book => {
-                if (book.id === selectedBook.id) {
-                return { ...book, readstartdate: new Date().toISOString(), complete: false };
-                }
-                return book;
-            });
-            setBooks(updatedBooks);
-            setSelectedBook({ ...selectedBook, readstartdate: new Date().toISOString(), complete: false });
-            }
-        };
-
-        // 독서 포기
-        const giveUpReading = () => {
-            if (selectedBook) {
-            const updatedBooks = books.map(book => {
-                if (book.id === selectedBook.id) {
-                return { ...book, readstartdate: 'null', complete: false };
-                }
-                return book;
-            });
-            setBooks(updatedBooks);
-            setSelectedBook({ ...selectedBook, readstartdate: 'null', complete: false });
-            }
-        };
-
-        // 독서 완료
-        const completeReading = () => {
-            if (selectedBook) {
-            const updatedBooks = books.map(book => {
-                if (book.id === selectedBook.id) {
-                return { ...book, readcompletedate: new Date().toISOString(), complete: true };
-                }
-                return book;
-            });
-            setBooks(updatedBooks);
-            setSelectedBook({ ...selectedBook, readcompletedate: new Date().toISOString(), complete: true });
-            }
-        };
-
-        const Header = () => {
-            return (
-              <div className="relative h-24">
-                {/* 블러 처리된 배경 이미지 */}
-                <div className="absolute inset-0 bg-cover bg-center blur-sm " 
-                     style={{ backgroundImage: `url(${book.image})` }}>
-                </div>
-                <div className="absolute inset-0 bg-black opacity-30">
-                    {/* 이 div는 검은색 반투명 오버레이 역할을 합니다. */}
-                </div>
-        
-                {/* 선명한 책 이미지와 정보 */}
-                <div className="relative flex items-start">
-                    <Image src={book.image} alt="Book Cover" width={70} height={105} className="h-auto rounded shadow-lg my-6 ml-6" />
-                    <div className="ml-4 mt-8">
-                        <h2 className="text-white text-md font-bold">{book.name}</h2>
-                        <div className="flex items-center mt-2">
-                            <p className="text-xs text-gray-300">저자 {book.author} |</p>
-                            <p className="text-xs text-gray-300 ml-1">출판사 {book.publisher}</p>
-                        </div>
-                        <div className="flex mt-6">
-                            <Link href='/detail' className="text-[#9268EB] text-xs">도서 정보 보기 {'>'}</Link>
-                        </div>
-                        <Button className="absolute right-0 top-0 text-white" variant="ghost" onClick={onClose}>
-                            <Image src="x-white.svg" alt='search' width={20} height={20}/>
-                        </Button>
-                    </div>
-                </div>
-              </div>
-            );
-        };
-
-        const Record = () => {
-            return (
-                <div className="mx-6 mt-10">
-                    <h1 className="text-xl font-bold mb-3">독서 기록</h1>
-                    <div className="flex justify-start items-center">
-                        <Button className="flex justify-start items-center font-bold text-xs text-gray-500 bg-white border border-gray-300 shadow-lg w-full ">
-                        {selectedBook && (selectedBook.readstartdate === null || selectedBook.readstartdate === 'null') ? (
-                            <p>독서 기록이 없습니다.</p>
-                        ) : (
-                            selectedBook && selectedBook.complete ? (
-                                selectedBook.readcompletedate ? (
-                                    <p>{`${new Date(selectedBook.readcompletedate).getFullYear()}년 ${new Date(selectedBook.readcompletedate).getMonth() + 1}월 ${new Date(selectedBook.readcompletedate).getDate()}일 독서 완료`}</p>
-                                ) : (
-                                    <p>독서 완료 날짜 정보가 없습니다.</p>
-                                )
-                            ) : (
-                                selectedBook && selectedBook.readstartdate ? (
-                                    <p>{`${new Date(selectedBook.readstartdate).getFullYear()}년 ${new Date(selectedBook.readstartdate).getMonth() + 1}월 ${new Date(selectedBook.readstartdate).getDate()}일부터 독서 중`}</p>
-                                ) : (
-                                    <p>독서 시작 날짜 정보가 없습니다.</p>
-                                )
-                            )
-                        )}
-                        </Button>
-                    </div>
-                </div>
-            )
-        }
-
-    const Review = () => {
 
         const displaySavedRatingStars = (rating: number) => {
             let stars = [];
@@ -379,21 +445,46 @@ const Library = () => {
             setIsSpoiler(event.target.checked); // 체크박스 상태 업데이트
         };
 
-        const saveReview = () => {
-            if (!selectedBook) return;
-            // 현재 선택된 책의 ID를 사용하여 리뷰, 별점, 스포일러 여부, 저장 시간 저장
-            const timestamp = new Date(); // 현재 시간
-            setSavedReview(prevReview => ({
-                ...prevReview,
-                [selectedBook.id]: { review, rating, isSpoiler, timestamp }
-            }));
-            // 저장 후 입력 필드 초기화
-            setReview('');
-            setRating(0);
-            setIsSpoiler(false);
+        const saveReview = async(userBook : UserBook) => {
+            if(!userBook.isCompleted){
+                console.log("432번째줄 토스트 추가좀.. ")
+                // toast({
+                //     title: "완독 x",
+                //     description: "완독해야 적을 수 있음!",
+                //   });
+                return;
+            }
+            console.log("save button")
+            const ratingData = {
+                userBookId:userBook.userBookId,
+                rating : rating,
+                ratingComment : review,
+                ratingSpoiler : isSpoiler
+            }
+            console.log(ratingData)
+            const response = await instance.post(
+                '/api/v1/userbook/rating', ratingData
+            )
+            // user book 갱신
+            
+            const {data} = await instance.get(
+                "/api/v1/userbook/detail/" + userBook.userBookId
+            );
+            const historyList : History[] = data.data.historyList
+            
+            
+            const selectedUserBook: UserBook = {
+                book:selectedBook?.book,
+                ...data.data,
+                history: historyList ? historyList[historyList.length-1] : null
+            };
+            setSelectedBook(selectedUserBook);
+            
+            
+
+
         };
 
-        const currentSavedReview = selectedBook ? savedReview[selectedBook.id] || {} : {};
 
         // 'YYYY/MM/DD 오후 HH:mm' 형식의 문자열로 시간을 변환하는 함수
         const formatTimestamp = (timestamp: Date | undefined) => {
@@ -417,7 +508,9 @@ const Library = () => {
         return (
             <div className="mx-6 mt-4">
                 <h1 className="mb-3 text-xl font-bold">나의 평점</h1>
-                {!currentSavedReview.review && (
+                { // 리뷰가 없을때
+                    (!userBook.rating && !userBook.ratingComment) ?
+                
                     <>
                         <div className="flex items-start justify-between mb-1">
                             <div className="mr-2 text-m font-bold">
@@ -441,39 +534,40 @@ const Library = () => {
                                 placeholder="리뷰를 입력하세요."
                                 className="w-5/6 p-2 mr-2 border rounded"
                             />
-                            <Button onClick={saveReview} className="bg-[#9268EB] rounded-md p-0.5 w-12 h-12">
+                            <Button onClick={()=>saveReview(userBook)} className="bg-[#9268EB] rounded-md p-0.5 w-12 h-12">
                                 <Image src='mdi_pencil.svg' alt='pencil' width={30} height={30} />
                             </Button>
                         </div>
                     </>
-                )}
-                {/* 저장된 리뷰 보여주기 */}
-                {currentSavedReview.review && (
-                    <div className="rounded border border-gray-300 shadow-lg p-4">
-                        <div className="flex justify-between">
-                            <div className="flex mb-1">
-                                <div className="text-sm font-bold mr-2">@{user.nickName} </div>
-                                <div className="text-sm">{currentSavedReview.timestamp ? formatTimestamp(currentSavedReview.timestamp) : '날짜 정보 없음'}</div>
-                            </div>
-                            <Button className="bg-white text-xs text-gray-400 p-1 rounded-md h-6">수정하기</Button>
-                        </div>   
+                    : 
+                    //  리뷰 입력 완료
+                    <>
+                        <div className="rounded border border-gray-300 shadow-lg p-4">
+                         <div className="flex justify-between">
+                             <div className="flex mb-1">
+                                 <div className="text-sm font-bold mr-2">@{user.nickName} </div>
+                             </div>
+                             <Button className="bg-white text-xs text-gray-400 p-1 rounded-md h-6">수정하기</Button>
+                         </div>   
 
-                        <div className="flex items-center mb-1">{currentSavedReview.rating !== undefined ? displaySavedRatingStars(currentSavedReview.rating) : '평점 정보 없음'}</div>
-                        <div className="text-sm mb-1">{currentSavedReview.review}</div>
-                        {/* 여기에 별점과 스포일러 여부도 표시 */}
-                        {currentSavedReview.isSpoiler && <div className="text-red-500">스포일러 포함</div>}
-                    </div>
-                )}
+                         <div className="flex items-center mb-1">{'평점 : ' + userBook.rating}</div>
+                         <div className="text-sm mb-1">{'리뷰 내용 : ' + userBook.ratingComment}</div>
+                             {/* 여기에 별점과 스포일러 여부도 표시 */}
+                            {userBook.ratingSpoiler && <div className="text-red-500">스포일러 포함</div>}
+                        </div>
+                    </>    
+                }
+
             </div>  
         );
     };
-
+    
         const Sentence = () => {
 
             const [api, setApi] = useState<CarouselApi>()
             const [current, setCurrent] = useState(0)
             const [count, setCount] = useState(0)
-            const [inputs, setInputs] = useState(['']); // 입력한 텍스트를 저장할 배열 상태를 추가
+            const [inputs, setInputs] = useState(userBook.commentList ? userBook.commentList : []); // 입력한 텍스트를 저장할 배열 상태를 추가
             const [currentInput, setCurrentInput] = useState('');
 
             useEffect(() => {
@@ -488,18 +582,28 @@ const Library = () => {
                 setCurrent(api.selectedScrollSnap() + 1)
                 })
             }, [api])
-
-            const handleSave = () => {
-                const newInputs = [currentInput, ...inputs]; // 현재 입력한 텍스트를 inputs 배열에 추가
-                setInputs(newInputs);
+            // 감명받은 글귀 저장하기 
+            const handleSave = async () => {
+                const response = await instance.post(
+                    "/api/v1/comment", {
+                        userBookId: selectedBook?.userBookId,
+                        content : currentInput   
+                    }
+                )
+                const updateList = await instance.get(
+                    "/api/v1/comment/userbook/" + selectedBook?.userBookId
+                )
+                const commentList = updateList.data.data
+                
+                setInputs(commentList);
                 setCurrentInput(''); // 입력 상태 초기화
-                setCount(count+1)
+                setCount(commentList.length+1)
             };
         
             const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
                 setCurrentInput(e.target.value); // 입력 필드의 변경사항을 currentInput 상태에 반영
             };
-    
+
             return (
                 <div className="mx-6 mt-4 mb-2">
                     <div className="flex justify-between">
@@ -515,16 +619,28 @@ const Library = () => {
                                         <Card>
                                             <CardContent className="flex items-center justify-center p-3 h-24 text-xs">
                                                 <textarea 
-                                                    placeholder="여기에 글귀를 입력하세요" 
                                                     className="flex w-full p-2 justify-center items-center text-center h-full resize-none"
                                                     rows={4}
-                                                    value={index === inputs.length - 1 ? currentInput : input}
-                                                    onChange={handleInputChange}
+                                                    value={input.content}
+                                                    disabled = {true}
                                                 />
                                             </CardContent>
                                         </Card>
                                     </CarouselItem>
                                 ))}
+                                <CarouselItem >
+                                        <Card>
+                                            <CardContent className="flex items-center justify-center p-3 h-24 text-xs">
+                                                <textarea 
+                                                    placeholder="여기에 글귀를 입력하세요" 
+                                                    className="flex w-full p-2 justify-center items-center text-center h-full resize-none"
+                                                    rows={4}
+                                                    value={currentInput}
+                                                    onChange={handleInputChange}
+                                                />
+                                            </CardContent>
+                                        </Card>
+                                    </CarouselItem>
                             </CarouselContent>
                             <CarouselPrevious />
                             <CarouselNext />
@@ -536,33 +652,35 @@ const Library = () => {
                 </div>
             );
         }
-
-            const ButtonComponent = () => {
+        const [bookHistory,setBookHistory] = useState(userBook.history)
+        const ButtonComponent = () => {
                 
-                if (!selectedBook || selectedBook.readstartdate === 'null' || selectedBook.readstartdate === null) {
+                if (!bookHistory || bookHistory.endDate) {
                     // 독서 기록이 없을 때
                     return (
                         <div className="flex justify-center"> 
-                            <button className="w-full p-1.5 mx-6 text-center bg-[#9268EB] rounded-md" onClick={startReading}>
+                            <button className="w-full p-1.5 mx-6 text-center bg-[#9268EB] rounded-md" onClick={() => startReading(userBook.userBookId)}>
                                 <div className=" text-white  ">독서 기록 시작하기</div>
                             </button>
                         </div>
                     );
-                } else if (selectedBook.complete) {
-                    // 독서 완료일 때
-                    return (
-                        <div className="flex justify-center"> 
-                            <button className="w-full p-1.5 mx-6 text-center bg-[#9268EB] rounded-md" onClick={startReading}>
-                                <div className=" text-white  ">독서 기록 다시 시작하기</div>
-                            </button>
-                        </div>
-                    );
-                } else {
-                    // 독서 중일 때
+                } 
+                //     // 독서 완료 or 포기 버튼
+                // else if (!bookHistory.endDate) {
+                //     return (
+                //         <div className="flex justify-center"> 
+                //             <button className="w-full p-1.5 mx-6 text-center bg-[#9268EB] rounded-md" onClick={startReading}>
+                //                 <div className=" text-white  ">독서 기록 다시 시작하기</div>
+                //             </button>
+                //         </div>
+                //     );
+                // } 
+                else if (!bookHistory.endDate) {
+                //     // 독서 중일 때
                     return (
                         <div className="flex justify-center mx-6"> 
-                            <button className="w-full bg-[#F87171] text-white p-1.5 rounded-md mr-4" onClick={giveUpReading}>독서 포기</button>
-                            <button className="w-full bg-[#9268EB] text-white p-1.5  rounded-md" onClick={completeReading }>완독</button>
+                            <button className="w-full bg-[#F87171] text-white p-1.5 rounded-md mr-4" onClick={() => giveUpReading(bookHistory)}>독서 포기</button>
+                            <button className="w-full bg-[#9268EB] text-white p-1.5  rounded-md" onClick={() => completeReading(bookHistory) }>완독</button>
                         </div>
                     );
                 }
@@ -580,7 +698,7 @@ const Library = () => {
             </div>
         );
     };
-
+// 여기까지
     return (
         <div className="bg-white h-full pt-12 overflow-auto ">
             <div className="pt-4 mb-3 px-3">
@@ -624,26 +742,26 @@ const Library = () => {
                 <div className="p-1">
                     
                     <div className="grid grid-cols-4 " >
-                        {currentBooks.map((book, index) => (
+                        {currentBooks.map((book : BookData, index) => (
                             <div key={index} className="group relative my-2 pt-2 pb-2 px-2 shadow border-b-4 border-white"
                                 onMouseEnter={() => setHoveredBook(index)}
                                 onMouseLeave={() => setHoveredBook(-99)}
                                 onClick={() => openModal(book)}>
                                 <div className={`w-full h-full ${book.complete ? 'ring ring-green-400' : ''}`}> {/* overflow-hidden 추가 */}
-                                    <Image src={`/${book.image}`} alt={`Book ${index + 1}`} width={100} height={150} layout="responsive" /> {/* object-cover 추가 */}
+                                    <Image src={book.image} alt={`Book ${index + 1}`} width={100} height={150} layout="responsive" /> {/* object-cover 추가 */}
                                 </div>
 
                                 {hoveredBook === index && (
                                     <div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-75 flex justify-start" >
                                         <div>
-                                            <p className="text-white text-sm mx-2 my-6 ">{book.name}</p>
+                                            <p className="text-white text-sm mx-2 my-6 ">{book.title}</p>
                                         </div>
                                         <div className="absolute top-12 left-0  flex justify-start">
-                                            <p className="text-white text-sm mx-2 my-6 ">{book.complete ? '' : `진행률: ${book.readrate}`}</p>
+                                            <p className="text-white text-sm mx-2 my-6 ">{book.complete ? '' : ``}</p>
                                         </div>
-                                        <div className="absolute top-16 left-0 flex justify-start">
+                                        {/* <div className="absolute top-16 left-0 flex justify-start">
                                             <p className="text-white text-sm mx-2 my-6 ">{book.complete ? '' : `${book.currentpage} / ${book.finalpage}`}</p>
-                                        </div>
+                                        </div> */}
                                     </div>
                                 )}
                             </div>
@@ -656,7 +774,7 @@ const Library = () => {
                         ))}
                     </div>
 
-                    {isModalOpen && selectedBook && <BookModal book={selectedBook} onClose={closeModal} />}
+                    {isModalOpen && selectedBook && <BookModal userBook={selectedBook} onClose={closeModal} />}
                     
                     <nav>
                         <ul className='pagination flex items-center justify-center'>

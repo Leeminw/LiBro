@@ -15,14 +15,14 @@ public class UserBookHistoryExceptionHandler {
 
     @ExceptionHandler(UserBookHistoryNotFoundException.class)
     public ResponseEntity<?> handleBookNotFoundException(UserBookHistoryNotFoundException e) {
-        log.error("UserBookComment NotFoundException: " + e.getMessage());
-        return new ResponseEntity<>(ResponseData.failure(e.getMessage()), HttpStatus.BAD_REQUEST);
+        log.error("UserBookHistory NotFoundException: " + e.getMessage());
+        return new ResponseEntity<>(ResponseData.failure(e.getMessage()), HttpStatus.NOT_FOUND);
     }
 
     //
     @ExceptionHandler(UserBookHistoryValidationException.class)
     public ResponseEntity<?> handleBookValidationException(UserBookHistoryValidationException e) {
-        log.error("UserBookCommentValidationException: " + e.getMessage());
+        log.error("UserBookHistoryValidationException: " + e.getMessage());
         return new ResponseEntity<>(ResponseData.failure(e.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
