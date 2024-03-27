@@ -44,7 +44,7 @@ public class UserBookHistoryController {
     @DeleteMapping("/{historyId}")
     public ResponseEntity<?> deleteUserBookHistory(@PathVariable Long historyId){
         userBookHistoryService.deleteUserBookHistory(historyId);
-        return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success("history deleted"));
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success("history deleted" + historyId));
     }
 
     @GetMapping("/userbook/{userBookId}")
