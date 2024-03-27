@@ -235,7 +235,7 @@ const Library = () => {
     // // 모달 상태와 선택된 책 정보를 관리하기 위한 상태 추가
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedBook, setSelectedBook] = useState<UserBook | null>(null);
-
+    const [bookHistory,setBookHistory] = useState<History | null>(null);
     // // 모달을 여는 함수
     const openModal = async (book: BookData) => {
         console.log("userbookId", book.userBookId)
@@ -251,8 +251,9 @@ const Library = () => {
             history: historyList ? historyList[historyList.length-1] : null
         };
         console.log(selectedUserBook)
-        setSelectedBook(selectedUserBook);
-        setIsModalOpen(true);
+        setSelectedBook(selectedUserBook)
+        setBookHistory(selectedUserBook.history)
+        setIsModalOpen(true)
     };
 
     // // 모달을 닫는 함수
@@ -282,7 +283,7 @@ const Library = () => {
         setIsModalOpen(false);
         setSelectedBook(null);
     };
-
+    
     const BookModal = ({ userBook, onClose }: ModalProps) => {
         if (!userBook) return null;
         
@@ -652,7 +653,7 @@ const Library = () => {
                 </div>
             );
         }
-        const [bookHistory,setBookHistory] = useState(userBook.history)
+        
         const ButtonComponent = () => {
                 
                 if (!bookHistory || bookHistory.endDate) {
