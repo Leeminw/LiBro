@@ -9,7 +9,7 @@ import {useParams} from "next/navigation";
 import {deleteCategory, getCategoryList, updateCategory, writeCategory} from "@/lib/club";
 import {toast} from "@/components/ui/use-toast";
 
-function CategoryItem({category, onEditStart, onDelete}) {
+function CategoryItem({category, onEditStart, onDelete}: { category: any, onEditStart: any, onDelete: any }) {
     const [editing, setEditing] = useState(false);
     const [inputValue, setInputValue] = useState(category.name); // Change category.name to category.title
 
@@ -27,7 +27,7 @@ function CategoryItem({category, onEditStart, onDelete}) {
         setInputValue(category.title); // Change category.name to category.title
     };
 
-    const handleChange = (e) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setInputValue(e.target.value);
     };
 
@@ -64,7 +64,7 @@ function CategoryItem({category, onEditStart, onDelete}) {
 export default function CategoryList() {
 
     const params = useParams();
-    const clubId = parseInt(params.id);
+    const clubId = parseInt(params.id as string);
     // const queryClient = useQueryClient();
 
     const {data: todos, isLoading, isError, refetch} = useQuery({
@@ -74,7 +74,7 @@ export default function CategoryList() {
 
     const addCategoryMutation = useMutation({
         // 변경시 사용할 네트워크 요청코드 입니다.
-        mutationFn: (param) => writeCategory(param),
+        mutationFn: (param: CategoryWrite) => writeCategory(param),
         onSuccess: (data, variables, context) => {
             toast({
                 title: "데이터를 정상적으로 저장하였습니다.",
@@ -90,7 +90,7 @@ export default function CategoryList() {
     });
     const updateCategoryMutation = useMutation({
         // 변경시 사용할 네트워크 요청코드 입니다.
-        mutationFn: (param) => updateCategory(param),
+        mutationFn: (param: CategoryUpdate) => updateCategory(param),
         onSuccess: (data, variables, context) => {
             toast({
                 title: "게시판을 정상적으로 수정 하였습니다.",
@@ -106,7 +106,7 @@ export default function CategoryList() {
     });
     const deleteCategoryMutation = useMutation({
         // 변경시 사용할 네트워크 요청코드 입니다.
-        mutationFn: (param) => deleteCategory(param),
+        mutationFn: (param: number) => deleteCategory(param),
         onSuccess: (data, variables, context) => {
             toast({
                 title: "게시판을 정상적으로 삭제 하였습니다.",
@@ -143,12 +143,12 @@ export default function CategoryList() {
         setNewCategory('');
     };
 
-    const handleEditStart = async (id, newTitle) => {
+    const handleEditStart = async (id: number, newTitle: string) => {
         const newVar: CategoryUpdate = {name: newTitle, clubId: clubId, boardId: id};
         await updateCategoryMutation.mutateAsync(newVar);
     };
 
-    const handleDeleteTodo = async (id) => {
+    const handleDeleteTodo = async (id: number) => {
         await deleteCategoryMutation.mutateAsync(id);
     };
 

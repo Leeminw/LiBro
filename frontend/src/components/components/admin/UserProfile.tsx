@@ -15,7 +15,7 @@ const UserProfile: React.FC<UserProfile> = (props) => {
     const {profile, userId, name, createdDate, role} = props;
 
     const params = useParams();
-    const clubId = parseInt(params.id);
+    const clubId = parseInt(params.id as string);
     const queryClient = useQueryClient();
 
     const handleBanUser = (userId: number, e: React.MouseEvent<HTMLButtonElement>) => {
@@ -34,7 +34,7 @@ const UserProfile: React.FC<UserProfile> = (props) => {
                 title: "해당 유저를 정상적으로 탈퇴 시켰습니다.",
             });
 
-            queryClient.invalidateQueries(['memberList', clubId])
+            queryClient.invalidateQueries({queryKey: ['memberList', clubId]})
         },
 
         onError: (data, variables, context) => {
