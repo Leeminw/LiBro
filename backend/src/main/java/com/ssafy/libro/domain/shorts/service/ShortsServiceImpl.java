@@ -169,7 +169,7 @@ public class ShortsServiceImpl implements ShortsService {
         // 자막처리
 //        uploadVideoToS3(videoFile);
 
-        byte[] videoBytes = Files.readAllBytes(videoFile.toPath());
+        byte[] videoBytes = Files.readAllBytes(subtitledVideoFile.toPath());
         cleanUpTemporaryDirectory(outputPath);
 //        return new FileSystemResource(videoFile);
         return new ByteArrayResource(videoBytes);
