@@ -16,6 +16,8 @@ public class RedisConfig {
 
     @Value("${spring.data.redis.host}")
     private String host;
+
+    @Bean
     public RedisConnectionFactory redisConnectionFactory() {
         return new LettuceConnectionFactory(host, port);
     }
