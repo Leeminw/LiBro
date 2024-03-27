@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.bytedeco.javacv.*;
 import org.bytedeco.javacv.Frame;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
@@ -74,7 +75,7 @@ public class ShortsServiceImpl implements ShortsService {
         List<String> encodedImages = processPrompts(promptResponseDto.getEngPrompt());
         List<byte[]> decodedImages = decodeImages(encodedImages);
 
-        saveImages(decodedImages);
+        // saveImages(decodedImages);
 
         Resource resource = createVideo(decodedImages);
         return ShortsResponseDto.builder()
@@ -120,8 +121,8 @@ public class ShortsServiceImpl implements ShortsService {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
 
-        // String url = "http://222.107.238.44:7860/sdapi/v1/txt2img";
-        String url = "http://127.0.0.1:7860/sdapi/v1/txt2img";
+        String url = "http://222.107.238.44:7860/sdapi/v1/txt2img";
+        // String url = "http://127.0.0.1:7860/sdapi/v1/txt2img";
         DiffusionRequestDto diffusionRequestDto = new DiffusionRequestDto().updatePrompt(prompt);
         log.info(diffusionRequestDto.toString());
         HttpEntity<DiffusionRequestDto> request = new HttpEntity<>(diffusionRequestDto, httpHeaders);
@@ -160,9 +161,11 @@ public class ShortsServiceImpl implements ShortsService {
     private Resource createVideo(List<byte[]> decodedImages) throws IOException {
         Path outputPath = Paths.get("outputs");
         File videoFile = generateVideoFromImages(decodedImages, outputPath);
+        byte[] videoBytes = Files.readAllBytes(videoFile.toPath());
 //        uploadVideoToS3(videoFile);
-//        cleanUpTemporaryDirectory(tempDir);
-        return new FileSystemResource(videoFile);
+        cleanUpTemporaryDirectory(outputPath);
+//        return new FileSystemResource(videoFile);
+        return new ByteArrayResource(videoBytes);
     }
 
     private File generateVideoFromImages(List<byte[]> decodedImages, Path tempDir) throws IOException {
