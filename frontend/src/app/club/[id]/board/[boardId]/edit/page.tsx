@@ -55,19 +55,26 @@ export default function InputForm({params}: { params: { id: number, boardId: num
     const hasError = results.some((query) => query.isError);
     const isSuccess = results.every((query) => query.isSuccess);
 
-    const [categories, post] = results.map(result => result.data)
-    //
+
+    // results.map의 결과를 any 타입으로 가정
+    const resultsArray: any = results.map(result => result.data);
+
+    // 타입 단언을 사용하여 각 변수의 타입을 명시적으로 지정
+    const categories = resultsArray[0] as Category[];
+    const post = resultsArray[1] as PostDetail;
+
+    // const [categories, post]: [Category[], PostDetail] = results.map(result => result.data);
     // const categories = fetchedCategories.data
     // const post = fetchedPost.data
 
     const {isPending, isError, error, mutate, data} = useMutation({
-        mutationFn: (param) => editPost(boardId, param),
+        mutationFn: (param: PostWrite) => editPost(boardId, param),
         onSuccess: (data, variables, context) => {
             toast({
                 title: "데이터를 정상적으로 수정 하였습니다.",
             });
-            queryClient.invalidateQueries(['boardDetail', boardId])
-            queryClient.invalidateQueries(['articleList']);
+            queryClient.invalidateQueries({queryKey: ['boardDetail', boardId]})
+            queryClient.invalidateQueries({queryKey: ['articleList']});
             router.push(`/club/${clubId}/board/${boardId}`);
         },
         onError: (data, variables, context) => {
@@ -95,7 +102,7 @@ export default function InputForm({params}: { params: { id: number, boardId: num
     };
 
     async function onSubmit(data: z.infer<typeof FormSchema>) {
-        const results: Object = {
+        const results: PostWrite = {
             content: contents,
             title: data["title"],
             boardId: parseInt(data["category"]),

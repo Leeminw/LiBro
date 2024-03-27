@@ -8,9 +8,9 @@ import {Skeleton} from "@/components/ui/skeleton";
 
 export default function UserProfileProvider() {
     const params = useParams();
-    const clubId = parseInt(params.id);
+    const clubId = parseInt(params.id as string);
 
-    const {data, isError, isSuccess, isLoading, refetch} = useQuery({
+    const {data, isError, isSuccess, isLoading, refetch} = useQuery<UserProfile[]>({
         queryKey: ['memberList', clubId],
         queryFn: () => getClubMemberList(clubId) // context 매개변수를 제거
     });

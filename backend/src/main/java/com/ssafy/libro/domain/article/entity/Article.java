@@ -51,9 +51,8 @@ public class Article {
     @JoinColumn(name = "board_id")
     private Board board;
 
-    @Builder.Default
     @OneToMany(mappedBy = "article", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Comment> comments = new ArrayList<>();
+    private List<Comment> comments;
 
     public Article(ArticleUpdateRequestDto dto){
         this.title = dto.getTitle();
@@ -62,6 +61,8 @@ public class Article {
         this.isDeleted = false;
         this.createdDate = LocalDateTime.now();
         this.updatedDate = LocalDateTime.now();
+        this.comments = new ArrayList<>();
+
     }
 
     public void update(ArticleUpdateRequestDto dto){

@@ -21,6 +21,9 @@ const FormSchema = z.object({
     title: z.string().refine(value => value.trim() !== "", {
         message: "해당 값은 반드시 입력해야 합니다."
     }),
+    content: z.string().refine(value => value.trim() !== "", {
+        message: "해당 값은 반드시 입력해야 합니다."
+    }),
 })
 
 
@@ -152,7 +155,7 @@ export default function InputForm() {
 
                     <FormField
                         control={form.control}
-                        name=""
+                        name="content"
                         render={({field}) => (
                             <FormItem>
                                 <FormLabel>커뮤니티 설명</FormLabel>
@@ -163,6 +166,9 @@ export default function InputForm() {
                             </FormItem>
                         )}
                     />
+
+                    {/*<Editor contents={contents} onChange={handleContentChange}/>*/}
+
                 </form>
             </Form>
         </>

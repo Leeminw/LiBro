@@ -10,7 +10,7 @@ import {Input} from "@/components/ui/input"
 import {toast} from "@/components/ui/use-toast"
 import {Button} from "@/components/ui/button";
 import {Editor} from "@/components/ui/quill";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {writeClub} from "@/lib/club";
 import {useParams, useRouter} from "next/navigation";
@@ -22,17 +22,22 @@ const FormSchema = z.object({
     title: z.string().refine(value => value.trim() !== "", {
         message: "해당 값은 반드시 입력해야 합니다."
     }),
+    content: z.string().refine(value => value.trim() !== "", {
+        message: "해당 값은 반드시 입력해야 합니다."
+    }),
 })
-
-
 export default function InputForm() {
-    const [contents, setContents] = useState<string>(''); // content 상태를 상위 컴포넌트에서 관리
 
+    const [contents, setContents] = useState<string>(''); // content 상태를 상위 컴포넌트에서 관리
+    const [editorLoaded, setEditorLoaded] = useState<boolean>(false);
     const queryClient = useQueryClient();
     const router = useRouter();
     const params = useParams();
-    const { getUserInfo } = useUserState();
+    const {getUserInfo} = useUserState();
+
+
     const userId = getUserInfo().id;
+
 
     const {isPending, isError, error, mutate, data} = useMutation({
         mutationFn: (param: ClubWrite) => writeClub(param),
@@ -82,6 +87,11 @@ export default function InputForm() {
         })
     }
 
+    useEffect(() => {
+        // 클라이언트 측에서만 Quill Editor가 로드되었음을 설정
+        setEditorLoaded(true);
+    }, []);
+
     return (
 
         <>
@@ -107,21 +117,23 @@ export default function InputForm() {
                         )}
                     />
 
-                    <FormField
+                    {editorLoaded && <FormField
                         control={form.control}
-                        name="contents"
+                        name="content"
                         render={({field}) => (
                             <FormItem>
                                 <FormLabel>커뮤니티 설명</FormLabel>
                                 <FormControl>
-                                    <Editor contents={contents} onChange={handleContentChange}/>
+                                    <Editor contents="" onChange={handleContentChange}/>
                                 </FormControl>
                                 <FormMessage/>
                             </FormItem>
                         )}
                     />
+                    }
                 </form>
             </Form>
         </>
     );
 }
+

@@ -44,7 +44,7 @@ const JoinedClubCard: React.FC = () => {
             console.log(nextCursor)
             return nextCursor;
         },
-        initialPageParam: null
+        initialPageParam: Number.POSITIVE_INFINITY
     })
 
     const handleSearchKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
