@@ -15,7 +15,6 @@ import org.bytedeco.javacv.Frame;
 import org.bytedeco.opencv.opencv_core.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -25,6 +24,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.file.Files;
@@ -43,7 +43,7 @@ public class ShortsServiceImpl implements ShortsService {
     private static final String S3_BASE_URL = "https://%s.s3.amazonaws.com/";
     private static final String S3KEY_PREFIX = "shorts/";
     private static final String VIDEO_FILE_FORMAT = ".mp4";
-    private static final int PROMPT_DIVIDE_NUM = 5;
+    private static final int PROMPT_DIVIDE_NUM = 3;
     private static final int WIDTH = 360;
     private static final int HEIGHT = 640;
     private static final int FRAME_RATE = 30;
@@ -164,9 +164,9 @@ public class ShortsServiceImpl implements ShortsService {
         Path outputPath = Paths.get("outputs");
         Files.createDirectories(outputPath);
         File videoFile = generateVideoFromImages(decodedImages, outputPath);
+        File subtitledVideoFile = addSubtitleToVideo(videoFile, sentences, outputPath);
 
         // 자막처리
-        addSubtitleToVideo(videoFile, sentences);
 //        uploadVideoToS3(videoFile);
 
         byte[] videoBytes = Files.readAllBytes(videoFile.toPath());
@@ -205,92 +205,161 @@ public class ShortsServiceImpl implements ShortsService {
         }
     }
 
-    public static void addSubtitleToVideo(File videoFile, String sentences) {
-        try (FFmpegFrameGrabber frameGrabber = new FFmpegFrameGrabber(videoFile)) {
-            frameGrabber.start();
-            // 동영상을 쓰기 위한 FrameRecorder 초기화
-            try (FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(videoFile, frameGrabber.getImageWidth(), frameGrabber.getImageHeight())) {
-                recorder.setVideoCodec(frameGrabber.getVideoCodec()); // 동일한 코덱 사용
-                recorder.setFrameRate(frameGrabber.getFrameRate()); // 동일한 프레임 레이트 사용
-                recorder.start();
+    public static File addSubtitleToVideo(File videoFile, String sentences, Path outputPath) {
+        String videoFileName = UUID.randomUUID() + VIDEO_FILE_FORMAT;
+        String videoFilePath = outputPath.resolve(videoFileName).toString();
 
-                // 자막으로 사용할 문장 배열
-                String[] subtitles = sentences.split(",");
-                int subtitleIndex = 0; // 현재 표시할 자막 인덱스
-                int frameCountPerSubtitle = (int) frameGrabber.getLengthInFrames() / subtitles.length; // 각 자막을 표시할 프레임 수
+        try (FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(videoFile);
+             FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(videoFilePath, grabber.getImageWidth(), grabber.getImageHeight())) {
+            grabber.start();
+            recorder.setVideoCodec(grabber.getVideoCodec());
+            recorder.setFrameRate(grabber.getFrameRate());
+            recorder.start();
 
-                Frame frame;
-                int frameCount = 0;
-                while ((frame = frameGrabber.grab()) != null && subtitleIndex < subtitles.length) {
-                    if (frame.image != null) {
-                        // 현재 프레임 번호가 다음 자막으로 넘어갈 시점인지 확인
-                        if (frameCount >= frameCountPerSubtitle * (subtitleIndex + 1)) {
-                            subtitleIndex++; // 다음 자막으로 넘어감
-                        }
+            Java2DFrameConverter frameConverter = new Java2DFrameConverter();
+            String[] subtitles = sentences.split(",");
 
-                        // 현재 자막을 프레임에 추가
-                        if (subtitleIndex < subtitles.length) {
-                            addSubtitleToFrame(frame, subtitles[subtitleIndex]);
-                        }
-
-                        recorder.record(frame); // 처리된 프레임을 출력 동영상에 기록
-                    }
-                    frameCount++;
+            Frame frame;
+            while ((frame = grabber.grabImage()) != null) {
+                BufferedImage bufferedImage = frameConverter.convert(frame);
+                for (String subtitle : subtitles) {
+                    BufferedImage overlayedImage = overlayTextOnImage(bufferedImage, subtitle);
+                    recorder.record(frameConverter.convert(overlayedImage));
                 }
-                recorder.stop();
             }
-            frameGrabber.stop();
+
+            recorder.stop();
+            grabber.stop();
         } catch (Exception e) {
-            log.error("Exception");
+            log.error(e.getMessage());
         }
+        return new File(videoFilePath);
     }
 
-    private static void addSubtitleToFrame(Frame frame, String subtitle) {
-        // JavaCV에서 Frame을 OpenCV의 Mat 객체로 변환
-        try (OpenCVFrameConverter.ToMat converter = new OpenCVFrameConverter.ToMat()) {
-            Mat mat = converter.convert(frame);
+    private static BufferedImage overlayTextOnImage(BufferedImage image, String text) {
+        Graphics2D g2d = image.createGraphics();
+        Font font = new Font("Malgun Gothic", Font.BOLD, 30);
+        g2d.setFont(font);
+        FontMetrics fm = g2d.getFontMetrics();
+        int imageWidth = image.getWidth();
+        List<String> lines = wrapText(text, fm, imageWidth - 20);
+        int textHeight = lines.size() * fm.getHeight();
+        int y = (image.getHeight() - textHeight) / 2; // 가운데 정렬
 
-            // 자막을 추가할 위치와 스타일 설정
-            int fontSize = 24; // 폰트 크기
-            int thickness = 2; // 폰트 두께
-            int fontFace = FONT_HERSHEY_SIMPLEX;
-            Scalar color = new Scalar(255, 255, 255, 0); // 흰색
-            IntPointer baseLine = new IntPointer(1);
-
-            // 프레임 크기에 맞춰 자막 줄바꿈 계산
-            String[] words = subtitle.split(" ");
-            List<String> lines = new ArrayList<>();
-            String currentLine = "";
-            for (String word : words) {
-                String testLine = currentLine + word + " ";
-                Size textSize = getTextSize(testLine, fontFace, fontSize, thickness, baseLine);
-                if (textSize.get(0) <= mat.cols()) { // 현재 줄에 단어를 추가
-                    currentLine = testLine;
-                } else { // 새 줄 시작
-                    lines.add(currentLine);
-                    currentLine = word + " ";
-                }
-            }
-            lines.add(currentLine); // 마지막 줄 추가
-
-            // 각 줄을 프레임 중앙에 추가
-            int startY = (mat.rows() - lines.size() * 30) / 2; // 시작 Y 위치 조정
-            for (String line : lines) {
-                Size textSize = getTextSize(line.trim(), fontFace, fontSize, thickness, baseLine);
-                int x = (mat.cols() - (int) textSize.width()) / 2;
-                int y = startY + (int) textSize.height();
-                startY += 30; // 다음 줄의 Y 위치
-
-                // 자막을 프레임에 추가하는 수정된 코드 부분
-                putText(mat, line.trim(), new Point(x, y), fontFace, fontSize, color, thickness, LINE_AA, false);
-
-            }
-
-            // 수정된 Mat 객체를 다시 Frame으로 변환
-            Frame newFrame = converter.convert(mat);
-            frame.image = newFrame.image;
+        for (String line : lines) {
+            int lineWidth = fm.stringWidth(line);
+            int x = (imageWidth - lineWidth) / 2;
+            g2d.drawString(line, x, y += fm.getAscent());
+            y += fm.getDescent() + fm.getLeading();
         }
+
+        g2d.dispose();
+        return image;
     }
+
+    private static List<String> wrapText(String text, FontMetrics fm, int maxWidth) {
+        List<String> lines = new ArrayList<>();
+        String[] words = text.split(" ");
+        StringBuilder line = new StringBuilder(words[0]);
+
+        for (int i = 1; i < words.length; i++) {
+            if (fm.stringWidth(line + " " + words[i]) < maxWidth) {
+                line.append(" ").append(words[i]);
+            } else {
+                lines.add(line.toString());
+                line = new StringBuilder(words[i]);
+            }
+        }
+
+        lines.add(line.toString());
+        return lines;
+    }
+//    public static void addSubtitleToVideo(File videoFile, String sentences) {
+//        try (FFmpegFrameGrabber frameGrabber = new FFmpegFrameGrabber(videoFile)) {
+//            frameGrabber.start();
+//            // 동영상을 쓰기 위한 FrameRecorder 초기화
+//            try (FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(videoFile, frameGrabber.getImageWidth(), frameGrabber.getImageHeight())) {
+//                recorder.setVideoCodec(frameGrabber.getVideoCodec()); // 동일한 코덱 사용
+//                recorder.setFrameRate(frameGrabber.getFrameRate()); // 동일한 프레임 레이트 사용
+//                recorder.start();
+//
+//                // 자막으로 사용할 문장 배열
+//                String[] subtitles = sentences.split(",");
+//                int subtitleIndex = 0; // 현재 표시할 자막 인덱스
+//                int frameCountPerSubtitle = (int) frameGrabber.getLengthInFrames() / subtitles.length; // 각 자막을 표시할 프레임 수
+//
+//                Frame frame;
+//                int frameCount = 0;
+//                while ((frame = frameGrabber.grab()) != null && subtitleIndex < subtitles.length) {
+//                    if (frame.image != null) {
+//                        // 현재 프레임 번호가 다음 자막으로 넘어갈 시점인지 확인
+//                        if (frameCount >= frameCountPerSubtitle * (subtitleIndex + 1)) {
+//                            subtitleIndex++; // 다음 자막으로 넘어감
+//                        }
+//
+//                        // 현재 자막을 프레임에 추가
+//                        if (subtitleIndex < subtitles.length) {
+//                            addSubtitleToFrame(frame, subtitles[subtitleIndex]);
+//                        }
+//
+//                        recorder.record(frame); // 처리된 프레임을 출력 동영상에 기록
+//                    }
+//                    frameCount++;
+//                }
+//                recorder.stop();
+//            }
+//            frameGrabber.stop();
+//        } catch (Exception e) {
+//            log.error("Exception");
+//        }
+//    }
+//
+//    private static void addSubtitleToFrame(Frame frame, String subtitle) {
+//        // JavaCV에서 Frame을 OpenCV의 Mat 객체로 변환
+//        try (OpenCVFrameConverter.ToMat converter = new OpenCVFrameConverter.ToMat()) {
+//            Mat mat = converter.convert(frame);
+//
+//            // 자막을 추가할 위치와 스타일 설정
+//            int fontSize = 11; // 폰트 크기
+//            int thickness = 4; // 폰트 두께
+//            int fontFace = FONT_HERSHEY_SIMPLEX;
+//            Scalar color = new Scalar(255, 255, 255, 0); // 흰색
+//            IntPointer baseLine = new IntPointer(1);
+//
+//            // 프레임 크기에 맞춰 자막 줄바꿈 계산
+//            String[] words = subtitle.split(" ");
+//            List<String> lines = new ArrayList<>();
+//            String currentLine = "";
+//            for (String word : words) {
+//                String testLine = currentLine + word + " ";
+//                Size textSize = getTextSize(testLine, fontFace, fontSize, thickness, baseLine);
+//                if (textSize.get(0) <= mat.cols()) { // 현재 줄에 단어를 추가
+//                    currentLine = testLine;
+//                } else { // 새 줄 시작
+//                    lines.add(currentLine);
+//                    currentLine = word + " ";
+//                }
+//            }
+//            lines.add(currentLine); // 마지막 줄 추가
+//
+//            // 각 줄을 프레임 중앙에 추가
+//            int startY = (mat.rows() - lines.size() * 30) / 2; // 시작 Y 위치 조정
+//            for (String line : lines) {
+//                Size textSize = getTextSize(line.trim(), fontFace, fontSize, thickness, baseLine);
+//                int x = (mat.cols() - (int) textSize.width()) / 2;
+//                int y = startY + (int) textSize.height();
+//                startY += 30; // 다음 줄의 Y 위치
+//
+//                // 자막을 프레임에 추가하는 수정된 코드 부분
+//                putText(mat, line.trim(), new Point(x, y), fontFace, fontSize, color, thickness, LINE_AA, false);
+//
+//            }
+//
+//            // 수정된 Mat 객체를 다시 Frame으로 변환
+//            Frame newFrame = converter.convert(mat);
+//            frame.image = newFrame.image;
+//        }
+//    }
 
     private void uploadVideoToS3(File videoFile) {
         if (!videoFile.exists()) {
