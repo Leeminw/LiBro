@@ -158,6 +158,7 @@ public class ShortsServiceImpl implements ShortsService {
 
     private Resource createVideo(List<byte[]> decodedImages) throws IOException {
         Path outputPath = Paths.get("outputs");
+        Files.createDirectories(outputPath);
         File videoFile = generateVideoFromImages(decodedImages, outputPath);
         byte[] videoBytes = Files.readAllBytes(videoFile.toPath());
 //        uploadVideoToS3(videoFile);
