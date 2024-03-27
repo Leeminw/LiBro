@@ -1,14 +1,5 @@
 "use client";
-interface book {
-  title: string;
-  image: string;
-  author: string;
-  discount: number;
-  publisher: string;
-  pubdate: string;
-  isbn: string;
-  description: string;
-}
+
 import SubHeader from "@/components/SubHeader";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
@@ -29,14 +20,14 @@ const DetailPage = () => {
   const URL = "ex0" + 0 + ".mp4";
   const isbn = useSearchParams().get("isbn");
   const [bookLoading, setBookLoading] = useState<boolean>(false);
-  const [bookDetail, setBookDetail] = useState<book>({
+  const [bookDetail, setBookDetail] = useState<Book>({
     title: "",
     image: "",
     author: "",
     discount: 0,
     publisher: "",
     pubdate: "",
-    isbn: "",
+    isbn: 0,
     description: "",
   });
   useEffect(() => {
