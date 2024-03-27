@@ -1,7 +1,5 @@
 "use client";
 import Shorts from "@/components/Shorts";
-import { Button } from "@/components/ui/button";
-import { AiOutlineSearch } from "react-icons/ai";
 import { useEffect, useRef, useState } from "react";
 import SubHeader from "@/components/SubHeader";
 import { SearchApi } from "@/lib/axios-search";
@@ -52,7 +50,7 @@ export default function Home() {
         setCurrentLoad((current) =>
           current.map((item, index) => (index === currentIndex ? true : item))
         );
-        console.log(currentIndex);
+        // console.log("currentIndex", currentIndex);
       }
     };
     const element = carouselRef.current;
