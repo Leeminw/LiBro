@@ -1,14 +1,21 @@
+'use client'
+
 import React, { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
-import { AvatarImage, AvatarFallback, Avatar } from "@/components/ui/avatar"
-import { Input } from "@/components/ui/input"
 
-import {
-    Tabs,
-    TabsContent,
-    TabsList,
-    TabsTrigger,
-  } from "@/components/ui/tabs"
+interface ImageDates {
+  [date: string]: string[];
+}
+
+interface calProps {
+
+}
+
+interface WeekDay {
+  day: number;
+  otherMonth: boolean;
+};
+
 import Image from "next/image"
 import 'react-calendar/dist/Calendar.css';
 
@@ -16,12 +23,20 @@ import { getDaysInMonth, subMonths } from 'date-fns';
 import { Calendar } from "@/lib/axios-calendar"
 
 
-interface ImageDates {
-    [date: string]: string[];
-  }
+interface calProps {
 
-export default function CalendarPage() {
-    // 달력 
+}
+
+interface WeekDay {
+  day: number;
+  otherMonth: boolean;
+};
+
+type CALENDER_RESULT_LIST = WeekDay[][];
+
+
+
+    // 달력
   const imageDates: ImageDates = {
     '2024-02-28': ['book1.svg'],
     '2024-03-20': ['book1.svg', 'book3.svg'],
@@ -31,34 +46,30 @@ export default function CalendarPage() {
     // 다른 날짜와 이미지도 추가 가능
   };
 
-  const [select, setSelect] = useState<number[]>([]);
-  const DATE_MONTH_FIXER = 1;
-  const CALENDER_LENGTH = 35;
-  const DEFAULT_TRASH_VALUE = 0;
-  const DAY_OF_WEEK = 7;
-  const DAY_LIST = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
-
+  
   const UseCalendar = () => {
+
+    const DAY_OF_WEEK = 7;
     const [currentDate, setCurrentDate] = useState(new Date());
     currentDate.setDate(currentDate.getDate() - currentDate.getDay());
     const totalMonthDays = getDaysInMonth(currentDate);
-    
+
     // 이전 달의 마지막 일요일까지의 날짜를 가져오는 로직
     const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
     const prevMonthDays = firstDayOfMonth.getDay(); // 첫째 날이 월요일이 아니라면, 이전 달의 날짜를 가져와야 함
-    
+
     const prevDayList = Array.from({
       length: prevMonthDays,
     }).map((_, i) => {
       const day = new Date(currentDate.getFullYear(), currentDate.getMonth(), -prevMonthDays + i + 1).getDate();
       return { day, otherMonth: true };
     });
-    
+
     // 이번 달의 날짜를 가져오는 로직
     const currentDayList = Array.from({ length: totalMonthDays }).map(
       (_, i) => ({ day: i + 1, otherMonth: false }),
     );
-    
+
     // 다음 달의 날짜를 계산하는 로직
     const totalDays = DAY_OF_WEEK * (Math.ceil((prevDayList.length + currentDayList.length) / DAY_OF_WEEK));
     const nextDayList = Array.from({
@@ -81,7 +92,7 @@ export default function CalendarPage() {
       },
       [],
     );
-    
+
     return {
       weekCalendarList: weekCalendarList,
       currentDate: currentDate,
@@ -90,6 +101,8 @@ export default function CalendarPage() {
   };
 
   const Cal = ({}: calProps) => {
+    const [select, setSelect] = useState<number[]>([]);
+    const DAY_LIST = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
     const calendar = UseCalendar();
     const CALENDER_RESULT_LIST = calendar.weekCalendarList;
     const { currentDate } = calendar; // 현재 날짜를 currentDate에서 구조 분해 할당합니다.
@@ -119,7 +132,7 @@ export default function CalendarPage() {
         setResponse(response.data)
         // 필요한 경우 상태에 데이터 저장 등의 추가 작업을 수행
       };
-  
+
       fetchData();
 
     }, [CurrentDateYear, CurrentDateMonth]); // 연도나 월이 변경될 때마다 fetchData를 다시 호출
@@ -130,7 +143,7 @@ export default function CalendarPage() {
           <div className="flex flex-col"> {/* flex-col 클래스를 추가하여 자식 요소들을 세로로 정렬합니다. */}
             <div className="flex items-end mb-2">
               <div className="text-3xl mr-3">{CurrentDateMonth}월</div>
-              <div className="text-sm">{CurrentDateYear}년</div>  
+              <div className="text-sm">{CurrentDateYear}년</div>
             </div>
             <div className="text-xs text-gray-400 font-bold"> {/* 'flex' 텍스트를 날짜 아래에 배치합니다. */}
               이 달에 {countBooksForMonth}권을 완독하였습니다.
@@ -163,7 +176,7 @@ export default function CalendarPage() {
 
         <div className="flex w-full">
           {DAY_LIST.map((weekday, index) => {
-            
+
             const isSunday = weekday === 'SUN';
             const isSaturday = weekday === 'SAT';
             const dayColor = isSunday ? 'text-[#F15B5B]' : isSaturday ? 'text-blue-500' : 'text-black';
@@ -175,20 +188,20 @@ export default function CalendarPage() {
             )
           })}
         </div>
-        
+
         {CALENDER_RESULT_LIST.map((week: WeekDay[], index: number) => (
           <div className="flex w-full" key={index}>
             {week.map(({ day, otherMonth }, dayIndex) => {
               const imageCount = !otherMonth ? getImageCountForDate(currentDate.getFullYear(), currentDate.getMonth() + 1, day) : 0;
               const firstImage = imageCount > 0 ? imageDates[`${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`][0] : null;
               const backgroundImageStyle = firstImage ? { backgroundImage: `url(${firstImage})`, backgroundSize: 'cover' } : {};
-              
+
               const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
               const dayOfWeek = date.getDay();
               const isSunday = dayOfWeek === 0;
               const isSaturday = dayOfWeek === 6;
               const dayColor = isSunday ? 'text-[#F15B5B]' : isSaturday ? 'text-blue-500' : 'text-black';
-              
+
               const handleDayClick = (dayInfo: WeekDay) => {
                 if (dayInfo.otherMonth) {
                   if (dayInfo.day > 15) { // 이전 달의 날짜를 클릭한 경우
@@ -226,4 +239,4 @@ export default function CalendarPage() {
     );
   };
 
-}
+export default Cal
