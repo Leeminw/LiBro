@@ -103,6 +103,11 @@ public class UserBookController {
         List<UserBookListResponseDto> responseDtoList = userBookService.getUserBookOnReading();
         return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(responseDtoList));
     }
-//    독서 기록 분석 ?
+    //
+    @GetMapping("/user/commentList")
+    public ResponseEntity<?> getUserCommentList() {
+        List<UserCommentListResponseDto> responseDtoList = userBookService.getUserCommetList();
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(responseDtoList));
+    }
 
 }
