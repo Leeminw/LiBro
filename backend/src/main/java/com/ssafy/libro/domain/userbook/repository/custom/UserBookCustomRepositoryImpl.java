@@ -15,7 +15,7 @@ import org.springframework.stereotype.Repository;
 import static com.ssafy.libro.domain.book.entity.QBook.book;
 import static com.ssafy.libro.domain.userbook.entity.QUserBook.userBook;
 import static com.ssafy.libro.domain.userbookhistory.entity.QUserBookHistory.userBookHistory;
-
+import static com.ssafy.libro.domain.userbookcomment.entity.QUserBookComment.userBookComment;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -135,6 +135,21 @@ public class UserBookCustomRepositoryImpl implements UserBookCustomRepository{
                         .and(userBook.isComplete.eq(true))
                 )
                 .fetchFirst();
+        return Optional.of(result);
+    }
+
+    @Override
+    public Optional<List<UserBook>> findUserBookCommentList(User user) {
+        List<UserBook> result = jpaQueryFactory
+                .select(userBook)
+                .from(userBook)
+                .leftJoin(userBook.book , book).fetchJoin()
+                .leftJoin(userBook.userBookCommentList, userBookComment).fetchJoin()
+                .where(userBook.user.eq(user)
+                        .and((userBook.isDeleted.eq(false)).or(userBook.isDeleted.isNull()))
+                ).fetch();
+
+
         return Optional.of(result);
     }
 }
