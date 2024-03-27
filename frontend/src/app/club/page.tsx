@@ -6,9 +6,13 @@ import React, {useState} from "react";
 import JoinedClubCard from "@/components/components/club/JoinedClubCard";
 import ClubListCard from "@/components/components/club/ClubListCard";
 import Link from "next/link";
+import useUserState from "@/lib/login-state";
 
 export default function ClubPage() {
     const [tabState, setTabState] = useState("find"); // Use array destructuring to get tabState and setTabState
+    const {getUserInfo} = useUserState();
+    const userId = getUserInfo().id;
+    const isMember = userId !== 0;
 
     const renderClubData = () => {
         switch (tabState) {
@@ -22,7 +26,6 @@ export default function ClubPage() {
     };
 
     return (
-
         <>
             <Tabs defaultValue={"find"} className="w-full pt-12">
                 <TabsList className="grid w-full grid-cols-2">
@@ -30,20 +33,14 @@ export default function ClubPage() {
                     <TabsTrigger value="my" onClick={() => setTabState("my")}>가입한 커뮤니티</TabsTrigger>
                 </TabsList>
 
-                <div className="flex justify-end">
-                    <Link href={"/club/write"}>
-                        <Button>커뮤니티 만들기</Button>
-                    </Link>
-                </div>
-
                 <TabsContent value="find">
-                        {tabState === "find" && renderClubData()}
+                    {tabState === "find" && renderClubData()}
                 </TabsContent>
-
                 <TabsContent value="my">
-                        {tabState === "my" && renderClubData()}
+                    {tabState === "my" && renderClubData()}
                 </TabsContent>
             </Tabs>
         </>
-    );
+    )
+        ;
 }

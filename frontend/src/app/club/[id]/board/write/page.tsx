@@ -17,6 +17,7 @@ import {getCategoryList, writePost} from "@/lib/club";
 import {QueryClient, useMutation, useSuspenseQuery} from "@tanstack/react-query";
 import {useParams, useRouter} from "next/navigation";
 import SubHeader from "@/components/SubHeader";
+import useUserState from "@/lib/login-state";
 
 
 const FormSchema = z.object({
@@ -47,7 +48,9 @@ export default function InputForm() {
         queryFn: () => getCategoryList(parseInt(clubId))
     });
 
-    const queryClient = new QueryClient()
+    const queryClient = new QueryClient();
+    const { getUserInfo } = useUserState();
+    const userId = getUserInfo().id;
 
 
     const {isPending, isError, error, mutate, data} = useMutation({
@@ -87,7 +90,7 @@ export default function InputForm() {
             content: contents,
             title: data["title"],
             boardId: parseInt(data["category"]),
-            userId: 1
+            userId: userId
         };
 
         mutate(results)

@@ -9,15 +9,17 @@ import {useQuery} from "@tanstack/react-query";
 import {getPostDetail} from "@/lib/club";
 import TitleCard from "@/components/components/board/titleCard";
 import BackBar from "@/components/layout/backbar";
+import useUserState from "@/lib/login-state";
 
 export default function CommunityPostPage({params}: { params: { id: number; boardId: number }; }) {
 
-    const {id : clubId, boardId } = params
+    const {id : clubId, boardId } = params;
 
     const { isLoading, isFetching, data : post , isError : isFetchingError, error : FetchingError, refetch, isSuccess  } = useQuery({
         queryKey: ['boardDetail', boardId],
         queryFn: () => getPostDetail(boardId)
     });
+
 
     // const results = useQueries({
     //     queries: [
@@ -51,7 +53,7 @@ export default function CommunityPostPage({params}: { params: { id: number; boar
                     <BackBar title={"글 조회하기"}/>
                     <TitleCard title={post.title} createdDate={post.createdDate}/>
 
-                    <Writter nickName={post.name} profileUrl={post.picture} boardId={boardId} groupId={clubId}/>
+                    <Writter nickName={post.name} profileUrl={post.picture} boardId={boardId} groupId={clubId} writerId={post.writerId}/>
 
                     <ScrollArea className="flex flex-col max-w-md mx-auto bg-white h-[calc(90vh-120px)]">
                         <Card>
