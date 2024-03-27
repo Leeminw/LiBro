@@ -34,8 +34,9 @@ public interface UserBookService {
     List<UserBookListResponseDto> getUserBookOnReading();
     //
     List<UserBookListResponseDto> getUserBookReadComplete();
-
-
+    // 특정 사용자가 작성한 글귀 리스트 or 갯수 반환
+    List<UserCommentListResponseDto> getUserCommetList();
+    //특정 사용자가 리뷰한 책들에 대한 평점 리스트
 
 
 }

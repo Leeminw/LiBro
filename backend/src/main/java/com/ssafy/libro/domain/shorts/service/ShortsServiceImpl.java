@@ -163,16 +163,15 @@ public class ShortsServiceImpl implements ShortsService {
     private Resource createVideo(List<byte[]> decodedImages, String sentences) throws IOException {
         Path outputPath = Paths.get("outputs");
         Files.createDirectories(outputPath);
-        File videoFile = generateVideoFromImages(decodedImages, outputPath);
-        File subtitledVideoFile = addSubtitleToVideo(videoFile.getAbsolutePath(), sentences, outputPath);
 
-        // 자막처리
-//        uploadVideoToS3(videoFile);
-
+//        File videoFile = generateVideoFromImages(decodedImages, outputPath);
+        File subtitledVideoFile = generateSubtitledVideoFromImages(decodedImages, sentences, outputPath);
         byte[] videoBytes = Files.readAllBytes(subtitledVideoFile.toPath());
+
+//        uploadVideoToS3(videoFile);
         cleanUpTemporaryDirectory(outputPath);
-//        return new FileSystemResource(videoFile);
         return new ByteArrayResource(videoBytes);
+//        return new FileSystemResource(videoFile);
     }
 
     private File generateVideoFromImages(List<byte[]> decodedImages, Path tempDir) throws IOException {
@@ -191,6 +190,62 @@ public class ShortsServiceImpl implements ShortsService {
         }
 
         return new File(videoFilePath);
+    }
+
+    private File generateSubtitledVideoFromImages(List<byte[]> decodedImages, String sentences, Path tempDir) throws IOException {
+        String videoFileName = UUID.randomUUID() + VIDEO_FILE_FORMAT;
+        String videoFilePath = tempDir.resolve(videoFileName).toString();
+
+        try (FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(videoFilePath, VIDEO_WIDTH, VIDEO_HEIGHT)) {
+            recorder.setFrameRate(FRAME_RATE);
+            recorder.setVideoCodec(org.bytedeco.ffmpeg.global.avcodec.AV_CODEC_ID_H264);
+            recorder.setFormat("mp4");
+            recorder.start();
+
+            List<byte[]> subtitledImages = createSubtitledImages(decodedImages, sentences);
+            recordImagesToVideo(subtitledImages, recorder);
+        } catch (FrameRecorder.Exception e) {
+            log.error("Error while generating video: {}", e.getMessage());
+            throw new IOException("Error generating video", e);
+        }
+
+        return new File(videoFilePath);
+    }
+
+    // 최대공약수(GCD)를 구하는 메소드
+    private static int gcd(int a, int b) {
+        if (b == 0) return a;
+        return gcd(b, a % b);
+    }
+
+    // 최소공배수(LCM)를 구하는 메소드
+    private static int lcm(int a, int b) {
+        return a * (b / gcd(a, b));
+    }
+
+    private static List<byte[]> createSubtitledImages(List<byte[]> decodedImages, String sentences) throws IOException {
+        String[] subtitles = sentences.split(",");
+        int cntSubtitledImages = lcm(decodedImages.size(), subtitles.length);
+
+        List<byte[]> newDecodedImages = new ArrayList<>();
+        for (int i = 0; i < cntSubtitledImages; i++) {
+            newDecodedImages.add(decodedImages.get(i % decodedImages.size()));
+        }
+
+        List<String> newSubtitles = new ArrayList<>();
+        for (int i = 0; i < cntSubtitledImages; i++) {
+            newSubtitles.add(subtitles[i % subtitles.length]);
+        }
+
+        List<byte[]> subtitledImages = new ArrayList<>();
+        for (int i = 0; i < cntSubtitledImages; i++) {
+            BufferedImage originalImage = ImageIO.read(new ByteArrayInputStream(newDecodedImages.get(i)));
+            BufferedImage overlayImage = overlayTextOnImage(originalImage, newSubtitles.get(i));
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ImageIO.write(overlayImage, "png", baos);
+            subtitledImages.add(baos.toByteArray());
+        }
+        return subtitledImages;
     }
 
     private void recordImagesToVideo(List<byte[]> decodedImages, FFmpegFrameRecorder recorder) throws FrameRecorder.Exception, IOException {
