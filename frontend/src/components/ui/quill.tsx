@@ -50,7 +50,7 @@ const modules = {
 };
 
 
-export function Editor(props: EditorProps) {
+export default function Editor(props: EditorProps) {
     const { contents = '', onChange } = props; // props에서 value를 가져오고, 없을 경우 빈 문자열로 초기화
 
     const [value, setValue] = useState<string>(contents); // useState에 초기값을 지정

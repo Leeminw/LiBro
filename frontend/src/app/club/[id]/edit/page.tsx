@@ -9,7 +9,7 @@ import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage,} from "@
 import {Input} from "@/components/ui/input"
 import {toast} from "@/components/ui/use-toast"
 import {Button} from "@/components/ui/button";
-import {Editor} from "@/components/ui/quill";
+import Editor from "@/components/ui/quill";
 import React, {useEffect, useState} from "react";
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {deleteClub, getClubDetail, updateClub} from "@/lib/club";
@@ -94,6 +94,7 @@ export default function InputForm() {
 
     const handleContentChange = (content: string) => {
         setContents(content); // content가 변경될 때마다 상태를 업데이트
+        form.setValue("content", club.description);
 
     };
     function onSubmit(data: z.infer<typeof FormSchema>) {
@@ -121,6 +122,7 @@ export default function InputForm() {
         if (isSuccess) {
             form.setValue("title", club.clubName);
             setContents(club.description);
+            form.setValue("content", club.description);
 
             return () => {
             };

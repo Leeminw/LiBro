@@ -11,7 +11,7 @@ import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/
 import {Input} from "@/components/ui/input";
 import {toast} from "@/components/ui/use-toast";
 import {Button} from "@/components/ui/button";
-import {Editor} from "@/components/ui/quill";
+import Editor from "@/components/ui/quill";
 
 import {getCategoryList, writePost} from "@/lib/club";
 import {QueryClient, useMutation, useSuspenseQuery} from "@tanstack/react-query";

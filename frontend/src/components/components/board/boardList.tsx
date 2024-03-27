@@ -54,7 +54,7 @@ export default function BoardList() {
             boardId: parseInt(selectedCategory),
             sortOrder: sortOrder,
             keyword: searchTerm,
-            articleId: Number.POSITIVE_INFINITY
+            articleId: undefined
         }),
         getNextPageParam: (lastPage, allPages, lastPageParam, allPageParams) => {
             return lastPage.content.length === 0 ? undefined : lastPage.content[lastPage.content.length - 1].id;
