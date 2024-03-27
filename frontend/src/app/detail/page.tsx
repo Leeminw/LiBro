@@ -88,9 +88,9 @@ const DetailPage = () => {
         
       } 
       // mapping
-      const data = await (response.data.data.length === 0 ? postResponse : response).data;
-      // console.log(data.data[0].id)
-      const bookId = (data.data[0].id)
+      const data = postResponse?.data.data || response.data.data[0]
+      console.log(data)
+      const bookId = (data.id)
       // // 이미 되어있는지 확인하기 todo 
       console.log(bookId)
       // mapping 
