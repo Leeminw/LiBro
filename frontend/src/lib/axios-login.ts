@@ -32,9 +32,9 @@ const LoginApi = {
       console.error(error);
     }
   },
-  test: async () => {
+  verifyToken: async () => {
     try {
-      const response = await instance.get("/api/user/test");
+      const response = await instance.get("/api/user/verify");
       return response.data;
     } catch (error) {
       return Promise.reject("expired");

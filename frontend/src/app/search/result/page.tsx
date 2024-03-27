@@ -37,10 +37,7 @@ const ResultPage = () => {
             console.log("응답 값", data);
             if (bookList.length === 0) setBookList(data.items);
             else {
-              setBookList((bookList) => [
-                ...bookList.slice(0, input - 1),
-                ...data.items,
-              ]);
+              setBookList((bookList) => [...bookList.slice(0, input - 1), ...data.items]);
             }
           })
           .catch((err) => console.log(err));
@@ -72,8 +69,7 @@ const ResultPage = () => {
                 }}
                 key={book.isbn}
                 className={`bg-white w-full h-56 mx-4 my-2 rounded-lg drop-shadow-md cursor-pointer ${
-                  curpage - 1 ===
-                  Math.floor(index / 10) + Math.floor(start / 10)
+                  curpage - 1 === Math.floor(index / 10) + Math.floor(start / 10)
                     ? "flex"
                     : "hidden"
                 }`}
@@ -86,13 +82,9 @@ const ResultPage = () => {
                   className="w-full h-full select-none max-w-36 p-4 drop-shadow-md"
                 />
                 <div className="py-4 pr-4 flex flex-col">
-                  <p className="text-sm text-gray-900 break-words line-clamp-4">
-                    {book.title}
-                  </p>
+                  <p className="text-sm text-gray-900 break-words line-clamp-4">{book.title}</p>
                   <p className="text-sm text-gray-500 mt-2">{book.author}</p>
-                  <p className="text-sm text-gray-500 mt-2">
-                    {book.discount}원
-                  </p>
+                  <p className="text-sm text-gray-500 mt-2">{book.discount}원</p>
                 </div>
               </div>
             ))
@@ -107,28 +99,19 @@ const ResultPage = () => {
                     className="rounded-full"
                     onClick={() => {
                       scrollTop();
-                      router.push(
-                        `/search/result?query=${query}&start=${start - 50}`
-                      );
+                      router.push(`/search/result?query=${query}&start=${start - 50}`);
                       updateBookList(start - 50, false);
                     }}
                   />
                 </PaginationItem>
               )}
               {/* 페이지 버튼 */}
-              {/* 
-                    bookList.length 32 = 4출력
-                    bookList.length가 51, 101, 125
-                    start에 따라서...
-                    Math.round(start / 10) = 0, 5, 10, 15, ...
-                    *10 = 0, 50, 100, 150
-              */}
               {Array.from(
                 {
                   length:
-                    Math.ceil(bookList.length / 10) % 5 === 1
+                    Math.round((start + 50) / 10) * 10 < bookList.length
                       ? 5
-                      : Math.ceil(bookList.length / 10) % 5,
+                      : Math.ceil(bookList.length / 50),
                 },
                 (_, index) => (
                   <div key={index}>
@@ -159,9 +142,7 @@ const ResultPage = () => {
                     className="rounded-full"
                     onClick={() => {
                       scrollTop();
-                      router.push(
-                        `/search/result?query=${query}&start=${start + 50}`
-                      );
+                      router.push(`/search/result?query=${query}&start=${start + 50}`);
                       updateBookList(start + 50, true);
                     }}
                   />
