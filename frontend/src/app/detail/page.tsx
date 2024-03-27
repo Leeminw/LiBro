@@ -55,7 +55,6 @@ const DetailPage = () => {
   }, []);
   const mappingBook = async () =>{
     let response, postResponse;
-    console.log("Test")
     // 검색을 했을때 isbn이 db에 있는지 확인하기
     try {
       response = await instance.get(
@@ -69,8 +68,8 @@ const DetailPage = () => {
         }
       )
       // 데이터가 없는경우 등록
-      if (response.data.length === 0) {
-
+      if (response.data.data.length === 0) {
+        console.log("do this")
         const dateString: string = bookDetail.pubdate
         const formattedDateString: string = `${dateString.slice(0, 4)}-${dateString.slice(4, 6)}-${dateString.slice(6)}`;
         const isoDateTime: String = new Date(formattedDateString).toISOString();
@@ -84,18 +83,16 @@ const DetailPage = () => {
           pubDate : isoDateTime,
           thumbnail : bookDetail.image,
         }
-        console.log(addBook)
         postResponse = await instance.post(
           "api/v1/book", addBook );
         
       } 
       // mapping
-      const data = response.data || postResponse?.data
-
-    // console.log(data.data[0].id)
+      const data = await (response.data.data.length === 0 ? postResponse : response).data;
+      // console.log(data.data[0].id)
       const bookId = (data.data[0].id)
-      // 이미 되어있는지 확인하기 todo 
-
+      // // 이미 되어있는지 확인하기 todo 
+      console.log(bookId)
       // mapping 
       const mappingResponse = await instance.post(
         "/api/v1/userbook", {

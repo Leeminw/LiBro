@@ -25,22 +25,19 @@ public class UserBook {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String type;
-    @Column(columnDefinition = "TINYINT(1)")
-    @ColumnDefault("false")
+    @Column(columnDefinition = "TINYINT(1) default false")
     private Boolean isComplete;
     private Double rating;
     private String ratingComment;
-    @Column(columnDefinition = "TINYINT(1)")
+    @Column(columnDefinition = "TINYINT(1) default false")
     private Boolean ratingSpoiler;
     @CreationTimestamp
     private LocalDateTime createdDate;
     @UpdateTimestamp
     private LocalDateTime updatedDate;
-    @Column(columnDefinition = "TINYINT(1)")
-    @ColumnDefault("false")
+    @Column(columnDefinition = "TINYINT(1) default false")
     private Boolean isDeleted;
-    @Column(columnDefinition = "TINYINT(1)")
-    @ColumnDefault("false")
+    @Column(columnDefinition = "TINYINT(1) default false")
     private Boolean isOnRead;
     // Join
     @ManyToOne(fetch = FetchType.LAZY)

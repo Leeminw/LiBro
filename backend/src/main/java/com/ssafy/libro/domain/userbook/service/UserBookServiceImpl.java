@@ -175,8 +175,8 @@ public class UserBookServiceImpl implements UserBookService{
         // book 정보 갱신
         Book book = userBook.getBook();
 
-        double rating = book.getRating();
-        int count = book.getRatingCount();
+        double rating = book.getRating()==null ? 0.0 : book.getRating();
+        int count = book.getRatingCount()==null ? 0 : book.getRatingCount();
 
         double updateRating;
         if(isModify){
