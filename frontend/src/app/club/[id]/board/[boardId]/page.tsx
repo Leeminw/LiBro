@@ -9,7 +9,6 @@ import {useQuery} from "@tanstack/react-query";
 import {getPostDetail} from "@/lib/club";
 import TitleCard from "@/components/components/board/titleCard";
 import BackBar from "@/components/layout/backbar";
-import useUserState from "@/lib/login-state";
 
 export default function CommunityPostPage({params}: { params: { id: number; boardId: number }; }) {
 
@@ -50,7 +49,7 @@ export default function CommunityPostPage({params}: { params: { id: number; boar
         <>
             {isSuccess && (
                 <>
-                    <BackBar title={"글 조회하기"}/>
+                    <BackBar title={"글 조회하기"} src={`/club/${clubId}`}/>
                     <TitleCard title={post.title} createdDate={post.createdDate}/>
 
                     <Writter nickName={post.name} profileUrl={post.picture} boardId={boardId} groupId={clubId} writerId={post.writerId}/>

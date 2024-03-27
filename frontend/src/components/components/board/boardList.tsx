@@ -25,7 +25,7 @@ export default function BoardList() {
 
     const [searchTerm, setSearchTerm] = useState('');
     const [sortOrder, setSortOrder] = useState('latest'); // 초기 정렬 순서를 설정합니다. 여기서는 최신순으로 초기화합니다.
-    const [selectedCategory, setSelectedCategory] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState('0');
 
     const clubId = parseInt(param.id as string);
     const {
@@ -71,15 +71,17 @@ export default function BoardList() {
 
     const handleSortChange = (event: string) => {
         setSortOrder(event);
+        refetch();
     };
 
     const handleCategoryChange = (event: string) => {
         setSelectedCategory(event);
+        refetch();
     };
 
-    useEffect(() => {
-        refetch();
-    }, [sortOrder, selectedCategory]);
+    // useEffect(() => {
+    //     refetch();
+    // }, [sortOrder, selectedCategory]);
 
     const {ref, inView} = useInView();
 
