@@ -1,11 +1,9 @@
 'use client'
 
-import {Button} from "@/components/ui/button"
 import {Tabs, TabsContent, TabsList, TabsTrigger,} from "@/components/ui/tabs"
 import React, {useState} from "react";
 import JoinedClubCard from "@/components/components/club/JoinedClubCard";
 import ClubListCard from "@/components/components/club/ClubListCard";
-import Link from "next/link";
 import useUserState from "@/lib/login-state";
 
 export default function ClubPage() {
@@ -41,6 +39,5 @@ export default function ClubPage() {
                 </TabsContent>
             </Tabs>
         </>
-    )
-        ;
+    );
 }

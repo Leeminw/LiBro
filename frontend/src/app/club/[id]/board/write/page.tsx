@@ -11,7 +11,7 @@ import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/
 import {Input} from "@/components/ui/input";
 import {toast} from "@/components/ui/use-toast";
 import {Button} from "@/components/ui/button";
-import {Editor} from "@/components/ui/quill";
+import Editor from "@/components/ui/quill";
 
 import {getCategoryList, writePost} from "@/lib/club";
 import {QueryClient, useMutation, useSuspenseQuery} from "@tanstack/react-query";
@@ -34,7 +34,7 @@ export default function InputForm() {
 
     const router = useRouter();
     const params = useParams()
-    const clubId = params.id;
+    const clubId = parseInt(params.id as string);
 
     const {
         isLoading,
@@ -45,7 +45,7 @@ export default function InputForm() {
         refetch
     } = useSuspenseQuery({
         queryKey: ['clubCategory', clubId],
-        queryFn: () => getCategoryList(parseInt(clubId))
+        queryFn: () => getCategoryList(clubId)
     });
 
     const queryClient = new QueryClient();
@@ -54,12 +54,12 @@ export default function InputForm() {
 
 
     const {isPending, isError, error, mutate, data} = useMutation({
-        mutationFn: (param) => writePost(param),
+        mutationFn: (param: PostWrite) => writePost(param),
         onSuccess: (data, variables, context) => {
             toast({
                 title: "데이터를 정상적으로 저장하였습니다.",
             });
-            queryClient.invalidateQueries(['articleList']);
+            queryClient.invalidateQueries({queryKey: ['articleList']});
             router.push(`/club/${clubId}/board/${data.data.id}`);
         },
         onError: () => {
@@ -86,7 +86,7 @@ export default function InputForm() {
     };
 
     async function onSubmit(data: z.infer<typeof FormSchema>) {
-        const results: Object = {
+        const results: PostWrite = {
             content: contents,
             title: data["title"],
             boardId: parseInt(data["category"]),
@@ -101,7 +101,7 @@ export default function InputForm() {
     }
 
     if (isLoading || isFetching) return <>Loading...</>;
-    if (isFetchingError) return <>{FetchingError.message}</>;
+    if (isFetchingError) return <>Error...</>;
 
     return (
         <>
