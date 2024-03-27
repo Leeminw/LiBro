@@ -54,7 +54,7 @@ public class UserBookHistoryServiceImpl implements UserBookHistoryService{
 
     @Override
     public void deleteUserBookHistory(Long id) {
-        userBookRepository.deleteById(id);
+        userBookHistoryRepository.deleteById(id);
     }
 
     @Override
@@ -86,7 +86,7 @@ public class UserBookHistoryServiceImpl implements UserBookHistoryService{
     public UserBookHistoryDetailResponseDto getRecentBookHistory(Long userBookId) {
         UserBook userBook = userBookRepository.findById(userBookId)
                 .orElseThrow(() -> new UserBookNotFoundException(userBookId));
-        UserBookHistory userBookHistory = userBookHistoryRepository.findFirstByUserBookOrderByStartDate(userBook)
+        UserBookHistory userBookHistory = userBookHistoryRepository.findFirstByUserBookOrderByStartDateDesc(userBook)
                 .orElseThrow(() -> new UserBookHistoryNotFoundException("no data"));
         return new UserBookHistoryDetailResponseDto(userBookHistory);
     }
