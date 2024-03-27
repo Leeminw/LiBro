@@ -32,8 +32,6 @@ import java.util.*;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.bytedeco.ffmpeg.global.avcodec.AV_CODEC_ID_H264;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -174,7 +172,7 @@ public class ShortsServiceImpl implements ShortsService {
 
         try (FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(videoFilePath, VIDEO_WIDTH, VIDEO_HEIGHT)) {
             recorder.setFrameRate(FRAME_RATE);
-            recorder.setVideoCodec(AV_CODEC_ID_H264);
+            recorder.setVideoCodec(org.bytedeco.ffmpeg.global.avcodec.AV_CODEC_ID_H264);
             recorder.setFormat("mp4");
             recorder.start();
             recordImagesToVideo(decodedImages, recorder);
