@@ -61,6 +61,8 @@ public class Article {
         this.isDeleted = false;
         this.createdDate = LocalDateTime.now();
         this.updatedDate = LocalDateTime.now();
+        this.comments = new ArrayList<>();
+
     }
 
     public void update(ArticleUpdateRequestDto dto){

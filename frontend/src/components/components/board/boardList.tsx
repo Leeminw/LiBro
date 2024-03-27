@@ -51,10 +51,10 @@ export default function BoardList() {
     } = useInfiniteQuery({
         queryKey: ['articleList'],
         queryFn: ({pageParam}) => getPostList(clubId, {
-            boardId: selectedCategory,
+            boardId: parseInt(selectedCategory),
             sortOrder: sortOrder,
             keyword: searchTerm,
-            articleId: pageParam
+            articleId: undefined
         }),
         getNextPageParam: (lastPage, allPages, lastPageParam, allPageParams) => {
             return lastPage.content.length === 0 ? undefined : lastPage.content[lastPage.content.length - 1].id;
@@ -121,16 +121,16 @@ export default function BoardList() {
                             </SelectContent>
                         </Select>
 
-                        <Select onValueChange={handleCategoryChange} defaultValue={null}>
+                        <Select onValueChange={handleCategoryChange} defaultValue={"0"}>
                             <SelectTrigger className="w-[180px]">
                                 <SelectValue placeholder="게시판"/>
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectGroup>
-                                    <SelectItem value={null}>전체 게시판</SelectItem>
+                                    <SelectItem value={"0"}>전체 게시판</SelectItem>
                                     {categoryList?.map((category) => (
                                         <SelectItem key={category.id}
-                                                    value={category.id}>{category.name}</SelectItem>
+                                                    value={category.id.toString()}>{category.name}</SelectItem>
                                     ))}
                                 </SelectGroup>
                             </SelectContent>
