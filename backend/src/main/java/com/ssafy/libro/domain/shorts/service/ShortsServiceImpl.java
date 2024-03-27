@@ -212,8 +212,9 @@ public class ShortsServiceImpl implements ShortsService {
         try (FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(videoFile);
              FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(videoFilePath, grabber.getImageWidth(), grabber.getImageHeight())) {
             grabber.start();
-            recorder.setVideoCodec(grabber.getVideoCodec());
-            recorder.setFrameRate(grabber.getFrameRate());
+            recorder.setFrameRate(FRAME_RATE);
+            recorder.setVideoCodec(org.bytedeco.ffmpeg.global.avcodec.AV_CODEC_ID_H264);
+            recorder.setFormat("mp4");
             recorder.start();
 
             Java2DFrameConverter frameConverter = new Java2DFrameConverter();
