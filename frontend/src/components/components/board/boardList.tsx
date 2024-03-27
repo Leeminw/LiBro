@@ -51,7 +51,7 @@ export default function BoardList() {
     } = useInfiniteQuery({
         queryKey: ['articleList'],
         queryFn: ({pageParam}) => getPostList(clubId, {
-            boardId: parseInt(selectedCategory),
+            boardId: selectedCategory,
             sortOrder: sortOrder,
             keyword: searchTerm,
             articleId: pageParam
@@ -59,7 +59,7 @@ export default function BoardList() {
         getNextPageParam: (lastPage, allPages, lastPageParam, allPageParams) => {
             return lastPage.content.length === 0 ? undefined : lastPage.content[lastPage.content.length - 1].id;
         },
-        initialPageParam: Infinity,
+        initialPageParam: null,
     })
 
     const handleSearchChange = (event: React.KeyboardEvent<HTMLInputElement>) => {
