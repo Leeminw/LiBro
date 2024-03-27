@@ -15,6 +15,7 @@ import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {writeClub} from "@/lib/club";
 import {useParams, useRouter} from "next/navigation";
 import BackBar from "@/components/layout/backbar";
+import useUserState from "@/lib/login-state";
 
 
 const FormSchema = z.object({
@@ -29,16 +30,18 @@ export default function InputForm() {
 
     const queryClient = useQueryClient();
     const router = useRouter();
-    const params = useParams()
+    const params = useParams();
+    const { getUserInfo } = useUserState();
+    const userId = getUserInfo().id;
 
     const {isPending, isError, error, mutate, data} = useMutation({
-        mutationFn: (param) => writeClub(param),
+        mutationFn: (param: ClubWrite) => writeClub(param),
         onSuccess: (data, variables, context) => {
             toast({
                 title: "데이터를 정상적으로 저장하였습니다.",
             });
-            queryClient.invalidateQueries(['clubList']);
-            queryClient.invalidateQueries(['myclubList']);
+            queryClient.invalidateQueries({queryKey: ['clubList']});
+            queryClient.invalidateQueries({queryKey: ['myclubList']});
             router.push(`/club/${data.clubId}`);
         },
         onError: () => {
@@ -64,7 +67,7 @@ export default function InputForm() {
         const results: ClubWrite = {
             description: contents,
             name: data.title,
-            userId: 1
+            userId: userId
         }
 
         mutate(results);

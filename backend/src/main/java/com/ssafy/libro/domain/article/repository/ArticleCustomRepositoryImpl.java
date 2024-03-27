@@ -17,7 +17,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-import static com.ssafy.libro.domain.article.entity.QArticle.*;
+import static com.ssafy.libro.domain.article.entity.QArticle.article;
 
 @Repository
 @AllArgsConstructor
@@ -36,7 +36,8 @@ public class ArticleCustomRepositoryImpl implements ArticleCustomRepository {
                         article.comments.size().as("commentCount"),
                         article.createdDate,
                         article.id.as("id"),
-                        article.board.id.as("categoryId")))
+                        article.board.id.as("categoryId"),
+                        article.user.id.as("writerId")))
                 .from(article)
                 .where(
                         equalClub(clubId),

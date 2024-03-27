@@ -12,10 +12,15 @@ import {ScrollArea} from "@/components/ui/scroll-area";
 import {Skeleton} from "@/components/ui/skeleton";
 import {dateView} from "@/lib/dayjs";
 import Link from "next/link";
+import useUserState from "@/lib/login-state";
 
 const FindClubCard: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [sortOrder, setSortOrder] = useState('latest'); // 초기 정렬 순서를 설정합니다. 여기서는 최신순으로 초기화합니다.
+
+    const {getUserInfo} = useUserState();
+    const userId = getUserInfo().id;
+    const isMember = userId !== 0;
 
     const {
         data: clubs,
@@ -25,6 +30,7 @@ const FindClubCard: React.FC = () => {
         fetchNextPage,
         isFetchingNextPage,
         refetch,
+        isSuccess
     } = useInfiniteQuery({
         queryKey: ['clubList'],
         queryFn: ({pageParam}) => getClubList({
@@ -38,15 +44,16 @@ const FindClubCard: React.FC = () => {
             console.log(nextCursor)
             return nextCursor;
         },
+        initialPageParam: null
     })
 
-    const handleSearchKeyDown = (event) => {
+    const handleSearchKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === 'Enter') {
             setSearchTerm(event.currentTarget.value);
         }
     };
 
-    const handleSortChange = (event) => {
+    const handleSortChange = (event: string) => {
         setSortOrder(event);
     };
 
@@ -70,10 +77,7 @@ const FindClubCard: React.FC = () => {
         return <div>Error</div>;
     }
 
-    console.log(inView)
-
-
-    return (
+    return isSuccess && (
         <>
             <div className="flex items-center justify-between w-2/3">
                 <Select onValueChange={handleSortChange}>

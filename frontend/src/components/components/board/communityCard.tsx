@@ -11,25 +11,28 @@ import {toast} from "@/components/ui/use-toast";
 import {leaveClub} from "@/lib/club";
 import Link from "next/link";
 import React from "react";
+import useUserState from "@/lib/login-state";
 
 
 export default function CommunityInformCard(props: ClubInform) {
     const {clubName, createdDate, memberType, memberCount} = props
     const router = useRouter();
     const params = useParams();
-    const clubId = params.id;
-    const queryClient = useQueryClient()
+    const clubId = parseInt(params.id as string);
+    const queryClient = useQueryClient();
+    const { getUserInfo } = useUserState();
+    const userId = getUserInfo().id;
 
 
     const {isPending, isError, error, mutate} = useMutation({
         // 변경시 사용할 네트워크 요청코드 입니다.
-        mutationFn: () => leaveClub(clubId, 1),
+        mutationFn: () => leaveClub(clubId, userId),
 
         onSuccess: (data, variables, context) => {
             toast({
                 title: "성공적으로 탈퇴 하였습니다.",
             });
-            queryClient.invalidateQueries(['membership', clubId, 1])
+            queryClient.invalidateQueries({queryKey: ['membership', clubId, userId]})
             router.push(`/club`);
         },
 

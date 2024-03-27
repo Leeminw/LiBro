@@ -15,6 +15,7 @@ import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {deleteClub, getClubDetail, updateClub} from "@/lib/club";
 import {useParams, useRouter} from "next/navigation";
 import BackBar from "@/components/layout/backbar";
+import useUserState from "@/lib/login-state";
 
 const FormSchema = z.object({
     title: z.string().refine(value => value.trim() !== "", {
@@ -28,13 +29,16 @@ export default function InputForm() {
     const router = useRouter();
     const params = useParams();
 
-    const clubId = params.id;
+    const clubId = parseInt(params.id as string);
 
     const [contents, setContents] = useState<string>(''); // content 상태를 상위 컴포넌트에서 관리
 
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
     });
+
+    const { getUserInfo } = useUserState();
+    const userId = getUserInfo().id;
 
 
     const {
@@ -51,12 +55,12 @@ export default function InputForm() {
     });
 
     const {isPending: isEditPending, isError: isEditError, mutate: updateMutation} = useMutation({
-        mutationFn: (param) => updateClub(clubId, param),
+        mutationFn: (param: ClubWrite) => updateClub(clubId, param),
         onSuccess: (data, variables, context) => {
             toast({
                 title: "데이터를 정상적으로 수정 하였습니다.",
             });
-            queryClient.invalidateQueries(['club', clubId])
+            queryClient.invalidateQueries({queryKey: ['club', clubId]})
             router.push(`/club/${clubId}`);
         },
         onError: (data, variables, context) => {
@@ -74,8 +78,8 @@ export default function InputForm() {
             toast({
                 title: "클럽을 정상적으로 삭제 하였습니다.",
             });
-            queryClient.invalidateQueries(['myclubList']);
-            queryClient.invalidateQueries(['clubList']);
+            queryClient.invalidateQueries({queryKey: ['myclubList']});
+            queryClient.invalidateQueries({queryKey: ['clubList']});
             router.push(`/club`);
         },
         onError: (data, variables, context) => {
@@ -94,14 +98,14 @@ export default function InputForm() {
         const results: ClubWrite = {
             description: contents,
             name: data.title,
-            userId: 1,
+            userId: userId,
         }
         console.log(results)
         updateMutation(results);
 
     }
     const handleDelete = (data: z.infer<typeof FormSchema>) => {
-        deleteMutation(clubId)
+        deleteMutation()
 
         toast({
             title: "삭제 당했어용",
@@ -148,7 +152,7 @@ export default function InputForm() {
 
                     <FormField
                         control={form.control}
-                        name="contents"
+                        name=""
                         render={({field}) => (
                             <FormItem>
                                 <FormLabel>커뮤니티 설명</FormLabel>
