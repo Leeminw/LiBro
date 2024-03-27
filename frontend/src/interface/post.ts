@@ -12,7 +12,8 @@ interface Comment {
     createdDate: string;
     content: string;
     picture?: string | null | undefined;
-    id : number
+    id : number,
+    writerId: number
 }
 
 interface PostDetail {
@@ -26,6 +27,7 @@ interface PostDetail {
     hit? : number | null;
     updatedDate : string;
     boardId : number
+    writerId: number
 }
 
 

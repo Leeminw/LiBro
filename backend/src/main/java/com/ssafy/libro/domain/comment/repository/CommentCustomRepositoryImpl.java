@@ -23,7 +23,8 @@ public class CommentCustomRepositoryImpl implements CommentCustomRepository {
                         comment.createdDate,
                         comment.content,
                         comment.user.profile,
-                        comment.id))
+                        comment.id,
+                        comment.user.id.as("writerId")))
                 .from(comment)
                 .where(comment.article.id.eq(articleId))
                 .fetch();

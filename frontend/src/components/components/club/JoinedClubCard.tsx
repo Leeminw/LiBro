@@ -12,10 +12,15 @@ import {ScrollArea} from "@/components/ui/scroll-area";
 import {Skeleton} from "@/components/ui/skeleton";
 import Link from "next/link";
 import {dateFormat} from "@/lib/dayjs";
+import useUserState from "@/lib/login-state";
+import {Button} from "@/components/ui/button";
 
 const JoinedClubCard: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [sortOrder, setSortOrder] = useState('latest'); // 초기 정렬 순서를 설정합니다. 여기서는 최신순으로 초기화합니다.
+    const {getUserInfo} = useUserState();
+    const userId = getUserInfo().id;
+    const isMember = userId !== 0;
 
     const {
         data: clubs,
@@ -25,9 +30,10 @@ const JoinedClubCard: React.FC = () => {
         fetchNextPage,
         isFetchingNextPage,
         refetch,
+        isSuccess
     } = useInfiniteQuery({
         queryKey: ['myclubList'],
-        queryFn: ({pageParam}) => getMyClubList(1, {
+        queryFn: ({pageParam}) => getMyClubList(userId, {
             sortOrder: sortOrder,
             keyword: searchTerm,
             clubId: pageParam,
@@ -38,15 +44,16 @@ const JoinedClubCard: React.FC = () => {
             console.log(nextCursor)
             return nextCursor;
         },
+        initialPageParam: null
     })
 
-    const handleSearchKeyDown = (event) => {
+    const handleSearchKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === 'Enter') {
             setSearchTerm(event.currentTarget.value);
         }
     };
 
-    const handleSortChange = (event) => {
+    const handleSortChange = (event: string) => {
         setSortOrder(event);
     };
 
@@ -70,11 +77,17 @@ const JoinedClubCard: React.FC = () => {
         return <div>Error</div>;
     }
 
-    console.log(inView)
-
-
-    return (
+    return isSuccess && (
         <>
+
+            {isMember && (
+                <div className="flex justify-end" suppressHydrationWarning={true}>
+                    <Link href={"/club/write"}>
+                        <Button>커뮤니티 만들기</Button>
+                    </Link>
+                </div>)
+            }
+
             <div className="flex items-center justify-between w-2/3">
                 <Select onValueChange={handleSortChange}>
                     <SelectTrigger className={""}>
@@ -98,24 +111,28 @@ const JoinedClubCard: React.FC = () => {
 
             <Card>
                 <ScrollArea className="flex flex-col max-w-md mx-auto bg-white h-[calc(100vh-140px)]">
-                    <div>
+                    {clubs.pages.flatMap(t => t.content).length === 0 ? (
+                        <div className="flex flex-grow justify-center items-center">
+                            <p className="text-gray-500 text-lg">데이터가 없습니다.</p>
+                        </div>
+                    ) : (
+                        <div>
                         {clubs.pages.flatMap(t => t.content).map((club) => (
-                            <Card key={club.clubId} className="pt-6 bg-white rounded-lg shadow-md mt-2 mb-2">
-                                <CardContent>
-                                    <Link href={`/club/${club.clubId}`}
-                                          className="text-lg font-bold">{club.clubName}</Link>
-                                    <div className="flex items-center space-x-2 mb-4">
-                                        <CalendarIcon className="w-4 h-4 text-gray-500"/>
-                                        <span className="text-sm text-gray-500">{dateFormat(club.createdDate)}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        {club.clubOwnerName}
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </div>
-
+                                <Card key={club.clubId} className="pt-6 bg-white rounded-lg shadow-md mt-2 mb-2">
+                                    <CardContent>
+                                        <Link href={`/club/${club.clubId}`} className="text-lg font-bold">{club.clubName}</Link>
+                                        <div className="flex items-center space-x-2 mb-4">
+                                            <CalendarIcon className="w-4 h-4 text-gray-500"/>
+                                            <span className="text-sm text-gray-500">{dateFormat(club.createdDate)}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            {club.clubOwnerName}
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
+                    )}
                     <div ref={ref}></div>
                 </ScrollArea>
 
