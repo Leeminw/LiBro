@@ -26,7 +26,7 @@ public class DiffusionRequestDto {
             "(poorly drawn, poorly drawn hands, poorly drawn face), (bad-artist, bad-artist-anime), " +
             "nsfw, ugly, blurry, jpeg artifacts, text, logo";
     @Builder.Default
-    private Integer steps = 20;
+    private Integer steps = 10;
     @Builder.Default
     private Double cfg_scale = 9.0;
     @Builder.Default
