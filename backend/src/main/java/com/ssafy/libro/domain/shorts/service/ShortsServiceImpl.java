@@ -164,7 +164,7 @@ public class ShortsServiceImpl implements ShortsService {
         Path outputPath = Paths.get("outputs");
         Files.createDirectories(outputPath);
         File videoFile = generateVideoFromImages(decodedImages, outputPath);
-        File subtitledVideoFile = addSubtitleToVideo(videoFile, sentences, outputPath);
+        File subtitledVideoFile = addSubtitleToVideo(videoFile.getAbsolutePath(), sentences, outputPath);
 
         // 자막처리
 //        uploadVideoToS3(videoFile);
@@ -205,11 +205,11 @@ public class ShortsServiceImpl implements ShortsService {
         }
     }
 
-    public static File addSubtitleToVideo(File videoFile, String sentences, Path outputPath) {
+    public static File addSubtitleToVideo(String inputPath, String sentences, Path outputPath) {
         String videoFileName = UUID.randomUUID() + VIDEO_FILE_FORMAT;
         String videoFilePath = outputPath.resolve(videoFileName).toString();
 
-        try (FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(videoFile);
+        try (FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(inputPath);
              FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(videoFilePath, grabber.getImageWidth(), grabber.getImageHeight())) {
             grabber.start();
             recorder.setFrameRate(FRAME_RATE);
