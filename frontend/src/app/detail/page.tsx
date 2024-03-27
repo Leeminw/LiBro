@@ -16,13 +16,14 @@ import DetailAnalyze from "@/components/components/detailAnalyze";
 import { SearchApi } from "@/lib/axios-search";
 import { FaPlus, FaStar } from "react-icons/fa6";
 import { RiPencilFill } from "react-icons/ri";
-import { dateFormatter } from "@/lib/dateFormatter";
+import { dateFormatter } from "@/lib/date-formatter";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
+import instance from '@/lib/interceptor'
 
 const DetailPage = () => {
   const URL = "ex0" + 0 + ".mp4";
@@ -52,6 +53,65 @@ const DetailPage = () => {
     };
     updateBookDetail();
   }, []);
+  const mappingBook = async () =>{
+    let response, postResponse;
+    console.log("Test")
+    // 검색을 했을때 isbn이 db에 있는지 확인하기
+    try {
+      response = await instance.get(
+        "/api/v1/book/search",{
+          params : {
+            key : "isbn",
+            word : bookDetail.isbn,
+            page : 0,
+            size : 0  ,
+          }
+        }
+      )
+      // 데이터가 없는경우 등록
+      if (response.data.length === 0) {
+
+        const dateString: string = bookDetail.pubdate
+        const formattedDateString: string = `${dateString.slice(0, 4)}-${dateString.slice(4, 6)}-${dateString.slice(6)}`;
+        const isoDateTime: String = new Date(formattedDateString).toISOString();
+        const addBook = {
+          isbn : bookDetail.isbn,
+          title : bookDetail.title,
+          summary : bookDetail.description,
+          price : bookDetail.discount,
+          author : bookDetail.author,
+          publisher : bookDetail.publisher,
+          pubDate : isoDateTime,
+          thumbnail : bookDetail.image,
+        }
+        console.log(addBook)
+        postResponse = await instance.post(
+          "api/v1/book", addBook );
+        
+      } 
+      // mapping
+      const data = response.data || postResponse?.data
+
+    // console.log(data.data[0].id)
+      const bookId = (data.data[0].id)
+      // 이미 되어있는지 확인하기 todo 
+
+      // mapping 
+      const mappingResponse = await instance.post(
+        "/api/v1/userbook", {
+          bookId :bookId,
+          type : '관심'
+        }
+      )
+    
+      console.log(mappingResponse.data) 
+      
+    }
+    catch (error : any) {
+      
+      console.log(error)
+    }
+  }
 
   return (
     <>
@@ -388,7 +448,8 @@ const DetailPage = () => {
         )}
 
         {bookLoading ? (
-          <Button className="bg-[#9268EB] hover:bg-[#bfa1ff] sticky bottom-20 left-full max-w-md drop-shadow-lg rounded-full z-20 w-12 h-12 mr-3">
+          <Button className="bg-[#9268EB] hover:bg-[#bfa1ff] sticky bottom-20 left-full max-w-md drop-shadow-lg rounded-full z-20 w-12 h-12 mr-3"
+          onClick={() => mappingBook()}>
             <FaPlus size={30} />
           </Button>
         ) : (

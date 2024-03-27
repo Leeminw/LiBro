@@ -1,7 +1,6 @@
-import {Card, CardContent, CardTitle,CardHeader,CardFooter,CardDescription} from "@/components/ui/card";
-import {CalendarIcon, MoreHorizontalIcon, SettingsIcon, XIcon, UsersIcon} from "lucide-react";
-import dayjs from 'dayjs'
-import dateView from "@/lib/dayjs";
+import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
+import {CalendarIcon} from "lucide-react";
+import {dateView} from "@/lib/dayjs";
 
 
 export default function TitleCard(props : Title) {

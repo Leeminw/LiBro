@@ -68,6 +68,7 @@
     "react-hook-form": "^7.51.0",
     "react-icons": "^5.0.1",
     "react-intersection-observer": "^9.8.1",
+    "react-query": "^3.39.3",
     "react-quill": "^2.0.0",
     "react-resizable-panels": "^2.0.12",
     "react-router-dom": "^6.22.3",
@@ -102,5 +103,6 @@
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^5.0.2",
     "zod": "^3.22.4"
-  }
+  },
+  "proxy": "http://localhost:8080"
 }

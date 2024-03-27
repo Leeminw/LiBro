@@ -1,9 +1,9 @@
 import React from 'react';
-import { Card, CardHeader, CardFooter} from "@/components/ui/card";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
+import {Card, CardFooter, CardHeader} from "@/components/ui/card";
+import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar"
 import Link from "next/link";
 import {useParams} from "next/navigation";
-import dateView from "@/lib/dayjs";
+import {dateView} from "@/lib/dayjs";
 
 export default function BoardItem (props : Post) {
     const { name, title , createdDate , commentCount, picture, articleId} = props

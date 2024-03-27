@@ -16,6 +16,8 @@ import {
     type CarouselApi,
   } from "@/components/ui/carousel"
 
+import { userBooks } from "@/lib/axios-userBook"
+import { useSearchParams } from "next/navigation"
 interface User {
     profileUrl: string
     id: string,
@@ -56,6 +58,7 @@ interface Review {
 
 const Library = () => {
 
+    const isbn = useSearchParams().get("isbn");
     const [user, setUser] = useState<User>({
         profileUrl: "https://github.com/shadcn.png",
         id: '',
@@ -71,8 +74,9 @@ const Library = () => {
     const booksPerPage = 12;
     const numberOfRows = 3; // 총 행의 수
 
+
     const [books, setBooks] = useState([
-        { id: 1, image: 'book1.svg', name: '니모를 찾아서', publisher: '바다출판사', date: '2023-01-04', author: '한명진', readstartdate: '2023-02-12', readcompletedate: '2023-03-14', complete: true, readrate: '100%', currentpage: 484, finalpage: 484},
+        { id: 1, isbn: 0, image: 'book1.svg', name: '니모를 찾아서', publisher: '바다출판사', date: '2023-01-04', author: '한명진', readstartdate: '2023-02-12', readcompletedate: '2023-03-14', complete: true, readrate: '100%', currentpage: 484, finalpage: 484},
         { id: 2, image: 'book2.svg', name: '우주 탐험', publisher: '별빛출판사', date: '2023-02-15', author: '김우주', readstartdate: '2023-02-12', readcompletedate: '2023-03-14', complete: false, readrate: '42%', currentpage: 203, finalpage: 484},
         { id: 3, image: 'book3.svg', name: '코딩의 정석', publisher: '코드출판사', date: '2023-03-20', author: '이코더', readstartdate: 'null', readcompletedate: 'null', complete: false, readrate: '0%', currentpage: 0, finalpage: 484},
         { id: 4, image: 'book4.svg', name: '식물의 비밀', publisher: '자연출판사', date: '2023-04-10', author: '박식물', readstartdate: 'null', readcompletedate: 'null', complete: false, readrate: '0%', currentpage: 0, finalpage: 484},
@@ -94,6 +98,7 @@ const Library = () => {
         { id: 21, image: 'book1.svg', name: '미래의 문', publisher: '내일출판사', date: '2023-06-01', author: '김미래', readstartdate: '2023-02-12', readcompletedate: '2023-03-14', complete: false, readrate: '3%', currentpage: 16, finalpage: 484},
         { id: 22, image: 'book2.svg', name: '별에서 온 그대', publisher: '우주출판사', date: '2023-06-15', author: '별하늘', readstartdate: '2023-02-12', readcompletedate: '2023-03-14', complete: true, readrate: '100%', currentpage: 484, finalpage: 484},
     ]);
+    
 
     // 검색어를 업데이트하는 함수입니다.
     const [searchTerm, setSearchTerm] = useState('');
@@ -136,7 +141,33 @@ const Library = () => {
         setProcessedBooks(updatedBooks);
     }, [searchTerm, arrange, books]);
     
+    // 등록 책 전체 조회
+    useEffect(() => {
+        userBooks.books()
+        .then((response) => {
+            // console.log(response.data)
+            setBooks(response.data)
+        })
+        .catch((error) => {
+            console.log(error)
+        })
+    }, [])
 
+    // 모달 열릴 시 특정 등록 책 조회
+    useEffect(() => { 
+        if (isModalOpen) {
+            userBooks.bookDetail()
+              .then((response) => {
+                // 요청이 성공적으로 완료되면 데이터를 상태에 저장
+              console.log(response.data);
+            })
+              .catch((error) => {
+                // 요청이 실패하면 에러 처리
+              console.error('There was an error!', error);
+            });
+        }
+    })
+    
     // 현재 페이지에 보여줄 책들을 계산합니다.
     const indexOfLastBook = currentPage * booksPerPage;
     const indexOfFirstBook = indexOfLastBook - booksPerPage;
@@ -202,7 +233,7 @@ const Library = () => {
 
     const BookModal = ({ book, onClose }: ModalProps) => {
         if (!book) return null;
-
+        
         const renderStars = () => {
             let stars = [];
             for (let i = 1; i <= 5; i++) {
