@@ -11,7 +11,7 @@ const Header = () => {
   const router = useRouter();
   const pathname = usePathname();
   const searchRef = useRef<HTMLInputElement>(null);
-  const { deleteUserInfo } = useUserState();
+  const { userInfo, deleteUserInfo } = useUserState();
   const { toast } = useToast();
   const [isLogin, setIsLogin] = useState(false);
   const [loginLoad, setLoginLoad] = useState(false);
@@ -22,7 +22,7 @@ const Header = () => {
 
   useEffect(() => {
     loadLogin();
-  }, []);
+  }, [userInfo]);
 
   const handleSearch = () => {
     if (searchRef.current) {
