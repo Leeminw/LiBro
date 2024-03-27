@@ -44,7 +44,7 @@ const FindClubCard: React.FC = () => {
             console.log(nextCursor)
             return nextCursor;
         },
-        initialPageParam: null
+        initialPageParam: undefined
     })
 
     const handleSearchKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
