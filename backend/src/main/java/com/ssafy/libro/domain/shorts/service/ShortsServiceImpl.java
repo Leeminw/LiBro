@@ -9,8 +9,10 @@ import com.ssafy.libro.domain.shorts.dto.*;
 import com.ssafy.libro.domain.shorts.repository.TaskJpaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacv.*;
 import org.bytedeco.javacv.Frame;
+import org.bytedeco.opencv.opencv_core.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.FileSystemResource;
@@ -31,6 +33,8 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Stream;
+
+import static org.bytedeco.opencv.global.opencv_imgproc.*;
 
 @Slf4j
 @Service
@@ -74,8 +78,8 @@ public class ShortsServiceImpl implements ShortsService {
         List<byte[]> decodedImages = decodeImages(encodedImages);
 
         // saveImages(decodedImages);
+        Resource resource = createVideo(decodedImages, promptResponseDto.getKorPrompt());
 
-        Resource resource = createVideo(decodedImages);
         return ShortsResponseDto.builder()
                 .title(promptResponseDto.getTitle())
                 .content(promptResponseDto.getContent())
@@ -156,12 +160,16 @@ public class ShortsServiceImpl implements ShortsService {
         }
     }
 
-    private Resource createVideo(List<byte[]> decodedImages) throws IOException {
+    private Resource createVideo(List<byte[]> decodedImages, String sentences) throws IOException {
         Path outputPath = Paths.get("outputs");
         Files.createDirectories(outputPath);
         File videoFile = generateVideoFromImages(decodedImages, outputPath);
-        byte[] videoBytes = Files.readAllBytes(videoFile.toPath());
+
+        // 자막처리
+        addSubtitleToVideo(videoFile, sentences);
 //        uploadVideoToS3(videoFile);
+
+        byte[] videoBytes = Files.readAllBytes(videoFile.toPath());
         cleanUpTemporaryDirectory(outputPath);
 //        return new FileSystemResource(videoFile);
         return new ByteArrayResource(videoBytes);
@@ -197,6 +205,93 @@ public class ShortsServiceImpl implements ShortsService {
         }
     }
 
+    public static void addSubtitleToVideo(File videoFile, String sentences) {
+        try (FFmpegFrameGrabber frameGrabber = new FFmpegFrameGrabber(videoFile)) {
+            frameGrabber.start();
+            // 동영상을 쓰기 위한 FrameRecorder 초기화
+            try (FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(videoFile, frameGrabber.getImageWidth(), frameGrabber.getImageHeight())) {
+                recorder.setVideoCodec(frameGrabber.getVideoCodec()); // 동일한 코덱 사용
+                recorder.setFrameRate(frameGrabber.getFrameRate()); // 동일한 프레임 레이트 사용
+                recorder.start();
+
+                // 자막으로 사용할 문장 배열
+                String[] subtitles = sentences.split(",");
+                int subtitleIndex = 0; // 현재 표시할 자막 인덱스
+                int frameCountPerSubtitle = (int) frameGrabber.getLengthInFrames() / subtitles.length; // 각 자막을 표시할 프레임 수
+
+                Frame frame;
+                int frameCount = 0;
+                while ((frame = frameGrabber.grab()) != null && subtitleIndex < subtitles.length) {
+                    if (frame.image != null) {
+                        // 현재 프레임 번호가 다음 자막으로 넘어갈 시점인지 확인
+                        if (frameCount >= frameCountPerSubtitle * (subtitleIndex + 1)) {
+                            subtitleIndex++; // 다음 자막으로 넘어감
+                        }
+
+                        // 현재 자막을 프레임에 추가
+                        if (subtitleIndex < subtitles.length) {
+                            addSubtitleToFrame(frame, subtitles[subtitleIndex]);
+                        }
+
+                        recorder.record(frame); // 처리된 프레임을 출력 동영상에 기록
+                    }
+                    frameCount++;
+                }
+                recorder.stop();
+            }
+            frameGrabber.stop();
+        } catch (Exception e) {
+            log.error("Exception");
+        }
+    }
+
+    private static void addSubtitleToFrame(Frame frame, String subtitle) {
+        // JavaCV에서 Frame을 OpenCV의 Mat 객체로 변환
+        try (OpenCVFrameConverter.ToMat converter = new OpenCVFrameConverter.ToMat()) {
+            Mat mat = converter.convert(frame);
+
+            // 자막을 추가할 위치와 스타일 설정
+            int fontSize = 24; // 폰트 크기
+            int thickness = 2; // 폰트 두께
+            int fontFace = FONT_HERSHEY_SIMPLEX;
+            Scalar color = new Scalar(255, 255, 255, 0); // 흰색
+            IntPointer baseLine = new IntPointer(1);
+
+            // 프레임 크기에 맞춰 자막 줄바꿈 계산
+            String[] words = subtitle.split(" ");
+            List<String> lines = new ArrayList<>();
+            String currentLine = "";
+            for (String word : words) {
+                String testLine = currentLine + word + " ";
+                Size textSize = getTextSize(testLine, fontFace, fontSize, thickness, baseLine);
+                if (textSize.get(0) <= mat.cols()) { // 현재 줄에 단어를 추가
+                    currentLine = testLine;
+                } else { // 새 줄 시작
+                    lines.add(currentLine);
+                    currentLine = word + " ";
+                }
+            }
+            lines.add(currentLine); // 마지막 줄 추가
+
+            // 각 줄을 프레임 중앙에 추가
+            int startY = (mat.rows() - lines.size() * 30) / 2; // 시작 Y 위치 조정
+            for (String line : lines) {
+                Size textSize = getTextSize(line.trim(), fontFace, fontSize, thickness, baseLine);
+                int x = (mat.cols() - (int) textSize.width()) / 2;
+                int y = startY + (int) textSize.height();
+                startY += 30; // 다음 줄의 Y 위치
+
+                // 자막을 프레임에 추가하는 수정된 코드 부분
+                putText(mat, line.trim(), new Point(x, y), fontFace, fontSize, color, thickness, LINE_AA, false);
+
+            }
+
+            // 수정된 Mat 객체를 다시 Frame으로 변환
+            Frame newFrame = converter.convert(mat);
+            frame.image = newFrame.image;
+        }
+    }
+
     private void uploadVideoToS3(File videoFile) {
         if (!videoFile.exists()) {
             log.error("Video file does not exist: {}", videoFile.getAbsolutePath());
@@ -218,6 +313,18 @@ public class ShortsServiceImpl implements ShortsService {
                     });
         }
     }
+
+
+
+
+
+
+
+
+
+
+
+
 
 //    private Resource createVideo(List<byte[]> decodedImages) throws IOException {
 //        // 동영상 파일을 임시 디렉토리에 저장
