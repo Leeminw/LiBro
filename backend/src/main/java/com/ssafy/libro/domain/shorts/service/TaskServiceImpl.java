@@ -113,7 +113,7 @@ public class TaskServiceImpl implements TaskService {
     private final int minWaitTime = 100; // Minimum wait time in milliseconds
     private final int maxWaitTime = 500; // Maximum wait time in milliseconds
 
-    @Scheduled(cron = "0 */1 * * * *", zone = "Asia/Seoul")
+    // @Scheduled(cron = "0 */1 * * * *", zone = "Asia/Seoul")
     public void updateTasks() throws IOException {
         log.info("Task Update Schedule Processing...");
         List<Book> books = bookRepository.findAllByShortsUrlIsNull().orElseThrow(
