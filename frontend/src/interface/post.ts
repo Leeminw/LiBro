@@ -53,5 +53,5 @@ interface PostSearch {
     sortOrder?: string;
     keyword?: string;
     boardId?: number;
-    articleId?: number;
+    articleId?: number | null;
 }

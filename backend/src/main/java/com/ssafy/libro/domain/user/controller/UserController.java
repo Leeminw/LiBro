@@ -32,6 +32,7 @@ public class UserController {
                     .name(user.getName())
                     .authType(user.getAuthType())
                     .role(user.getRole())
+                    .nickName(user.getNickname())
                     .build();
             return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success("회원 정보 로드 성공", result));
         }

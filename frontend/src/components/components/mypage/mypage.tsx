@@ -4,20 +4,12 @@ import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
 import {Button} from "@/components/ui/button";
 import Image from "next/image";
 import {Input} from "@/components/ui/input";
-import React, {useState, useEffect} from "react";
-
-interface User {
-    profileUrl: string
-    id: string,
-    nickName: string,
-    truename: string,
-    birth: string
-    readRate: number,
-    bookRate: number,
-    registeredBooks: number,
-    completedBooks: number,
-    sentencedBooks: number,
-}
+import React, {useState} from "react";
+import {useQueries} from "@tanstack/react-query";
+import {getCompleteBookList, getCompleteRatio, getUserInform, getWrittenComment} from "@/lib/axiois-mypage";
+import useUserState from "@/lib/login-state";
+import {useRouter} from "next/navigation";
+import {toast} from "@/components/ui/use-toast";
 
 interface Modal {
     isOpen: boolean;
@@ -108,31 +100,40 @@ const renderStars = (rate : number) => {
 
 
 export default function Myinfo() {
-    const [user, setUser] = useState<User>({
-        profileUrl: "https://github.com/shadcn.png",
-        id: '',
-        nickName: '11',
-        truename: '',
-        birth: '11',
-        readRate: 0,
-        bookRate: 1,
-        registeredBooks: 41,
-        completedBooks: 23,
-        sentencedBooks: 31,
+    const {getUserInfo, deleteUserInfo} = useUserState();
+    const userId = getUserInfo().id;
+    const router = useRouter();
+
+    const results = useQueries({
+        queries: [
+            {
+                queryKey: ['myinfo'],
+                queryFn: () => getUserInform(userId)
+            },
+            {
+                queryKey: ['myReadCompleteRatio'],
+                queryFn: () => getCompleteRatio()
+            },
+            {
+                queryKey: ['myReadCompleteList'],
+                queryFn: () => getCompleteBookList()
+            },
+            {
+                queryKey: ['myWrittenComment'],
+                queryFn: () => getWrittenComment()
+            },
+        ]
     });
 
-    const [bookRate, setBookRate] = useState(4.0) // 책 평점
-    const [reviews, setReviews] = useState(0)
 
-// 완독한 책의 수와 총 책의 수
-    const [rateOneBooks, setRateOneBooks] = useState(1)
-    const [rateTwoBooks, setRateTwoBooks] = useState(4)
-    const [rateThreeBooks, setRateThreeBooks] = useState(7)
-    const [rateFourBooks, setRateFourBooks] = useState(6)
-    const [rateFiveBooks, setRateFiveBooks] = useState(15)
+// isLoading, hasError, isSuccess 는 기존 코드와 동일합니다.
+    const isLoading = results.some((query) => query.isLoading);
+    const hasError = results.some((query) => query.isError);
+    const isSuccess = results.every((query) => query.isSuccess);
+
 
 // 임시 닉네임 상태
-    const [tempNickName, setTempNickName] = useState(user.nickName);
+    const [tempNickName, setTempNickName] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     function Modal({ isOpen, isClose, children }: Modal) {
@@ -151,15 +152,16 @@ export default function Myinfo() {
         );
     }
 
+
     // 모달 제어 함수
     const openModal = () => {
         setIsModalOpen(true);
-        setTempNickName(user.nickName);
+        setTempNickName("");
     };
     const isClose = () => setIsModalOpen(false);
 
 // 유저 정보 업데이트 함수
-    const updateUser = (updates: Partial<User>) => setUser({ ...user, ...updates });
+//     const updateUser = (updates: Partial<User>) => setUser({ ...user, ...updates });
 
 // 닉네임 임시 변경 핸들러
     const handleTempNickNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -168,41 +170,32 @@ export default function Myinfo() {
 
 // 닉네임 업데이트 및 모달 닫기
     const handleUpdateAndClose = () => {
-        updateUser({ nickName: tempNickName });
+        // updateUser({ nickName: tempNickName });
         isClose();
     };
 
-    useEffect(() => {
-        // 완독율 계산 후 상태 업데이트
-        const newReadRate = parseFloat((user.completedBooks / user.registeredBooks * 100).toFixed(0));
-        setUser(prevUser => ({
-          ...prevUser,
-          readRate: newReadRate,
-        }));
-      }, [user.completedBooks, user.registeredBooks]); // user.completedBooks 또는 user.registeredBooks가 변경될 때마다 실행
-      
-    
-    useEffect(() => {
-    // 책 평점 계산 후 상태 업데이트
-        const newRate1Books = parseFloat((rateOneBooks / user.registeredBooks * 100).toFixed(0));
-        const newRate2Books = parseFloat((rateTwoBooks / user.registeredBooks * 100).toFixed(0));
-        const newRate3Books = parseFloat((rateThreeBooks / user.registeredBooks * 100).toFixed(0));
-        const newRate4Books = parseFloat((rateFourBooks / user.registeredBooks * 100).toFixed(0));
-        const newRate5Books = parseFloat((rateFiveBooks / user.registeredBooks * 100).toFixed(0));
-        setRateFiveBooks(newRate5Books);
-        setRateFourBooks(newRate4Books);
-        setRateThreeBooks(newRate3Books);
-        setRateTwoBooks(newRate2Books);
-        setRateOneBooks(newRate1Books);
-    }, []);
-    
-    return (
+    const logout = () => {
+        deleteUserInfo();
+        router.push("/");
+        toast({
+            title: "로그아웃",
+            description: `정상적으로 로그아웃 되었습니다.`,
+        });
+    }
+
+
+    if (isLoading) return <>Loading...</>;
+    if (hasError) return <>Error</>;
+
+    const [userInfo, completeRatio, bookReviews, writtenComment] = results.map(result => result.data);
+
+    return isSuccess && (
         <>
             <div className="mt-4 pb-3 flex w-full border-b border-gray-300">
                 <div className="w-1/3 flex justify-center items-center">
                     <div>
                         <Avatar className="h-24 w-24">
-                            <AvatarImage src={user.profileUrl} alt="@defaultUser"/>
+                            <AvatarImage src={userInfo.profile} alt="@defaultUser"/>
                             <AvatarFallback></AvatarFallback>
                         </Avatar>
                         <Button className="mt-4 bg-[#9268EB] text-white font-bold hover:bg-[#9268EB] hover:text-current"
@@ -214,7 +207,7 @@ export default function Myinfo() {
                             <div className='flex justify-center items-center w-full'>
                                 <div className="relative"> {/* 여기에 relative 추가 */}
                                     <Avatar className="h-16 w-16 mt-2">
-                                        <AvatarImage src={user.profileUrl || "https://github.com/shadcn.png"}
+                                        <AvatarImage src={userInfo.profile}
                                                      alt="@defaultUser"/>
                                         <AvatarFallback></AvatarFallback>
                                     </Avatar>
@@ -239,19 +232,15 @@ export default function Myinfo() {
                 <div className="w-2/3 justify-center mt-2">
                     <div className="mb-6 grid grid-cols-12 gap-4 pl-2">
                         <div className="text-sm text-gray-500 font-bold col-span-4 ">계정</div>
-                        <div className="text-sm text-gray-500 col-span-8">{user.id}</div>
+                        <div className="text-sm text-gray-500 col-span-8">{userInfo.email}</div>
                     </div>
                     <div className="mb-6 grid grid-cols-12 gap-4 pl-2">
                         <div className="text-sm text-gray-500 font-bold col-span-4">닉네임</div>
-                        <div className="text-sm text-gray-500 col-span-8">{user.nickName}</div>
+                        <div className="text-sm text-gray-500 col-span-8">{userInfo.nickName}</div>
                     </div>
                     <div className="mb-6 grid grid-cols-12 gap-4 pl-2">
                         <div className="text-sm text-gray-500 font-bold col-span-4">이름</div>
-                        <div className="text-sm text-gray-500 col-span-8">{user.truename}</div>
-                    </div>
-                    <div className="mb-1 grid grid-cols-12 gap-4 pl-2">
-                        <div className="text-sm text-gray-500 font-bold col-span-4">생년월일</div>
-                        <div className="text-sm text-gray-500 col-span-8">{user.birth}</div>
+                        <div className="text-sm text-gray-500 col-span-8">{userInfo.name}</div>
                     </div>
                 </div>
             </div>
@@ -266,17 +255,17 @@ export default function Myinfo() {
                     <div
                         className="flex flex-row items-center justify-center space-x-2 col-span-1 border-r border-gray-300">
                         <div className="text-sm font-bold">담은 책 수</div>
-                        <div className="text-xs">{user.registeredBooks}</div>
+                        <div className="text-xs">{completeRatio.totalSize}</div>
                     </div>
                     <div
                         className="flex flex-row items-center justify-center space-x-2 col-span-1 border-l border-r border-gray-300">
                         <div className="text-sm font-bold">책 완독 수</div>
-                        <div className="text-xs">{user.completedBooks}</div>
+                        <div className="text-xs">{completeRatio.readSize}</div>
                     </div>
                     <div
                         className="flex flex-row items-center justify-center space-x-2 col-span-1 border-l border-gray-300">
                         <div className="text-sm font-bold">기록 글귀 수</div>
-                        <div className="text-xs">{user.sentencedBooks}</div>
+                        <div className="text-xs">{writtenComment.length}</div>
                     </div>
                 </div>
             </div>
@@ -284,12 +273,14 @@ export default function Myinfo() {
             <div className="ml-2 mr-2">
                 <div className="flex items-center justify-between">
                     <div className="text-sm font-bold">완독율</div>
-                    <div className="text-sm font-bold text-gray-500">{user.readRate}%</div>
+                    <div
+                        className="text-sm font-bold text-gray-500">{completeRatio.totalSize === 0 ? 0 : completeRatio.readSize / completeRatio.totalSize}%
+                    </div>
                 </div>
                 <div className="w-full bg-[#E5E7EB] rounded h-2">
                     <div
                         className="bg-[#9268EB] h-2 rounded"
-                        style={{width: `${user.readRate}%`}}
+                        style={{width: `${completeRatio.totalSize === 0 ? 0 : completeRatio.readSize / completeRatio.totalSize}%`}}
                     ></div>
                 </div>
             </div>
@@ -298,11 +289,15 @@ export default function Myinfo() {
                 <div className="flex items-center justify-between">
                     <div className="text-sm font-bold">나의 평균 평점</div>
                     <div className="flex items-center">
-                        <div className="mr-2 text-m font-bold">{bookRate}</div>
-                        {renderStars(bookRate)}
+                        <div className="mr-2 text-m font-bold">{bookReviews.length === 0 ? 0 : bookReviews.map((r: {
+                            rating: number;
+                        }) => r.rating).reduce((acc: number, rating: number) => acc + rating, 0) / bookReviews.length}</div>
+                        {renderStars(bookReviews.map((r: {
+                            rating: number;
+                        }) => r.rating).reduce((acc: number, rating: number) => acc + rating, 0) / bookReviews.length)}
                     </div>
                     <div className="flex items-center">
-                        <div className="text-xs font-bold pl-3 pr-3">리뷰 수 {reviews}</div>
+                        <div className="text-xs font-bold pl-3 pr-3">리뷰 수 {bookReviews.length}</div>
                     </div>
                 </div>
 
@@ -313,11 +308,18 @@ export default function Myinfo() {
                         <div className="w-full bg-[#E5E7EB] rounded h-1.5" style={{width: '320px'}}>
                             <div
                                 className="bg-[#FFCA28] h-1.5 rounded"
-                                style={{width: `${rateFiveBooks}%`}}
+                                style={{
+                                    width: `${bookReviews.length === 0 ? 0 : (bookReviews.map((r: {
+                                        rating: number;
+                                    }) => r.rating).filter((r: number) => r === 5).length / bookReviews.length * 100)}%`
+                                }}
                             ></div>
                         </div>
                         <div className="w-13 pl-1 pr-1 text-center ">
-                            <div className="text-sm ">{rateFiveBooks}%</div>
+                            <div className="text-sm ">{bookReviews.length === 0 ? 0 : (bookReviews.map((r: {
+                                rating: number;
+                            }) => r.rating).filter((r: number) => r === 5).length / bookReviews.length * 100)}%
+                            </div>
                         </div>
                     </div>
                     <div className="flex items-center justify-between mb-2">
@@ -326,11 +328,18 @@ export default function Myinfo() {
                         <div className="w-full bg-[#E5E7EB] rounded h-1.5" style={{width: '320px'}}>
                             <div
                                 className="bg-[#FFCA28] h-1.5 rounded"
-                                style={{width: `${rateFourBooks}%`}}
+                                style={{
+                                    width: `${bookReviews.length === 0 ? 0 : (bookReviews.map((r: {
+                                        rating: number;
+                                    }) => r.rating).filter((r: number) => r === 4).length / bookReviews.length * 100)}%`
+                                }}
                             ></div>
                         </div>
                         <div className="w-13 pl-1 pr-1 text-center ">
-                            <div className="text-sm ">{rateFourBooks}%</div>
+                            <div className="text-sm ">{bookReviews.length === 0 ? 0 : (bookReviews.map((r: {
+                                rating: number;
+                            }) => r.rating).filter((r: number) => r === 4).length / bookReviews.length * 100)}%
+                            </div>
                         </div>
                     </div>
                     <div className="flex items-center justify-between mb-2">
@@ -339,11 +348,18 @@ export default function Myinfo() {
                         <div className="w-full bg-[#E5E7EB] rounded h-1.5" style={{width: '320px'}}>
                             <div
                                 className="bg-[#FFCA28] h-1.5 rounded"
-                                style={{width: `${rateThreeBooks}%`}}
+                                style={{
+                                    width: `${bookReviews.length === 0 ? 0 : (bookReviews.map((r: {
+                                        rating: number;
+                                    }) => r.rating).filter((r: number) => r === 3).length / bookReviews.length * 100)}%`
+                                }}
                             ></div>
                         </div>
                         <div className="w-13 pl-1 pr-1 text-center ">
-                            <div className="text-sm ">{rateThreeBooks}%</div>
+                            <div className="text-sm ">{bookReviews.length === 0 ? 0 : (bookReviews.map((r: {
+                                rating: number;
+                            }) => r.rating).filter((r: number) => r === 3).length / bookReviews.length * 100)}%
+                            </div>
                         </div>
                     </div>
                     <div className="flex items-center justify-between mb-2">
@@ -352,11 +368,18 @@ export default function Myinfo() {
                         <div className="w-full bg-[#E5E7EB] rounded h-1.5" style={{width: '320px'}}>
                             <div
                                 className="bg-[#FFCA28] h-1.5 rounded"
-                                style={{width: `${rateTwoBooks}%`}}
+                                style={{
+                                    width: `${bookReviews.length === 0 ? 0 : (bookReviews.map((r: {
+                                        rating: number;
+                                    }) => r.rating).filter((r: number) => r === 2).length / bookReviews.length * 100)}%`
+                                }}
                             ></div>
                         </div>
                         <div className="w-13 pl-1 pr-1 text-center ">
-                            <div className="text-sm">{rateTwoBooks}%</div>
+                            <div className="text-sm">{bookReviews.length === 0 ? 0 : (bookReviews.map((r: {
+                                rating: number;
+                            }) => r.rating).filter((r: number) => r === 2).length / bookReviews.length * 100)}%
+                            </div>
                         </div>
                     </div>
                     <div className="flex items-center justify-between mb-2">
@@ -365,24 +388,31 @@ export default function Myinfo() {
                         <div className="w-full bg-[#E5E7EB] rounded h-1.5" style={{width: '320px'}}>
                             <div
                                 className="bg-[#FFCA28] h-1.5 rounded"
-                                style={{width: `${rateOneBooks}%`}}
+                                style={{
+                                    width: `${bookReviews.length === 0 ? 0 : (bookReviews.map((r: {
+                                        rating: number;
+                                    }) => r.rating).filter((r: number) => r === 1).length / bookReviews.length * 100)}%`
+                                }}
                             ></div>
                         </div>
                         <div className="w-13 pl-1 pr-1 text-center ">
-                            <div className="text-sm">{rateOneBooks}%</div>
+                            <div className="text-sm">{bookReviews.length === 0 ? 0 : (bookReviews.map((r: {
+                                rating: number;
+                            }) => r.rating).filter((r: number) => r === 1).length / bookReviews.length * 100)}%
+                            </div>
                         </div>
                     </div>
 
-                    <Button
-                        className="flex justify-between items-center mt-4 font-bold text-[#F24E1E] bg-white border border-gray-300 shadow-lg w-full">
-                        <div className="flex">
-                            <Image src='vector.svg' width={20} height={20} alt='vector' className="mr-2"/>
-                            로그아웃
-                        </div>
-                        <div className="flex">
-                            <ChevronRightIcon className="text-gray-400"/>
-                        </div>
-                    </Button>
+                    {/*<Button*/}
+                    {/*    className="flex justify-between items-center mt-4 font-bold text-[#F24E1E] bg-white border border-gray-300 shadow-lg w-full">*/}
+                    {/*    <div className="flex" >*/}
+                    {/*        <Image src='vector.svg' width={20} height={20} alt='vector' className="mr-2"/>*/}
+                    {/*        로그아웃*/}
+                    {/*    </div>*/}
+                    {/*    <div className="flex">*/}
+                    {/*        <ChevronRightIcon className="text-gray-400"/>*/}
+                    {/*    </div>*/}
+                    {/*</Button>*/}
 
                 </div>
 
