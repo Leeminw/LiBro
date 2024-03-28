@@ -1,12 +1,10 @@
 package com.ssafy.libro.domain.userbook.controller;
 
-import com.ssafy.libro.domain.book.dto.BookDetailResponseDto;
 import com.ssafy.libro.domain.userbook.dto.*;
 import com.ssafy.libro.domain.userbook.service.UserBookService;
 import com.ssafy.libro.global.common.ResponseData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.annotations.Parameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -100,6 +98,11 @@ public class UserBookController {
         UserBookRatioResponseDto responseDto = userBookService.getBookReadRatio(bookId);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(responseDto));
     }
+    @GetMapping("/read-ratio/isbn/{isbn}")
+    public ResponseEntity<?> getUserBookMappingCount(@PathVariable String isbn){
+        UserBookRatioResponseDto responseDto = userBookService.getBookReadRatio(isbn);
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(responseDto));
+    }
 //
     @GetMapping("/complete")
     public ResponseEntity<?> getUserBookReadComplete(){
@@ -116,6 +119,18 @@ public class UserBookController {
     @GetMapping("/user/commentList")
     public ResponseEntity<?> getUserCommentList() {
         List<UserCommentListResponseDto> responseDtoList = userBookService.getUserCommetList();
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(responseDtoList));
+    }
+
+    @GetMapping("/age-gender/book/{bookId}")
+    public ResponseEntity<?> getUserGenderAgeCounts(@PathVariable Long bookId) {
+        List<UserGenderAgeCountResponseDto> responseDtoList = userBookService.getUserGenderAgeCountList(bookId);
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(responseDtoList));
+    }
+
+    @GetMapping("/rating/summary/{bookId}")
+    public ResponseEntity<?> getRatingSummary(@PathVariable Long bookId){
+        List<UserBookRatingSummary> responseDtoList = userBookService.getUserBookSummaryList(bookId);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(responseDtoList));
     }
 

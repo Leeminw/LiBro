@@ -1,6 +1,9 @@
 package com.ssafy.libro.domain.userbook.repository.custom;
 
+import com.querydsl.core.Tuple;
+import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPAExpressions;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.ssafy.libro.domain.book.entity.Book;
 import com.ssafy.libro.domain.user.entity.QUser;
@@ -13,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import static com.ssafy.libro.domain.book.entity.QBook.book;
+import static com.ssafy.libro.domain.user.entity.QUser.user;
 import static com.ssafy.libro.domain.userbook.entity.QUserBook.userBook;
 import static com.ssafy.libro.domain.userbookhistory.entity.QUserBookHistory.userBookHistory;
 import static com.ssafy.libro.domain.userbookcomment.entity.QUserBookComment.userBookComment;
@@ -166,5 +170,43 @@ public class UserBookCustomRepositoryImpl implements UserBookCustomRepository{
 
 
         return Optional.of(result);
+    }
+
+    @Override
+    public List<Tuple> getUserGenderAgeCounts(Book entity) {
+
+        return jpaQueryFactory
+                .select(
+                        user.age.floor(),
+                        user.gender,
+                        user.id.count().as("count")
+                )
+                .from(user)
+                .leftJoin(user.userBookList,userBook)
+                .leftJoin(userBook.book, book)
+                .where(book.eq(entity)
+                        .and(
+                                (userBook.isDeleted.eq(false)).or(userBook.isDeleted.isNull())
+                        )
+                )
+                .groupBy(user.gender,user.age.floor())
+                .fetch();
+    }
+
+    @Override
+    public List<Tuple> getUserBookRating(Book entity) {
+        return jpaQueryFactory
+                .select(
+                        userBook.rating.floor(),
+                        userBook.count().as("count")
+                )
+                .from(userBook)
+                .leftJoin(userBook.book,book)
+                .where(book.eq(entity).and(
+                        (userBook.isDeleted.eq(false)).or(userBook.isDeleted.isNull())
+                ))
+                .groupBy(userBook.rating.floor())
+                .fetch();
+
     }
 }

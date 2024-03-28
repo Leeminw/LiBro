@@ -16,7 +16,7 @@ export default function Home() {
       setPageLoad(true);
     } else {
       const requestBooks = async () => {
-        await SearchApi.searchBooks("베르나르 베르베르", 1)
+        await SearchApi.searchBooks("플라톤", 1)
           .then((data) => {
             console.log("응답 값", data);
             const updateBookList = data.items.map((item: Book) => ({
@@ -27,12 +27,15 @@ export default function Home() {
               isbn: item.isbn,
               src: "ex00.mp4",
             }));
-            setBookList(updateBookList);
-            setCurrentLoad(Array(updateBookList.length).fill(false));
+            // 일단 10개까지만 로드
+            setBookList(updateBookList.slice(0, 10));
+            setCurrentLoad(
+              Array(updateBookList.slice(0, 10).length).fill(false)
+            );
             setCurrentLoad((current) =>
               current.map((item, index) => (index === 0 ? true : item))
             );
-            loadComplete(updateBookList.length);
+            loadComplete(updateBookList.slice(0, 10).length);
           })
           .catch((err) => console.log(err));
       };

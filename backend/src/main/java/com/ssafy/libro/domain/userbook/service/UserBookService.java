@@ -39,5 +39,9 @@ public interface UserBookService {
     List<UserCommentListResponseDto> getUserCommetList();
     //특정 사용자가 리뷰한 책들에 대한 평점 리스트
 
+    UserBookRatioResponseDto getBookReadRatio(String isbn);
+    List<UserGenderAgeCountResponseDto> getUserGenderAgeCountList(Long bookId);
+    List<UserBookRatingSummary> getUserBookSummaryList(Long bookId);
+
 
 }

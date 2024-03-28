@@ -1,5 +1,6 @@
 package com.ssafy.libro.domain.userbook.repository.custom;
 
+import com.querydsl.core.Tuple;
 import com.ssafy.libro.domain.book.entity.Book;
 import com.ssafy.libro.domain.user.entity.User;
 import com.ssafy.libro.domain.userbook.entity.UserBook;
@@ -24,5 +25,8 @@ public interface UserBookCustomRepository {
     Optional<Long> countUserBookByUserReadComplete(User user);
 
     Optional<List<UserBook>> findUserBookCommentList(User user);
+    List<Tuple> getUserGenderAgeCounts(Book entity);
+    List<Tuple> getUserBookRating(Book entity);
+
 
 }

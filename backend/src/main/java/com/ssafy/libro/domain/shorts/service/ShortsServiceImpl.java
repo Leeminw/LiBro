@@ -41,7 +41,7 @@ public class ShortsServiceImpl implements ShortsService {
     private static final String S3_BASE_URL = "https://%s.s3.amazonaws.com/";
     private static final String S3KEY_PREFIX = "shorts/";
     private static final String VIDEO_FILE_FORMAT = ".mp4";
-    private static final int PROMPT_DIVIDE_NUM = 3;
+    private static final int PROMPT_DIVIDE_NUM = 5;
     private static final int FRAME_RATE = 30;
     private static final int VIDEO_WIDTH = 720;     // 360, 720, 1080
     private static final int VIDEO_HEIGHT = 1280;   // 640, 1280, 1920
@@ -111,9 +111,11 @@ public class ShortsServiceImpl implements ShortsService {
         return encodedImages;
     }
 
-    private static String[] dividePrompt(String initPrompt) {
-        String[] splitPrompts = initPrompt.split(", ");
-        int elemNumPerPrompt = (int) Math.ceil((double) splitPrompts.length / PROMPT_DIVIDE_NUM);
+    private static String[] dividePrompt(String summary) {
+        String processedSummary = summary.replaceAll("\\s+", "\n");
+        String[] splitSummary = processedSummary.split("[.!?]+\\s+|\\r?\\n");;
+
+        int elemNumPerPrompt = (int) Math.ceil((double) splitSummary.length / PROMPT_DIVIDE_NUM);
 
         String[] sentences = new String[PROMPT_DIVIDE_NUM];
         for (int i = 0; i < PROMPT_DIVIDE_NUM; i++) {
@@ -121,12 +123,29 @@ public class ShortsServiceImpl implements ShortsService {
 
             int initIndex = i * elemNumPerPrompt;
             int exitIndex = (i + 1) * elemNumPerPrompt;
-            for (int j = initIndex; j < Math.min(exitIndex, splitPrompts.length); j++)
-                sb.append(splitPrompts[j]).append(", ");
+            for (int j = initIndex; j < Math.min(exitIndex, splitSummary.length); j++)
+                sb.append(splitSummary[j]).append(", ");
             sentences[i] = sb.toString();
         }
         return sentences;
     }
+
+//    private static String[] dividePrompt(String initPrompt) {
+//        String[] splitPrompts = initPrompt.split(", ");
+//        int elemNumPerPrompt = (int) Math.ceil((double) splitPrompts.length / PROMPT_DIVIDE_NUM);
+//
+//        String[] sentences = new String[PROMPT_DIVIDE_NUM];
+//        for (int i = 0; i < PROMPT_DIVIDE_NUM; i++) {
+//            StringBuilder sb = new StringBuilder();
+//
+//            int initIndex = i * elemNumPerPrompt;
+//            int exitIndex = (i + 1) * elemNumPerPrompt;
+//            for (int j = initIndex; j < Math.min(exitIndex, splitPrompts.length); j++)
+//                sb.append(splitPrompts[j]).append(", ");
+//            sentences[i] = sb.toString();
+//        }
+//        return sentences;
+//    }
 
     private static DiffusionResponseDto createImages(String prompt) {
         RestTemplate restTemplate = new RestTemplate();
@@ -275,7 +294,8 @@ public class ShortsServiceImpl implements ShortsService {
     private static BufferedImage overlayTextOnImage(BufferedImage image, String text) {
         Graphics2D g2d = image.createGraphics();
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        Font font = new Font("Malgun Gothic", Font.BOLD, 125);
+        Font font = new Font("Noto Sans CJK KR", Font.BOLD, 125);
+        // Font font = new Font("Malgun Gothic", Font.BOLD, 125);
         g2d.setFont(font);
 
         FontMetrics fm = g2d.getFontMetrics();
@@ -343,14 +363,16 @@ public class ShortsServiceImpl implements ShortsService {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    private void uploadVideoToS3(File videoFile) {
+    private String uploadVideoToS3(File videoFile) {
         if (!videoFile.exists()) {
             log.error("Video file does not exist: {}", videoFile.getAbsolutePath());
-            return;
+            return null;
         }
         String s3Key = S3KEY_PREFIX + videoFile.getName();
         amazonS3.putObject(new PutObjectRequest(bucketName, s3Key, videoFile));
         log.info("Uploaded video to S3: {}", s3Key);
+
+        return String.format("https://%s.s3.%s.amazonaws.com/%s", bucketName, amazonS3.getRegionName(), s3Key); // 최종 URL 리턴
     }
 
     public void cleanupTemporaryDirectory(Path path) throws IOException {
