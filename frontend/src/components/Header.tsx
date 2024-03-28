@@ -178,8 +178,8 @@ const Header = () => {
             transition-all origin-top duration-300
             ${
               menuOpen
-                ? "opacity-100 scale-y-100 scale-x-100"
-                : "opacity-0 scale-y-50 scale-x-75"
+                ? "opacity-100 scale-100"
+                : "opacity-0 scale-0"
             }
             `}
               ref={menuRef}
