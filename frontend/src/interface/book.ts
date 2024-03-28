@@ -15,5 +15,5 @@ interface BookShorts {
     author: string;
     publisher: string;
     isbn: number;
-    src: number;
+    src: string;
 }
