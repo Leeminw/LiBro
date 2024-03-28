@@ -10,30 +10,13 @@ import {getCompleteBookList, getCompleteRatio, getUserInform, getWrittenComment}
 import useUserState from "@/lib/login-state";
 import {useRouter} from "next/navigation";
 import {toast} from "@/components/ui/use-toast";
+import {Progress} from "@/components/ui/progress";
+import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTrigger} from "@/components/ui/dialog";
 
 interface Modal {
     isOpen: boolean;
     isClose: () => void;
     children: any
-}
-
-function ChevronRightIcon(props: any) {
-    return (
-        <svg
-            {...props}
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <path d="m9 18 6-6-6-6"/>
-        </svg>
-    )
 }
 
 function StarFillIcon(props: any) {
@@ -192,7 +175,9 @@ export default function Myinfo() {
 
     const [userInfo, completeRatio, bookReviews, writtenComment] = results.map(result => result.data);
 
-    const reviewList = bookReviews.map((r: { rating: number; }) => r.rating).filter((r: null | number) => r !== null);
+    const reviewList = bookReviews && bookReviews.map((r: {
+        rating: number;
+    }) => r.rating).filter((r: null | number) => r !== null);
     const reviewCount = reviewList.length;
     console.log(reviewCount)
 
@@ -205,35 +190,41 @@ export default function Myinfo() {
                             <AvatarImage src={userInfo.profile} alt="@defaultUser"/>
                             <AvatarFallback></AvatarFallback>
                         </Avatar>
-                        <Button className="mt-4 bg-[#9268EB] text-white font-bold hover:bg-[#9268EB] hover:text-current"
-                                onClick={openModal} variant="secondary">
-                            프로필 수정
-                        </Button>
-                        <Modal isOpen={isModalOpen} isClose={isClose}>
-                            <div className='font-bold border-b border-gray-400 pb-2 p-0'>프로필 수정</div>
-                            <div className='flex justify-center items-center w-full'>
-                                <div className="relative"> {/* 여기에 relative 추가 */}
-                                    <Avatar className="h-16 w-16 mt-2">
-                                        <AvatarImage src={userInfo.profile}
-                                                     alt="@defaultUser"/>
-                                        <AvatarFallback></AvatarFallback>
-                                    </Avatar>
-                                    <Button
-                                        className="absolute bottom-0 right-0 bg-[#9268EB] rounded-full p-0.5 w-6 h-6"> {/* 배경 동그라미와 위치 조정 */}
-                                        <Image src='mdi_pencil.svg' alt='pencil' width={20} height={20}
-                                               className="bg-[#9268EB] rounded-full"/>
-                                    </Button>
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <Button
+                                    className="mt-4 bg-[#9268EB] text-white font-bold hover:bg-[#9268EB] hover:text-current">Edit
+                                    Profile</Button>
+                            </DialogTrigger>
+                            <DialogContent className="">
+                                <DialogHeader>프로필 수정</DialogHeader>
+                                <div className='flex justify-center items-center w-full'>
+                                    <div className="relative"> {/* 여기에 relative 추가 */}
+                                        <Avatar className="h-16 w-16 mt-2">
+                                            <AvatarImage src={userInfo.profile}
+                                                         alt="@defaultUser"/>
+                                            <AvatarFallback></AvatarFallback>
+                                        </Avatar>
+                                        <Button
+                                            className="absolute bottom-0 right-0 bg-[#9268EB] rounded-full p-0.5 w-6 h-6"> {/* 배경 동그라미와 위치 조정 */}
+                                            <Image src='mdi_pencil.svg' alt='pencil' width={20} height={20}
+                                                   className="bg-[#9268EB] rounded-full"/>
+                                        </Button>
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="mx-10">
-                                <Input
-                                    className="border-white border-b-black text-center text-black font-bold rounded-none"
-                                    value={tempNickName} // 임시 닉네임 상태를 사용
-                                    placeholder="닉네임을 입력하세요"
-                                    onChange={handleTempNickNameChange} // 임시 닉네임 변경을 처리하는 함수를 연결
-                                />
-                            </div>
-                        </Modal>
+                                <div className="mx-10">
+                                    <Input
+                                        className="border-white border-b-black text-center text-black font-bold rounded-none"
+                                        value={tempNickName} // 임시 닉네임 상태를 사용
+                                        placeholder="닉네임을 입력하세요"
+                                        onChange={handleTempNickNameChange} // 임시 닉네임 변경을 처리하는 함수를 연결
+                                    />
+                                </div>
+                                <DialogFooter>
+                                    <Button type="submit">수정하기</Button>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
                     </div>
                 </div>
                 <div className="w-2/3 justify-center mt-2">
@@ -285,13 +276,13 @@ export default function Myinfo() {
                 <div className="flex items-center justify-between">
                     <div className="text-sm font-bold">완독율</div>
                     <div
-                        className="text-sm font-bold text-gray-500">{completeRatio.totalSize === 0 ? 0 : (completeRatio.readSize / completeRatio.totalSize) * 100} %
+                        className="text-sm font-bold text-gray-500">{completeRatio.totalSize === 0 ? 0 : ((completeRatio.readSize / completeRatio.totalSize) * 100).toFixed(1)} %
                     </div>
                 </div>
                 <div className="w-full bg-[#E5E7EB] rounded h-2">
                     <div
                         className="bg-[#9268EB] h-2 rounded"
-                        style={{width: `${completeRatio.totalSize === 0 ? 0 : (completeRatio.readSize / completeRatio.totalSize) * 100}%`}}
+                        style={{width: `${completeRatio.totalSize === 0 ? 0 : ((completeRatio.readSize / completeRatio.totalSize) * 100).toFixed(1)}%`}}
                     ></div>
                 </div>
             </div>
@@ -301,108 +292,36 @@ export default function Myinfo() {
                     <div className="text-sm font-bold">나의 평균 평점</div>
                     <div className="flex items-center">
                         <div
-                            className="mr-2 text-m font-bold">{reviewCount === 0 ? 0 : reviewList.reduce((acc: number, rating: number) => acc + rating, 0) / reviewCount}</div>
-                        {renderStars(bookReviews.map((r: {
-                            rating: number;
-                        }) => r.rating).reduce((acc: number, rating: number) => acc + rating, 0) / reviewCount)}
+                            className="mr-2 text-m font-bold">{reviewCount === 0 ? 0 : (reviewList.reduce((acc: number, rating: number) => acc + rating, 0) / reviewCount).toFixed(1)}</div>
+                        {renderStars((reviewList.reduce((acc: number, rating: number) => acc + rating, 0) / reviewCount))}
                     </div>
                     <div className="flex items-center">
                         <div className="text-xs font-bold pl-3 pr-3">리뷰 수 {reviewCount}</div>
                     </div>
                 </div>
-
-                <div className="mt-3 text-center">
-                    <div className="flex items-center justify-between mb-2">
-                        <div className="text-sm mr-1">5</div>
-                        <StarFillIcon className="text-[#FFCA28] w-4 h-4 mr-1"/>
-                        <div className="w-full bg-[#E5E7EB] rounded h-1.5" style={{width: '320px'}}>
-                            <div
-                                className="bg-[#FFCA28] h-1.5 rounded"
-                                style={{
-                                    width: `${reviewCount === 0 ? 0 : (reviewList.filter((r: number) => r === 5).length / reviewCount * 100)}%`
-                                }}
-                            ></div>
+                {[5, 4, 3, 2, 1].map((rating: number) => {
+                    const ScorePerRating: number = reviewList.filter((r: number) => r === rating).length / reviewCount * 100;
+                    return (
+                        <div className="flex items-center mt-4">
+                            <StarFillIcon className="text-[#FFCA28] w-4 h-4 mr-1"/>
+                            <p className="text-sm w-4 font-medium text-blue-600 dark:text-blue-500 select-none">
+                                {rating}
+                            </p>
+                            <Progress
+                                className="ml-2 mr-4"
+                                indicatorColor="bg-yellow-300 w-full h-5 rounded-full"
+                                value={reviewCount === 0 ? 0 : ScorePerRating}
+                            />
+                            <p className="text-sm w-8 text-end font-medium text-gray-500 dark:text-gray-400">
+                                {reviewCount === 0 ? 0 : ScorePerRating}%
+                            </p>
                         </div>
-                        <div className="w-13 pl-1 pr-1 text-center ">
-                            <div
-                                className="text-sm ">{reviewCount === 0 ? 0 : (reviewList.filter((r: number) => r === 5).length / reviewCount * 100)}%
-                            </div>
-                        </div>
-                    </div>
-                    <div className="flex items-center justify-between mb-2">
-                        <div className="text-sm mr-1">4</div>
-                        <StarFillIcon className="text-[#FFCA28] w-4 h-4 mr-1"/>
-                        <div className="w-full bg-[#E5E7EB] rounded h-1.5" style={{width: '320px'}}>
-                            <div
-                                className="bg-[#FFCA28] h-1.5 rounded"
-                                style={{
-                                    width: `${reviewCount === 0 ? 0 : (reviewList.filter((r: number) => r === 4).length / reviewCount * 100)}%`
-                                }}
-                            ></div>
-                        </div>
-                        <div className="w-13 pl-1 pr-1 text-center ">
-                            <div
-                                className="text-sm ">{reviewCount === 0 ? 0 : (reviewList.filter((r: number) => r === 4).length / reviewCount * 100)}%
-                            </div>
-                        </div>
-                    </div>
-                    <div className="flex items-center justify-between mb-2">
-                        <div className="text-sm mr-1">3</div>
-                        <StarFillIcon className="text-[#FFCA28] w-4 h-4 mr-1"/>
-                        <div className="w-full bg-[#E5E7EB] rounded h-1.5" style={{width: '320px'}}>
-                            <div
-                                className="bg-[#FFCA28] h-1.5 rounded"
-                                style={{
-                                    width: `${reviewCount === 0 ? 0 : (reviewList.filter((r: number) => r === 3).length / reviewCount * 100)}%`
-                                }}
-                            ></div>
-                        </div>
-                        <div className="w-13 pl-1 pr-1 text-center ">
-                            <div
-                                className="text-sm ">{reviewCount === 0 ? 0 : (reviewList.filter((r: number) => r === 3).length / reviewCount * 100)}%
-                            </div>
-                        </div>
-                    </div>
-                    <div className="flex items-center justify-between mb-2">
-                        <div className="text-sm mr-1">2</div>
-                        <StarFillIcon className="text-[#FFCA28] w-4 h-4 mr-1"/>
-                        <div className="w-full bg-[#E5E7EB] rounded h-1.5" style={{width: '320px'}}>
-                            <div
-                                className="bg-[#FFCA28] h-1.5 rounded"
-                                style={{
-                                    width: `${reviewCount === 0 ? 0 : ((reviewList.filter((r: number) => r === 2).length / reviewCount * 100))}%`
-                                }}
-                            ></div>
-                        </div>
-                        <div className="w-13 pl-1 pr-1 text-center ">
-                            <div
-                                className="text-sm">{reviewCount === 0 ? 0 : ((reviewList.filter((r: number) => r === 2).length / reviewCount * 100))}%
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="flex items-center justify-between mb-2">
-                        <div className="text-sm">1</div>
-                        <StarFillIcon className="text-[#FFCA28] w-4 h-4"/>
-                        <div className="w-full bg-[#E5E7EB] rounded h-1.5" style={{width: '320px'}}>
-                            <div
-                                className="bg-[#FFCA28] h-1.5 rounded"
-                                style={{
-                                    width: `${reviewCount === 0 ? 0 : ((reviewList.filter((r: number) => r === 1).length / reviewCount * 100))}%`
-                                }}
-                            ></div>
-                        </div>
-                        <div className="w-13 pl-1 pr-1 text-center ">
-                            <div
-                                className="text-sm">{reviewCount === 0 ? 0 : ((reviewList.filter((r: number) => r === 1).length / reviewCount * 100))}%
-                            </div>
-                        </div>
-                    </div>
-
-
-                </div>
-
+                    );
+                })}
             </div>
+
+            <div className="mt-20"/>
+
         </>
 
     );
