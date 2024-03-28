@@ -317,7 +317,8 @@ public class ShortsServiceImpl implements ShortsService {
         Graphics2D g2d = image.createGraphics();
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 //        Font font = new Font("Noto Sans CJK KR", Font.BOLD, 64);
-        Font font = new Font("Nanum Pen", Font.BOLD, 54);
+        Font font = new Font("Nanum Pen Script", Font.BOLD, 54);
+//        Font font = new Font("Nanum Pen", Font.BOLD, 54);
         g2d.setFont(font);
 
         FontMetrics fm = g2d.getFontMetrics();
