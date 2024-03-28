@@ -44,7 +44,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         }
 
         Map<String,Object> result = new HashMap<>();
-        response.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
+        response.setHeader("Access-Control-Allow-Origin", "https://j10a301.p.ssafy.io/");
         response.setStatus(HttpStatus.CREATED.value());
         String providerResult = jwtProvider.validateToken(jwtToken);
         if (providerResult.equals("access")) {
