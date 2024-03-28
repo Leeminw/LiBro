@@ -15,13 +15,13 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 const ResultPage = () => {
   const params = useSearchParams();
-  const [query, setQuery] = useState<string | null>(params.get("query"));
+  const query = params.get("query");
   const [bookList, setBookList] = useState<Book[]>([]);
   const [start, setStart] = useState(Number(params.get("start")));
   const [curpage, setCurpage] = useState(Math.floor(start / 10) + 1);
   const scrollRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
-
+  
   const scrollTop = () => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = 0;
@@ -55,7 +55,11 @@ const ResultPage = () => {
   };
   useEffect(() => {
     updateBookList(start, true);
-  }, []);
+  }, [query]);
+
+  useEffect(()=>{
+
+  },[])
 
   return (
     <>
@@ -89,7 +93,7 @@ const ResultPage = () => {
                   <p className="text-sm text-gray-900 break-words line-clamp-4">
                     {book.title}
                   </p>
-                  <p className="text-sm text-gray-500 mt-2">{book.author}</p>
+                  <p className="text-sm text-gray-500 mt-2">{book.author.split("^").join(", ")}</p>
                   <p className="text-sm text-gray-500 mt-2">
                     {book.discount}원
                   </p>
@@ -116,13 +120,6 @@ const ResultPage = () => {
                 </PaginationItem>
               )}
               {/* 페이지 버튼 */}
-              {/* 
-                    bookList.length 32 = 4출력
-                    bookList.length가 51, 101, 125
-                    start에 따라서...
-                    Math.round(start / 10) = 0, 5, 10, 15, ...
-                    *10 = 0, 50, 100, 150
-              */}
               {Array.from(
                 {
                   length:
