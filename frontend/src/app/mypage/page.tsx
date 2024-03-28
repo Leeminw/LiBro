@@ -1,19 +1,14 @@
 'use client'
 
 import React from "react"
-import {
-    Tabs,
-    TabsContent,
-    TabsList,
-    TabsTrigger,
-  } from "@/components/ui/tabs"
+import {Tabs, TabsContent, TabsList, TabsTrigger,} from "@/components/ui/tabs"
 import Myinfo from '../../components/components/mypage/mypage'
-import Calendar from '../../components/components/mypage/calendar'
+import Calendar from '../../components/components/mypage/calendarV2'
 
 
 const Mypage = () => {
-  
-  return (
+
+    return (
     <div className="bg-white h-full pt-12 overflow-auto">
       <div className="p-4">
 

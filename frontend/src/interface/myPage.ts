@@ -37,3 +37,10 @@ interface UserBookListResponse {
     ratingComment: string;
     ratingSpoiler: boolean;
 }
+
+interface UserBookCommentDetailResponse {
+    id: number
+    content: string
+    createdDate: string
+    updatedDate: string
+}
