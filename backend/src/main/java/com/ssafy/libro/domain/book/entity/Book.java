@@ -68,4 +68,9 @@ public class Book {
         return this;
     }
 
+    public Book updateShortsUrl(String shortsUrl) {
+        this.shortsUrl = shortsUrl;
+        return this;
+    }
+
 }
