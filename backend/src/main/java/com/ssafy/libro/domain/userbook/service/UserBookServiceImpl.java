@@ -24,12 +24,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.Year;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -116,7 +118,7 @@ public class UserBookServiceImpl implements UserBookService{
 
         userBook.updateDelete();
         userBookRepository.save(userBook);
-        
+
     }
 
     @Override
@@ -149,6 +151,38 @@ public class UserBookServiceImpl implements UserBookService{
 
         return responseDtoList;
     }
+
+    @Override
+    public Map<LocalDate, LinkedHashSet<Object>> getBookListByDateV2(Integer year, Integer month) {
+        User user = userService.loadUser();
+
+        LocalDateTime startDateTime = LocalDateTime.of(year, month, 1, 0, 0);
+        int lastDayOfMonth = Month.of(month).length(Year.isLeap(year));
+        LocalDateTime endDateTime = LocalDateTime.of(year, month, lastDayOfMonth, 23, 59, 59);
+
+        List<UserBook> bookList = userBookRepository.findUserBookByUserAndDateV2(user,startDateTime,endDateTime)
+                .orElseThrow(()-> new UserBookNotFoundException("userid : " + user.getId()));
+
+        log.debug(bookList.size() + "");
+
+        Map<LocalDate, LinkedHashSet<Object>> result = new HashMap<>();
+
+        for (UserBook userBook : bookList) {
+            userBook.getUserBookHistoryList().stream()
+                    .sorted(Comparator.comparing(UserBookHistory::getEndDate).reversed())
+                    .findAny()
+                    .ifPresent(ubh -> {
+                        String thumbnail = userBook.getBook().getThumbnail();
+                        LocalDate endDate = ubh.getEndDate().toLocalDate();
+
+                        result.computeIfAbsent(endDate, k -> new LinkedHashSet<>())
+                                .add(thumbnail);
+                    });
+        }
+
+        return result;
+    }
+
     @Override
     @Transactional
     public UserBookDetailResponseDto updateRating(UserBookRatingRequestDto requestDto){
@@ -210,6 +244,8 @@ public class UserBookServiceImpl implements UserBookService{
                 .orElseThrow(() -> new UserBookNotFoundException("no data"));
         long read = userBookRepository.countUserBookByUserReadComplete(user)
                 .orElse(0L);
+
+        log.info("호출당함...");
 
         return UserBookRatioResponseDto.builder()
                 .type("user")

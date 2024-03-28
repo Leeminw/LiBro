@@ -13,6 +13,7 @@ import {useInView} from "react-intersection-observer";
 import {useInfiniteQuery, useQueryClient, useSuspenseQuery} from "@tanstack/react-query";
 import {getCategoryList, getPostList} from "@/lib/club";
 import {useParams, useRouter} from "next/navigation";
+import {Skeleton} from "@/components/ui/skeleton";
 
 
 export default function BoardList() {
@@ -25,7 +26,7 @@ export default function BoardList() {
 
     const [searchTerm, setSearchTerm] = useState('');
     const [sortOrder, setSortOrder] = useState('latest'); // 초기 정렬 순서를 설정합니다. 여기서는 최신순으로 초기화합니다.
-    const [selectedCategory, setSelectedCategory] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState('0');
 
     const clubId = parseInt(param.id as string);
     const {
@@ -34,7 +35,7 @@ export default function BoardList() {
         data: categoryList,
         isError: isCategoryError,
         error: FetchingCategoryError,
-        isSuccess: isCategorySuccess
+        isSuccess: isCategorySuccess,
     } = useSuspenseQuery({
         queryKey: ['clubCategory', clubId],
         queryFn: () => getCategoryList(clubId)
@@ -47,14 +48,16 @@ export default function BoardList() {
         hasNextPage,
         fetchNextPage,
         isFetchingNextPage,
-        refetch
+        refetch,
+        isRefetching,
+        isSuccess,
     } = useInfiniteQuery({
         queryKey: ['articleList'],
         queryFn: ({pageParam}) => getPostList(clubId, {
             boardId: parseInt(selectedCategory),
             sortOrder: sortOrder,
             keyword: searchTerm,
-            articleId: undefined
+            articleId: pageParam
         }),
         getNextPageParam: (lastPage, allPages, lastPageParam, allPageParams) => {
             return lastPage.content.length === 0 ? undefined : lastPage.content[lastPage.content.length - 1].id;
@@ -64,10 +67,14 @@ export default function BoardList() {
 
     const handleSearchChange = (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === 'Enter') {
-            setSearchTerm(event.currentTarget.value);
             refetch();
         }
     };
+
+    const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const value = event.currentTarget.value;
+        setSearchTerm(value);
+    }
 
     const handleSortChange = (event: string) => {
         setSortOrder(event);
@@ -78,7 +85,7 @@ export default function BoardList() {
     };
 
     useEffect(() => {
-        refetch();
+        if (!isLoading || !isRefetching) refetch();
     }, [sortOrder, selectedCategory]);
 
     const {ref, inView} = useInView();
@@ -90,9 +97,11 @@ export default function BoardList() {
     }, [inView]);
 
 
-    const  writeHandler =  () => {
+    const writeHandler = () => {
         router.push(`/club/${clubId}/board/write`)
     };
+
+
     return (
         <>
             <div className="flex justify-between">
@@ -101,7 +110,7 @@ export default function BoardList() {
                     <div className="relative ">
                         <Search className="absolute left-2 top-3 h-4 w-4 text-muted-foreground"/>
                         <Input placeholder="Search" defaultValue={searchTerm} className="pl-8"
-                               onKeyDown={handleSearchChange}/>
+                               onKeyDown={handleSearchChange} onChange={handleInputChange}/>
                     </div>
                 </div>
             </div>
@@ -142,12 +151,21 @@ export default function BoardList() {
                     <CardContent className="p-0">
 
                         {
-                            boards?.pages.flatMap(t => t.content).map((board) => (
+                            isSuccess && boards?.pages.flatMap(t => t.content).map((board) => (
                                 <BoardItem key={board.id} articleId={board.id} name={board.name}
                                            picture={board.picture}
                                            title={board.title} commentCount={board.commentCount}
                                            createdDate={board.createdDate} category={board.category}/>
                             ))
+                        }
+
+
+                        {
+
+                            (isLoading || isRefetching) && (<div className="flex flex-col space-y-3">
+                                <Skeleton/>
+                            </div>)
+
                         }
                     </CardContent>
                 </ScrollArea>

@@ -17,7 +17,7 @@ interface ClubItemInform {
 interface ClubSearch {
     sortOrder?: string;
     keyword?: string;
-    clubId?: number;
+    clubId?: number | null;
 }
 
 interface ClubWrite {

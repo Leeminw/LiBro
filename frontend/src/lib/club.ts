@@ -103,7 +103,7 @@ export const getCommentList = async (
 }
 
 export const getPostList = async (
-    clubId: number,
+    clubId: number | null,
     params?: PostSearch
 ) => {
     let axiosParams: AxiosRequestConfig | undefined;
@@ -207,3 +207,5 @@ export const getClubMemberShip = async (
     const axiosResponse = await instance.get(`/api/usergroup/hasPermission/${clubId}/${userId}`)
     return axiosResponse.data.data
 }
+
+

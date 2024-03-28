@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 @Slf4j
@@ -74,6 +76,13 @@ public class UserBookController {
             (@RequestParam Integer year, @RequestParam Integer month){
         List<UserBookListByDateResponseDto> responseDtoList = userBookService.getBookListByDate(year,month);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(responseDtoList));
+    }
+
+    @GetMapping("/dateV2")
+    public ResponseEntity<?> getBookListByDateV2
+            (@RequestParam Integer year, @RequestParam Integer month){
+        Map<LocalDate, LinkedHashSet<Object>> bookListByDateV2 = userBookService.getBookListByDateV2(year, month);
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(bookListByDateV2));
     }
 
 //    사용자 등록 도서 완독
