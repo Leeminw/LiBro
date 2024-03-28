@@ -57,7 +57,7 @@ const Shorts = ({
                   {bookDetail.title}
                 </div>
                 <div className="text-xs text-[#CCCCCC] self-start break-words overflow-ellipsis">
-                  저자 {bookDetail.author} | 출판사 {bookDetail.publisher}
+                  {bookDetail.author.split("^").join(", ")}
                 </div>
               </div>
               <div className="text-xs self-end">자세히 보기 &gt;</div>
