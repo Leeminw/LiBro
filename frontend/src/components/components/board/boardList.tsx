@@ -51,8 +51,6 @@ export default function BoardList() {
         refetch,
         isRefetching,
         isSuccess,
-
-
     } = useInfiniteQuery({
         queryKey: ['articleList'],
         queryFn: ({pageParam}) => getPostList(clubId, {

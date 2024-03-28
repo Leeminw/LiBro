@@ -24,8 +24,11 @@ export default function ClubPage() {
     };
 
     return (
-        <>
-            <Tabs defaultValue={"find"} className="w-full pt-12">
+        <div className="bg-white">
+            <div className="pt-16">
+                <div className="text-xl font-bold ml-2 ">커뮤니티</div>
+            </div>
+            <Tabs defaultValue={"find"} className="w-full pt-4">
                 <TabsList className="grid w-full grid-cols-2">
                     <TabsTrigger value="find" onClick={() => setTabState("find")}>커뮤니티 찾기</TabsTrigger>
                     <TabsTrigger value="my" onClick={() => setTabState("my")}>가입한 커뮤니티</TabsTrigger>
@@ -38,6 +41,6 @@ export default function ClubPage() {
                     {tabState === "my" && renderClubData()}
                 </TabsContent>
             </Tabs>
-        </>
+        </div>
     );
 }
