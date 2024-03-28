@@ -302,7 +302,7 @@ export default function Myinfo() {
                 {[5, 4, 3, 2, 1].map((rating: number) => {
                     const ScorePerRating: number = reviewList.filter((r: number) => r === rating).length / reviewCount * 100;
                     return (
-                        <div className="flex items-center mt-4">
+                        <div key={rating} className="flex items-center mt-4">
                             <StarFillIcon className="text-[#FFCA28] w-4 h-4 mr-1"/>
                             <p className="text-sm w-4 font-medium text-blue-600 dark:text-blue-500 select-none">
                                 {rating}
