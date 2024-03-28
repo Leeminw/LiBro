@@ -11,6 +11,7 @@ import {getClubDetail, joinClub} from "@/lib/club";
 import {toast} from "@/components/ui/use-toast";
 import {useRouter} from "next/navigation";
 import useUserState from "@/lib/login-state";
+import {Spinner} from "@/components/ui/spinner";
 
 export default function CommunityPostPage({params}: { params: { id: number } }) {
     const clubId = params.id;
@@ -32,9 +33,8 @@ export default function CommunityPostPage({params}: { params: { id: number } }) 
                 title: "클럽에 정상적으로 가입되었습니다.",
             });
             queryClient.invalidateQueries({queryKey: ['myclubList']});
+            queryClient.invalidateQueries({queryKey: ['memberShip', clubId, userId]});
             router.refresh();
-
-
         },
         onError: (data, variables, context) => {
             toast({
@@ -46,6 +46,8 @@ export default function CommunityPostPage({params}: { params: { id: number } }) 
     if (isLoading) {
         return <div>Loading...</div>;
     }
+
+    if (isPending) return <Spinner>Loading...</Spinner>;
 
     if (isFetchingError) {
         return <div>Error...</div>;
