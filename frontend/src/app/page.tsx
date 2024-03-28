@@ -25,7 +25,7 @@ export default function Home() {
               author: item.author,
               publisher: item.publisher,
               isbn: item.isbn,
-              src: item.isbn % 2 == 0 ? "ex00.mp4" : "ex01.mp4",
+              src: "ex00.mp4",
             }));
             // 일단 10개까지만 로드
             setBookList(updateBookList.slice(0, 10));
