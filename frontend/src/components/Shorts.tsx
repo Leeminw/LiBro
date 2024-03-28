@@ -5,11 +5,9 @@ import { BsBookmark, BsBookmarkFill } from "react-icons/bs";
 import { Skeleton } from "./ui/skeleton";
 import { SearchApi } from "@/lib/axios-search";
 const Shorts = ({
-  idx,
   bookDetail,
   shortsLoad,
 }: {
-  idx: number;
   bookDetail: BookShorts;
   shortsLoad: boolean;
 }) => {
@@ -26,7 +24,7 @@ const Shorts = ({
             className="bg-black/50 hover:bg-black/30 rounded-full p-2 backdrop-blur-md absolute top-2 right-2 z-10 cursor-pointer transition-colors duration-150"
             onClick={() => {
               setBookmark(bookmark ? false : true);
-              console.log(idx + "번 쇼츠 클릭 = " + bookDetail.isbn);
+              console.log(bookDetail.isbn + " 쇼츠 클릭 = " + bookDetail.isbn);
             }}
           >
             <div className="relative w-5 h-5">
