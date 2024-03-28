@@ -125,7 +125,7 @@ const DetailPage = () => {
                 />
                 <div className="flex items-end mb-4">
                   <div className="flex flex-col">
-                    <p className="text-white font-semibold text-sm">
+                    <p className="text-white font-semibold text-lg">
                       {bookDetail.title}
                     </p>
                     <p className="text-gray-300 text-xs mt-1">
@@ -217,58 +217,44 @@ const DetailPage = () => {
                           female={70}
                           isLeft={false}
                           total={20}
+                          description="10대"
                         />
                         <DetailAnalyze
                           male={40}
                           female={60}
                           isLeft={false}
                           total={20}
+                          description="20대"
                         />
                         <DetailAnalyze
                           male={70}
                           female={30}
                           isLeft={false}
                           total={60}
+                          description="30대"
                         />
                         <DetailAnalyze
                           male={10}
                           female={90}
                           isLeft={true}
                           total={20}
+                          description="40대"
                         />
                         <DetailAnalyze
                           male={20}
                           female={80}
                           isLeft={true}
                           total={10}
+                          description="50대"
                         />
                         <DetailAnalyze
                           male={50}
                           female={50}
                           isLeft={true}
                           total={10}
+                          description="60대 이상"
                         />
                       </div>
-                    </div>
-                  </div>
-                  <div className="w-full mt-2 flex relative">
-                    <div className="w-full flex justify-between absolute pl-[3rem]">
-                      <p className="text-xs text-[#888888] w-10 px-1 text-center">
-                        10대
-                      </p>
-                      <p className="text-xs text-[#888888] w-10 px-1 text-center">
-                        20대
-                      </p>
-                      <p className="text-xs text-[#888888] w-10 px-1 text-center">
-                        30대
-                      </p>
-                      <p className="text-xs text-[#888888] w-10 px-1 text-center">
-                        40대
-                      </p>
-                      <p className="text-xs text-[#888888] w-10 px-1 text-center">
-                        50대
-                      </p>
-                      <p className="text-xs text-[#888888]">60대 이상</p>
                     </div>
                   </div>
                 </div>
