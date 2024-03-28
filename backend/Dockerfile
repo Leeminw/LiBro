@@ -1,5 +1,5 @@
 # OpenJDK 17을 포함하는 경량화된 Alpine Linux 베이스 이미지 사용
-FROM openjdk:17-jdk-slim
+FROM openjdk:17-jdk-buster
 
 # 컨테이너 내부의 작업 디렉토리를 /home/app로 설정
 WORKDIR /home/app
@@ -8,7 +8,7 @@ WORKDIR /home/app
 COPY build/libs/*.jar app.jar
 
 # 컨테이너가 시작될 때 실행될 명령어 정의, 작업 디렉토리 /home/app/app.jar 파일 실행
-ENTRYPOINT ["java","-jar","./app.jar"]
+ENTRYPOINT ["java", "-Djava.library.path=/home/backend/lib/", "-jar", "./app.jar"]
 
 # 컨테이너의 8080 포트를 외부로 노출
 EXPOSE 8080

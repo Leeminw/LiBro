@@ -50,10 +50,9 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(ResponseData.success("회원가입 성공"));
     }
 
-    @GetMapping("/test")
-    public ResponseEntity<?> getTest() {
-        log.info("call test");
-        return ResponseEntity.status(HttpStatus.CREATED).body(ResponseData.success("성공"));
+    @GetMapping("/verify")
+    public ResponseEntity<?> getVerify() {
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success("성공"));
     }
 
 }
