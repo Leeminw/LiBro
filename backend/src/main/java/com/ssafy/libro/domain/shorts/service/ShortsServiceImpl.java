@@ -275,7 +275,7 @@ public class ShortsServiceImpl implements ShortsService {
     private static BufferedImage overlayTextOnImage(BufferedImage image, String text) {
         Graphics2D g2d = image.createGraphics();
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        Font font = new Font("Arial", Font.BOLD, 125);
+        Font font = new Font("Noto Sans CJK KR", Font.BOLD, 125);
         // Font font = new Font("Malgun Gothic", Font.BOLD, 125);
         g2d.setFont(font);
 
