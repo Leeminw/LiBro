@@ -9,16 +9,25 @@ import { FaPlus, FaStar } from "react-icons/fa6";
 import { RiPencilFill } from "react-icons/ri";
 import { dateFormatter } from "@/lib/date-formatter";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
-import instance from '@/lib/interceptor'
+import instance from "@/lib/interceptor";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 const DetailPage = () => {
   const URL = "ex0" + 0 + ".mp4";
   const isbn = useSearchParams().get("isbn");
+  const ratingRef = useRef<HTMLDivElement>(null);
   const [bookLoading, setBookLoading] = useState<boolean>(false);
   const [bookDetail, setBookDetail] = useState<Book>({
     title: "",
@@ -30,6 +39,34 @@ const DetailPage = () => {
     isbn: 0,
     description: "",
   });
+  const [start, setStart] = useState<number>(1);
+  const [curpage, setCurpage] = useState<number>(1);
+  const [rating, setRating] = useState([
+    {
+      nickname: "A",
+      email: "A0@A.com",
+      rating: 1,
+      comment: "정말 재미없어요",
+      createdDate: "2022-01-03",
+    },
+    {
+      nickname: "A",
+      email: "A1@A.com",
+      rating: 1,
+      comment: "정말 재미없어요",
+      createdDate: "2022-01-03",
+    },
+  ]);
+
+  const ratingPaging = (input: number, isNext: boolean) => {
+    setStart(input);
+    if (isNext) {
+      setCurpage(Math.floor(input / 10) + 1);
+    } else {
+      setCurpage(Math.floor(input / 10) + 5);
+    }
+  };
+
   useEffect(() => {
     const updateBookDetail = () => {
       if (isbn) {
@@ -44,62 +81,56 @@ const DetailPage = () => {
     };
     updateBookDetail();
   }, []);
-  const mappingBook = async () =>{
+  const mappingBook = async () => {
     let response, postResponse;
     // 검색을 했을때 isbn이 db에 있는지 확인하기
     try {
-      response = await instance.get(
-        "/api/v1/book/search",{
-          params : {
-            key : "isbn",
-            word : bookDetail.isbn,
-            page : 0,
-            size : 0  ,
-          }
-        }
-      )
+      response = await instance.get("/api/v1/book/search", {
+        params: {
+          key: "isbn",
+          word: bookDetail.isbn,
+          page: 0,
+          size: 0,
+        },
+      });
       // 데이터가 없는경우 등록
       if (response.data.data.length === 0) {
-        console.log("do this")
-        const dateString: string = bookDetail.pubdate
-        const formattedDateString: string = `${dateString.slice(0, 4)}-${dateString.slice(4, 6)}-${dateString.slice(6)}`;
+        console.log("do this");
+        const dateString: string = bookDetail.pubdate;
+        const formattedDateString: string = `${dateString.slice(
+          0,
+          4
+        )}-${dateString.slice(4, 6)}-${dateString.slice(6)}`;
         const isoDateTime: String = new Date(formattedDateString).toISOString();
         const addBook = {
-          isbn : bookDetail.isbn,
-          title : bookDetail.title,
-          summary : bookDetail.description,
-          price : bookDetail.discount,
-          author : bookDetail.author,
-          publisher : bookDetail.publisher,
-          pubDate : isoDateTime,
-          thumbnail : bookDetail.image,
-        }
-        postResponse = await instance.post(
-          "api/v1/book", addBook );
-        
-      } 
+          isbn: bookDetail.isbn,
+          title: bookDetail.title,
+          summary: bookDetail.description,
+          price: bookDetail.discount,
+          author: bookDetail.author,
+          publisher: bookDetail.publisher,
+          pubDate: isoDateTime,
+          thumbnail: bookDetail.image,
+        };
+        postResponse = await instance.post("api/v1/book", addBook);
+      }
       // mapping
-      const data = postResponse?.data.data || response.data.data[0]
-      console.log(data)
-      const bookId = (data.id)
-      // // 이미 되어있는지 확인하기 todo 
-      console.log(bookId)
-      // mapping 
-      const mappingResponse = await instance.post(
-        "/api/v1/userbook", {
-          bookId :bookId,
-          type : '관심'
-        }
-      )
-    
-      console.log(mappingResponse.data) 
-      
+      const data = postResponse?.data.data || response.data.data[0];
+      console.log(data);
+      const bookId = data.id;
+      // // 이미 되어있는지 확인하기 todo
+      console.log(bookId);
+      // mapping
+      const mappingResponse = await instance.post("/api/v1/userbook", {
+        bookId: bookId,
+        type: "관심",
+      });
+
+      console.log(mappingResponse.data);
+    } catch (error: any) {
+      console.log(error);
     }
-    catch (error : any) {
-      
-      console.log(error)
-    }
-  }
+  };
 
   return (
     <>
@@ -115,7 +146,7 @@ const DetailPage = () => {
                 backgroundPosition: "center",
               }}
             >
-              <div className="w-full h-full backdrop-blur-lg backdrop-brightness-75 flex absolute">
+              <div className="w-full h-full backdrop-blur-lg backdrop-brightness-75 flex absolute pr-2">
                 <Image
                   src={bookDetail.image}
                   alt=""
@@ -125,11 +156,12 @@ const DetailPage = () => {
                 />
                 <div className="flex items-end mb-4">
                   <div className="flex flex-col">
-                    <p className="text-white font-semibold text-lg">
+                    <p className="text-white font-semibold text-lg line-clamp-3">
                       {bookDetail.title}
                     </p>
                     <p className="text-gray-300 text-xs mt-1">
-                      저자 {bookDetail.author} | 출판사 {bookDetail.publisher}
+                      저자 {bookDetail.author.split("^").join(", ")} | 출판사{" "}
+                      {bookDetail.publisher}
                     </p>
                   </div>
                 </div>
@@ -261,7 +293,7 @@ const DetailPage = () => {
               </div>
 
               {/* 리뷰 */}
-              <div className="mt-8 w-full h-fit">
+              <div ref={ratingRef} className="mt-8 w-full h-fit">
                 <p className="text-lg text-gray-800 font-semibold">리뷰</p>
                 <hr className="mt-2 mb-3" />
               </div>
@@ -350,64 +382,92 @@ const DetailPage = () => {
                 </p>
               </div>
               <div className="mt-8 w-full h-fit pl-1">
-                <div className="flex flex-col justify-between bg-white border border-gray-200 w-full h-28 rounded-lg drop-shadow-md p-4 my-4">
-                  <p className="font-semibold text-sm">
-                    코린이 @sadacxz21422 | 2024-01-01 15:36
-                  </p>
-                  <div className="flex">
-                    <FaStar className="w-5 h-5 text-yellow-300 me-1" />
-                    <FaStar className="w-5 h-5 text-yellow-300 me-1" />
-                    <FaStar className="w-5 h-5 text-yellow-300 me-1" />
-                    <FaStar className="w-5 h-5 text-yellow-300 me-1" />
-                    <FaStar className="w-5 h-5 text-gray-300 me-1" />
-                  </div>
-                  <p className="text-sm">정말 재밌어요</p>
-                </div>
-                <div className="flex flex-col justify-between bg-white border border-gray-200 w-full h-28 rounded-lg drop-shadow-md p-4 my-4">
-                  <p className="font-semibold text-sm">
-                    코린이 @sadacxz21422 | 2024-01-01 15:36
-                  </p>
-                  <div className="flex">
-                    <FaStar className="w-5 h-5 text-yellow-300 me-1" />
-                    <FaStar className="w-5 h-5 text-yellow-300 me-1" />
-                    <FaStar className="w-5 h-5 text-yellow-300 me-1" />
-                    <FaStar className="w-5 h-5 text-yellow-300 me-1" />
-                    <FaStar className="w-5 h-5 text-gray-300 me-1" />
-                  </div>
-                  <p className="text-sm">정말 재밌어요</p>
-                </div>
-              </div>
-              {/* 리뷰 작성 */}
-              <div className="mt-12 w-full h-fit">
-                <p className="text-lg text-gray-800 font-semibold">리뷰 작성</p>
-                <hr className="mt-2 mb-3" />
-                <div className="flex">
-                  <FaStar className="w-6 h-6 text-yellow-300 me-1" />
-                  <FaStar className="w-6 h-6 text-yellow-300 me-1" />
-                  <FaStar className="w-6 h-6 text-yellow-300 me-1" />
-                  <FaStar className="w-6 h-6 text-yellow-300 me-1" />
-                  <FaStar className="w-6 h-6 text-gray-300 me-1" />
-                </div>
-                <div className="flex">
-                  <div className="w-full pr-2">
-                    <Label htmlFor="rating" className="text-sm text-gray-500">
-                      Comments
-                    </Label>
-                    <Input
-                      id="rating"
-                      className="h-12 my-2 transition duration-300"
-                    />
-                  </div>
-                  <div className="flex items-end mb-2">
-                    <Button
-                      size={"icon"}
-                      className="bg-[#9268EB] hover:bg-[#bfa1ff] aspect-square w-12 h-12"
+                {/* 리뷰 */}
+                {rating
+                  .slice((curpage - 1) * 10, (curpage - 1) * 10 + 10)
+                  .map((key, index) => (
+                    <div
+                      key={key.email}
+                      className="flex flex-col justify-between bg-white border border-gray-200 w-full h-28 rounded-lg drop-shadow-md p-4 my-4"
                     >
-                      <RiPencilFill size={25} />
-                    </Button>
-                  </div>
-                </div>
+                      <p className="font-semibold text-sm">
+                        {key.nickname} {key.email} | {key.createdDate}
+                      </p>
+                      <div className="flex">
+                        <FaStar className="w-5 h-5 text-yellow-300 me-1" />
+                        <FaStar className="w-5 h-5 text-yellow-300 me-1" />
+                        <FaStar className="w-5 h-5 text-yellow-300 me-1" />
+                        <FaStar className="w-5 h-5 text-yellow-300 me-1" />
+                        <FaStar className="w-5 h-5 text-gray-300 me-1" />
+                      </div>
+                      <p className="text-sm">{key.comment}</p>
+                    </div>
+                  ))}
               </div>
+              <Pagination>
+                <PaginationContent>
+                  {/* 이전 버튼 */}
+                  {start != 1 && (
+                    <PaginationItem>
+                      <PaginationPrevious
+                        className="rounded-full"
+                        onClick={() => {
+                          ratingRef.current?.scrollIntoView({
+                            behavior: "smooth",
+                          });
+                          ratingPaging(start - 50, false);
+                        }}
+                      />
+                    </PaginationItem>
+                  )}
+                  {/* 페이지 버튼 */}
+                  {Array.from(
+                    {
+                      length:
+                        start + 49 <= rating.length
+                          ? 5
+                          : Math.ceil((rating.length % 50) / 10),
+                    },
+                    (_, index) => (
+                      <div key={index}>
+                        <PaginationItem>
+                          <PaginationLink
+                            className={
+                              index === (curpage - 1) % 5
+                                ? "cursor-default bg-[#9268EB] hover:bg-[#684ba6] text-white hover:text-white rounded-full"
+                                : "cursor-pointer rounded-full"
+                            }
+                            onClick={() => {
+                              ratingRef.current?.scrollIntoView({
+                                behavior: "smooth",
+                              });
+                              setCurpage(index + 1 + Math.round(start / 10));
+                              console.log(index + 1 + Math.round(start / 10));
+                            }}
+                            isActive={index === (curpage - 1) % 5}
+                          >
+                            {index + 1 + Math.round(start / 10)}
+                          </PaginationLink>
+                        </PaginationItem>
+                      </div>
+                    )
+                  )}
+                  {/* 다음 버튼 */}
+                  {start + 50 <= rating.length && (
+                    <PaginationItem>
+                      <PaginationNext
+                        className="rounded-full"
+                        onClick={() => {
+                          ratingRef.current?.scrollIntoView({
+                            behavior: "smooth",
+                          });
+                          ratingPaging(start + 50, true);
+                        }}
+                      />
+                    </PaginationItem>
+                  )}
+                </PaginationContent>
+              </Pagination>
             </div>
           </div>
         ) : (
@@ -422,8 +482,10 @@ const DetailPage = () => {
         )}
 
         {bookLoading ? (
-          <Button className="bg-[#9268EB] hover:bg-[#bfa1ff] sticky bottom-20 left-full max-w-md drop-shadow-lg rounded-full z-20 w-12 h-12 mr-3"
-          onClick={() => mappingBook()}>
+          <Button
+            className="bg-[#9268EB] hover:bg-[#bfa1ff] sticky bottom-20 left-full max-w-md drop-shadow-lg rounded-full z-20 w-12 h-12 mr-3"
+            onClick={() => mappingBook()}
+          >
             <FaPlus size={30} />
           </Button>
         ) : (
