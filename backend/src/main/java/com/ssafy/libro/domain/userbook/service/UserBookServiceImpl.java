@@ -1,11 +1,11 @@
 package com.ssafy.libro.domain.userbook.service;
 
+import com.querydsl.core.Tuple;
 import com.ssafy.libro.domain.book.dto.BookDetailResponseDto;
 import com.ssafy.libro.domain.book.entity.Book;
 import com.ssafy.libro.domain.book.exception.BookNotFoundException;
 import com.ssafy.libro.domain.book.repository.BookRepository;
 import com.ssafy.libro.domain.user.entity.User;
-import com.ssafy.libro.domain.user.exception.UserNotFoundException;
 import com.ssafy.libro.domain.user.repository.UserRepository;
 import com.ssafy.libro.domain.user.service.UserService;
 import com.ssafy.libro.domain.userbook.dto.*;
@@ -30,7 +30,6 @@ import java.time.Year;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -233,7 +232,7 @@ public class UserBookServiceImpl implements UserBookService{
 
         return UserBookRatioResponseDto.builder()
                 .type("book")
-                .ratio(1.0*read/total)
+                .ratio(1.0 * read / total)
                 .totalSize(total)
                 .readSize(read)
                 .build();
@@ -283,6 +282,70 @@ public class UserBookServiceImpl implements UserBookService{
         return responseDtoList;
     }
 
+    @Override
+    public UserBookRatioResponseDto getBookReadRatio(String isbn) {
+        Book book = bookRepository.findByIsbn(isbn)
+                .orElseThrow(() -> new BookNotFoundException(isbn));
+        long total = userBookRepository.countUserBookByBook(book)
+                .orElseThrow(() -> new UserBookNotFoundException("no data"));
+        long read  = userBookRepository.countUserBookByBookReadComplete(book)
+                .orElse(0L);
+
+        return UserBookRatioResponseDto.builder()
+                .type("book")
+                .ratio(1.0*read/total)
+                .totalSize(total)
+                .readSize(read)
+                .build();
+    }
+
+    @Override
+    public List<UserGenderAgeCountResponseDto> getUserGenderAgeCountList(Long bookId) {
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new BookNotFoundException(bookId));
+
+        List<Tuple> result = userBookRepository.getUserGenderAgeCounts(book);
+        List<UserGenderAgeCountResponseDto> responseDtoList = new ArrayList<>();
+        for(Tuple tuple : result){
+//            log.debug(tuple.toString());
+            Integer age = tuple.get(0, Integer.class);
+            Character gender = tuple.get(1, Character.class);
+            Long count = tuple.get(2, Long.class);
+            responseDtoList.add(
+                    UserGenderAgeCountResponseDto.builder()
+                    .age(age)
+                    .gender(gender)
+                    .count(count)
+                    .build()
+            );
+
+        }
+
+        return responseDtoList;
+    }
+
+    @Override
+    public List<UserBookRatingSummary> getUserBookSummaryList(Long bookId) {
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new BookNotFoundException(bookId));
+
+        List<Tuple> result = userBookRepository.getUserBookRating(book);
+        List<UserBookRatingSummary> responseDtoList = new ArrayList<>();
+        for(Tuple tuple : result){
+//            log.debug(tuple.toString());
+            Integer score = tuple.get(0, Double.class).intValue();
+            Long count = tuple.get(1, Long.class);
+           responseDtoList.add(
+                   UserBookRatingSummary.builder()
+                           .score(score)
+                           .count(count)
+                           .build()
+           );
+        }
+
+        return responseDtoList;
+    }
+
     private List<UserBookListResponseDto> getUserBookListResponseDtos(List<UserBook> userBookList) {
         List<UserBookListResponseDto> responseDtoList = new ArrayList<>();
         for(UserBook userBook : userBookList){
@@ -304,6 +367,7 @@ public class UserBookServiceImpl implements UserBookService{
 
         return responseDtoList;
     }
+
 
 
 }
