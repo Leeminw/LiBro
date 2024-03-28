@@ -1,11 +1,11 @@
 package com.ssafy.libro.domain.userbook.service;
 
-import com.ssafy.libro.domain.book.dto.BookDetailResponseDto;
-import com.ssafy.libro.domain.book.entity.Book;
-import com.ssafy.libro.domain.user.entity.User;
 import com.ssafy.libro.domain.userbook.dto.*;
 
+import java.time.LocalDate;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 
 public interface UserBookService {
     // 등록도서 검색
@@ -25,6 +25,7 @@ public interface UserBookService {
 
     // 회원별 월별 도서 기록
     List<UserBookListByDateResponseDto> getBookListByDate(Integer year, Integer month);
+    Map<LocalDate, LinkedHashSet<Object>> getBookListByDateV2(Integer year, Integer month);
     UserBookDetailResponseDto updateRating(UserBookRatingRequestDto requestDto);
     UserBookDetailResponseDto updateType(UserBookTypeUpdateRequestDto requestDto);
     //
