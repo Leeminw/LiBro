@@ -2,7 +2,7 @@ import axios from "axios";
 import instance from "./interceptor";
 import useUserState from "./login-state";
 const apiClient = axios.create({
-  baseURL: "http://localhost:8080",
+  baseURL: "http://j10a301.p.ssafy.io:8080",
 });
 
 const LoginApi = {

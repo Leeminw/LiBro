@@ -1,10 +1,10 @@
 import axios from "axios";
 const instance = axios.create({
-  baseURL: "http://localhost:8080",
+  baseURL: "http://j10a301.p.ssafy.io:8080",
 });
 
 const apiclient = axios.create({
-  baseURL: "http://localhost:8080",
+  baseURL: "http://j10a301.p.ssafy.io:8080",
 });
 
 instance.interceptors.request.use(
