@@ -41,10 +41,10 @@ public class ShortsServiceImpl implements ShortsService {
     private static final String S3_BASE_URL = "https://%s.s3.amazonaws.com/";
     private static final String S3KEY_PREFIX = "shorts/";
     private static final String VIDEO_FILE_FORMAT = ".mp4";
-    private static final int PROMPT_DIVIDE_NUM = 3;
+    private static final int PROMPT_DIVIDE_NUM = 5;
     private static final int FRAME_RATE = 30;
-    private static final int VIDEO_WIDTH = 720;     // 360, 720, 1080
-    private static final int VIDEO_HEIGHT = 1280;   // 640, 1280, 1920
+    private static final int VIDEO_WIDTH = 360;     // 360, 720, 1080
+    private static final int VIDEO_HEIGHT = 640;   // 640, 1280, 1920
 
     @Value("${cloud.aws.bucket-name}")
     private String bucketName;
