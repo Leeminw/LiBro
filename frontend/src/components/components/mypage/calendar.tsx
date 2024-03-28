@@ -1,7 +1,12 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from "react"
-import { Button } from "@/components/ui/button"
+import React, {useEffect, useState} from "react"
+import {Button} from "@/components/ui/button"
+import Image from "next/image"
+import 'react-calendar/dist/Calendar.css';
+
+import {getDaysInMonth, subMonths} from 'date-fns';
+import {Calendar} from "@/lib/axios-calendar"
 
 interface ImageDates {
   [date: string]: string[];
@@ -15,12 +20,6 @@ interface WeekDay {
   day: number;
   otherMonth: boolean;
 };
-
-import Image from "next/image"
-import 'react-calendar/dist/Calendar.css';
-
-import { getDaysInMonth, subMonths } from 'date-fns';
-import { Calendar } from "@/lib/axios-calendar"
 
 
 interface calProps {
@@ -46,7 +45,7 @@ type CALENDER_RESULT_LIST = WeekDay[][];
     // 다른 날짜와 이미지도 추가 가능
   };
 
-  
+
   const UseCalendar = () => {
 
     const DAY_OF_WEEK = 7;
@@ -127,7 +126,7 @@ type CALENDER_RESULT_LIST = WeekDay[][];
     useEffect(() => {
       // 컴포넌트가 마운트될 때 현재 연도와 월에 해당하는 데이터를 API로부터 불러옵니다.
       const fetchData = async () => {
-        const response = await Calendar.date(CurrentDateYear, CurrentDateMonth);
+        const response = await Calendar.date(CurrentDateYear, CurrentDateMonth, 10);
         console.log(response)
         setResponse(response.data)
         // 필요한 경우 상태에 데이터 저장 등의 추가 작업을 수행

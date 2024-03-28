@@ -57,6 +57,21 @@ public class UserBookCustomRepositoryImpl implements UserBookCustomRepository{
 
         return Optional.of(bookList);
     }
+
+    @Override
+    public Optional<List<UserBook>> findUserBookByUserAndDateV2(User user, LocalDateTime startDate, LocalDateTime endDate) {
+        List<UserBook> bookList = jpaQueryFactory
+                .select(userBook)
+                .from(userBook)
+                .leftJoin(userBook.userBookHistoryList, userBookHistory).fetchJoin()
+                .leftJoin(userBook.book, book).fetchJoin()
+                .where(userBook.user.eq(user),
+                        (userBook.isDeleted.eq(false)).or(userBook.isDeleted.isNull()),
+                        userBookHistory.endDate.between(startDate, endDate))
+                .fetch();
+        return Optional.ofNullable(bookList);
+    }
+
     // 읽고있는 도서 (유저) 가장 최근 데이터가 null 값인것.
     @Override
     public Optional<List<UserBook>> findUserBookOnReading(User user) {

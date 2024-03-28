@@ -5,7 +5,6 @@ import com.ssafy.libro.domain.book.entity.Book;
 import com.ssafy.libro.domain.book.exception.BookNotFoundException;
 import com.ssafy.libro.domain.book.repository.BookRepository;
 import com.ssafy.libro.domain.user.entity.User;
-import com.ssafy.libro.domain.user.exception.UserNotFoundException;
 import com.ssafy.libro.domain.user.repository.UserRepository;
 import com.ssafy.libro.domain.user.service.UserService;
 import com.ssafy.libro.domain.userbook.dto.*;
@@ -24,13 +23,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.Year;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -150,6 +147,38 @@ public class UserBookServiceImpl implements UserBookService{
 
         return responseDtoList;
     }
+
+    @Override
+    public Map<LocalDate, LinkedHashSet<Object>> getBookListByDateV2(Integer year, Integer month) {
+        User user = userService.loadUser();
+
+        LocalDateTime startDateTime = LocalDateTime.of(year, month, 1, 0, 0);
+        int lastDayOfMonth = Month.of(month).length(Year.isLeap(year));
+        LocalDateTime endDateTime = LocalDateTime.of(year, month, lastDayOfMonth, 23, 59, 59);
+
+        List<UserBook> bookList = userBookRepository.findUserBookByUserAndDateV2(user,startDateTime,endDateTime)
+                .orElseThrow(()-> new UserBookNotFoundException("userid : " + user.getId()));
+
+        log.debug(bookList.size() + "");
+
+        Map<LocalDate, LinkedHashSet<Object>> result = new HashMap<>();
+
+        for (UserBook userBook : bookList) {
+            userBook.getUserBookHistoryList().stream()
+                    .sorted(Comparator.comparing(UserBookHistory::getEndDate).reversed())
+                    .findAny()
+                    .ifPresent(ubh -> {
+                        String thumbnail = userBook.getBook().getThumbnail();
+                        LocalDate endDate = ubh.getEndDate().toLocalDate();
+
+                        result.computeIfAbsent(endDate, k -> new LinkedHashSet<>())
+                                .add(thumbnail);
+                    });
+        }
+
+        return result;
+    }
+
     @Override
     @Transactional
     public UserBookDetailResponseDto updateRating(UserBookRatingRequestDto requestDto){
