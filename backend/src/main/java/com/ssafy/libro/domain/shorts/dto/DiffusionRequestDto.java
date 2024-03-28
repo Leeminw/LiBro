@@ -42,7 +42,7 @@ public class DiffusionRequestDto {
             "sd_vae", "vaeFtMse840000Ema_v100.pt"
     );
     @Builder.Default
-    private Boolean enable_hr = false;
+    private Boolean enable_hr = true;
     @Builder.Default
     private Double hr_scale = 2.0;
     @Builder.Default
