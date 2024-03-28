@@ -14,4 +14,5 @@ public class OAuthUser {
     private String authType;
     private String profile;
     private Role role;
+    private String nickName;
 }

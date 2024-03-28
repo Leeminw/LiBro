@@ -9,12 +9,11 @@ import com.ssafy.libro.domain.shorts.dto.*;
 import com.ssafy.libro.domain.shorts.repository.TaskJpaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacv.*;
 import org.bytedeco.javacv.Frame;
-import org.bytedeco.opencv.opencv_core.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -33,8 +32,6 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Stream;
-
-import static org.bytedeco.opencv.global.opencv_imgproc.*;
 
 @Slf4j
 @Service
@@ -72,24 +69,40 @@ public class ShortsServiceImpl implements ShortsService {
         return createOrGetShorts(book.getTitle(), book.getSummary());
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     private ShortsResponseDto createOrGetShorts(String title, String content) throws IOException {
         PromptResponseDto promptResponseDto = promptService.translateText2Prompt(new PromptRequestDto(title, content));
-        List<String> encodedImages = processPrompts(promptResponseDto.getEngPrompt());
-        List<byte[]> decodedImages = decodeImages(encodedImages);
+//        List<String> encodedImages = requestStableDiffusion(promptResponseDto.getEngPrompt());
+//        List<byte[]> decodedImages = decodeImages(encodedImages);
+
+        /* Local 환경 테스트용 임시 코드*/
+        String[] imageFiles = {"00017-977685478.png", "00034-4170023442.png", "00042-3231078231.png"};
+        List<byte[]> decodedImages = new ArrayList<>();
+        for (String imageFile : imageFiles) {
+            Path imageFilePath = Paths.get(imageFile);
+            byte[] imageBytes = Files.readAllBytes(imageFilePath);
+            decodedImages.add(imageBytes);
+        }
+        /* Local 환경 테스트용 임시 코드*/
 
         // saveImages(decodedImages);
-        Resource resource = createVideo(decodedImages, promptResponseDto.getKorPrompt());
+        Resource sourceResource = createVideo(decodedImages, promptResponseDto.getKorPrompt());
+        Resource targetResource = convertFileSystem2ByteArrayResource((FileSystemResource) sourceResource);
+        String filename = sourceResource.getFilename();
+        cleanupTemporaryDirectory(Paths.get("outputs"));
 
         return ShortsResponseDto.builder()
                 .title(promptResponseDto.getTitle())
                 .content(promptResponseDto.getContent())
                 .korPrompt(promptResponseDto.getKorPrompt())
                 .engPrompt(promptResponseDto.getEngPrompt())
-                .resource(resource)
+                .resource(targetResource)
+                .filename(filename)
                 .build();
     }
 
-    private List<String> processPrompts(String engPrompt) {
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    private List<String> requestStableDiffusion(String engPrompt) {
         String[] sentences = dividePrompt(engPrompt);
         List<String> encodedImages = new ArrayList<>();
         for (String sentence : sentences) {
@@ -115,16 +128,14 @@ public class ShortsServiceImpl implements ShortsService {
         }
         return sentences;
     }
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    /* Request Stable Diffusion */
+    
     private static DiffusionResponseDto createImages(String prompt) {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
 
         String url = "http://222.107.238.44:7860/sdapi/v1/txt2img";
-        // String url = "http://127.0.0.1:7860/sdapi/v1/txt2img";
+//        String url = "http://127.0.0.1:7860/sdapi/v1/txt2img";
         DiffusionRequestDto diffusionRequestDto = new DiffusionRequestDto().updatePrompt(prompt);
         log.info(diffusionRequestDto.toString());
         HttpEntity<DiffusionRequestDto> request = new HttpEntity<>(diffusionRequestDto, httpHeaders);
@@ -140,7 +151,8 @@ public class ShortsServiceImpl implements ShortsService {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error during image creation");
         }
     }
-
+    
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     private static List<byte[]> decodeImages(List<String> base64Images) {
         List<byte[]> decodedImages = new ArrayList<>();
         for (String base64Image : base64Images) {
@@ -155,8 +167,8 @@ public class ShortsServiceImpl implements ShortsService {
         Files.createDirectories(outputPath);
         for (byte[] decodedImage : decodedImages) {
             String imageFileName = UUID.randomUUID() + ".jpg";
-            Path imagePath = outputPath.resolve(imageFileName);
-            Files.write(imagePath, decodedImage);
+            Path imageFilePath = outputPath.resolve(imageFileName);
+            Files.write(imageFilePath, decodedImage);
         }
     }
 
@@ -164,41 +176,55 @@ public class ShortsServiceImpl implements ShortsService {
         Path outputPath = Paths.get("outputs");
         Files.createDirectories(outputPath);
 
-//        File videoFile = generateVideoFromImages(decodedImages, outputPath);
-        File subtitledVideoFile = generateSubtitledVideoFromImages(decodedImages, sentences, outputPath);
-        byte[] videoBytes = Files.readAllBytes(subtitledVideoFile.toPath());
+        File videoFile = sentences == null || sentences.isEmpty() ?
+                generateVideoFromImages(decodedImages, outputPath) :
+                generateSubtitledVideoFromImages(decodedImages, sentences, outputPath);
 
 //        uploadVideoToS3(videoFile);
-        cleanUpTemporaryDirectory(outputPath);
-        return new ByteArrayResource(videoBytes);
-//        return new FileSystemResource(videoFile);
+        return new FileSystemResource(videoFile);
     }
 
-    private File generateVideoFromImages(List<byte[]> decodedImages, Path tempDir) throws IOException {
+    private Resource convertFileSystem2ByteArrayResource(FileSystemResource fileSystemResource) throws IOException {
+        Path filePath = Paths.get(fileSystemResource.getPath());
+        byte[] fileBytes = Files.readAllBytes(filePath);
+        return new ByteArrayResource(fileBytes);
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    private File generateVideoFromImages(List<byte[]> decodedImages, Path outputPath) throws IOException {
         String videoFileName = UUID.randomUUID() + VIDEO_FILE_FORMAT;
-        String videoFilePath = tempDir.resolve(videoFileName).toString();
+        String videoFilePath = outputPath.resolve(videoFileName).toString();
 
         try (FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(videoFilePath, VIDEO_WIDTH, VIDEO_HEIGHT)) {
-            recorder.setFrameRate(FRAME_RATE);
             recorder.setVideoCodec(org.bytedeco.ffmpeg.global.avcodec.AV_CODEC_ID_H264);
+            recorder.setFrameRate(FRAME_RATE);
             recorder.setFormat("mp4");
             recorder.start();
+
             recordImagesToVideo(decodedImages, recorder);
-        } catch (FrameRecorder.Exception e) {
-            log.error("Error while generating video: {}", e.getMessage());
-            throw new IOException("Error generating video", e);
         }
 
         return new File(videoFilePath);
     }
 
-    private File generateSubtitledVideoFromImages(List<byte[]> decodedImages, String sentences, Path tempDir) throws IOException {
+    private void recordImagesToVideo(List<byte[]> decodedImages, FFmpegFrameRecorder recorder) throws IOException {
+        try (Java2DFrameConverter frameConverter = new Java2DFrameConverter()) {
+            for (byte[] imageBytes : decodedImages) {
+                BufferedImage image = ImageIO.read(new ByteArrayInputStream(imageBytes));
+                for (int i = 0; i < FRAME_RATE * (60 / decodedImages.size()); i++)
+                    recorder.record(frameConverter.convert(image));
+            }
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    private File generateSubtitledVideoFromImages(List<byte[]> decodedImages, String sentences, Path outputPath) throws IOException {
         String videoFileName = UUID.randomUUID() + VIDEO_FILE_FORMAT;
-        String videoFilePath = tempDir.resolve(videoFileName).toString();
+        String videoFilePath = outputPath.resolve(videoFileName).toString();
 
         try (FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(videoFilePath, VIDEO_WIDTH, VIDEO_HEIGHT)) {
-            recorder.setFrameRate(FRAME_RATE);
             recorder.setVideoCodec(org.bytedeco.ffmpeg.global.avcodec.AV_CODEC_ID_H264);
+            recorder.setFrameRate(FRAME_RATE);
             recorder.setFormat("mp4");
             recorder.start();
 
@@ -227,36 +253,25 @@ public class ShortsServiceImpl implements ShortsService {
         String[] subtitles = sentences.split(",");
         int cntSubtitledImages = lcm(decodedImages.size(), subtitles.length);
 
-        // 이미지와 자막의 반복 비율을 계산합니다.
+        // 이미지 & 자막의 반복 비율 계산
         int imageRepeatRate = cntSubtitledImages / decodedImages.size();
         int subtitleRepeatRate = cntSubtitledImages / subtitles.length;
 
         List<byte[]> subtitledImages = new ArrayList<>();
         for (int i = 0; i < cntSubtitledImages; i++) {
-            // 적절한 이미지와 자막을 선택합니다.
             int imageIndex = (i / imageRepeatRate) % decodedImages.size();
             int subtitleIndex = (i / subtitleRepeatRate) % subtitles.length;
 
             BufferedImage originalImage = ImageIO.read(new ByteArrayInputStream(decodedImages.get(imageIndex)));
             BufferedImage overlayImage = overlayTextOnImage(originalImage, subtitles[subtitleIndex]);
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ImageIO.write(overlayImage, "png", baos);
-            subtitledImages.add(baos.toByteArray());
+            try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+                ImageIO.write(overlayImage, "jpg", baos);
+                subtitledImages.add(baos.toByteArray());
+            }
         }
         return subtitledImages;
     }
 
-    private void recordImagesToVideo(List<byte[]> decodedImages, FFmpegFrameRecorder recorder) throws FrameRecorder.Exception, IOException {
-        try (Java2DFrameConverter frameConverter = new Java2DFrameConverter()) {
-            for (byte[] imageBytes : decodedImages) {
-                BufferedImage image = ImageIO.read(new ByteArrayInputStream(imageBytes));
-                for (int i = 0; i < FRAME_RATE * (60 / decodedImages.size()); i++)
-                    recorder.record(frameConverter.convert(image));
-            }
-        } catch (Exception e) {
-            log.error(e.getMessage());
-        }
-    }
 
     public static File addSubtitleToVideo(String inputPath, String sentences, Path outputPath) {
         String videoFileName = UUID.randomUUID() + VIDEO_FILE_FORMAT;
@@ -290,15 +305,19 @@ public class ShortsServiceImpl implements ShortsService {
         return new File(videoFilePath);
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     private static BufferedImage overlayTextOnImage(BufferedImage image, String text) {
         Graphics2D g2d = image.createGraphics();
-        Font font = new Font("Malgun Gothic", Font.BOLD, 30);
+        Font font = new Font("Malgun Gothic", Font.BOLD, 125);
         g2d.setFont(font);
+
         FontMetrics fm = g2d.getFontMetrics();
         int imageWidth = image.getWidth();
+
         List<String> lines = wrapText(text, fm, imageWidth - 20);
         int textHeight = lines.size() * fm.getHeight();
-        int y = (image.getHeight() - textHeight) / 2; // 가운데 정렬
+        int y = (image.getHeight() - textHeight) / 2;   // 가운데 정렬
+//        int y = (image.getHeight() - textHeight) - 10;  // 아래쪽 정렬, margin 10
 
         for (String line : lines) {
             int lineWidth = fm.stringWidth(line);
@@ -328,6 +347,29 @@ public class ShortsServiceImpl implements ShortsService {
         lines.add(line.toString());
         return lines;
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    private void uploadVideoToS3(File videoFile) {
+        if (!videoFile.exists()) {
+            log.error("Video file does not exist: {}", videoFile.getAbsolutePath());
+            return;
+        }
+        String s3Key = S3KEY_PREFIX + videoFile.getName();
+        amazonS3.putObject(new PutObjectRequest(bucketName, s3Key, videoFile));
+        log.info("Uploaded video to S3: {}", s3Key);
+    }
+
+    public void cleanupTemporaryDirectory(Path path) throws IOException {
+        try (Stream<Path> stream = Files.walk(path)) {
+            stream.sorted(Comparator.reverseOrder()).map(Path::toFile)
+                    .forEach(file -> {
+                        if (!file.delete())
+                            log.error("Failed to delete {}", file.getAbsolutePath());
+                    });
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //    public static void addSubtitleToVideo(File videoFile, String sentences) {
 //        try (FFmpegFrameGrabber frameGrabber = new FFmpegFrameGrabber(videoFile)) {
 //            frameGrabber.start();
@@ -415,40 +457,7 @@ public class ShortsServiceImpl implements ShortsService {
 //        }
 //    }
 
-    private void uploadVideoToS3(File videoFile) {
-        if (!videoFile.exists()) {
-            log.error("Video file does not exist: {}", videoFile.getAbsolutePath());
-            return;
-        }
-        String s3Key = S3KEY_PREFIX + videoFile.getName();
-        amazonS3.putObject(new PutObjectRequest(bucketName, s3Key, videoFile));
-        log.info("Uploaded video to S3: {}", s3Key);
-    }
-
-    private void cleanUpTemporaryDirectory(Path tempDir) throws IOException {
-        try (Stream<Path> walk = Files.walk(tempDir)) {
-            walk.sorted(Comparator.reverseOrder())
-                    .map(Path::toFile)
-                    .forEach(file -> {
-                        if (!file.delete()) {
-                            log.error("Failed to delete {}", file.getAbsolutePath());
-                        }
-                    });
-        }
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //    private Resource createVideo(List<byte[]> decodedImages) throws IOException {
 //        // 동영상 파일을 임시 디렉토리에 저장
 //        Path tempDir = Files.createTempDirectory("outputs");
@@ -504,8 +513,6 @@ public class ShortsServiceImpl implements ShortsService {
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //    public void createImages(PromptRequestDto promptRequestDto) throws IOException {
 //        PromptResponseDto promptResponseDto = promptService.translateText2Prompt(promptRequestDto);
 //
@@ -533,8 +540,8 @@ public class ShortsServiceImpl implements ShortsService {
 //
 //            for (byte[] decodedImage : decodedImages) {
 //                String imageFileName = UUID.randomUUID() + ".jpg";
-//                Path imagePath = tempDir.resolve(imageFileName);
-//                Files.write(imagePath, decodedImage);
+//                Path imageFilePath = tempDir.resolve(imageFileName);
+//                Files.write(imageFilePath, decodedImage);
 //            }
 //
 //            // ffmpeg를 사용하여 이미지로부터 동영상 생성
@@ -675,52 +682,5 @@ public class ShortsServiceImpl implements ShortsService {
 //        }
 //    }
 //
-//    private static BufferedImage overlayTextOnImage(BufferedImage image, String text) {
-//        // 텍스트 오버레이 설정
-//        Graphics2D g2d = image.createGraphics();
-//        Font font = new Font("Malgun Gothic", Font.BOLD, 150);
-//        g2d.setFont(font);
-//
-//        FontMetrics fm = g2d.getFontMetrics();
-//        int imageWidth = image.getWidth();
-//
-//        // Break the text into lines that fit the image width
-//        List<String> lines = wrapText(text, fm, imageWidth - 20);
-//
-//        // Calculate the total height of the text block
-//        int textHeight = lines.size() * fm.getHeight();
-//
-//        // Starting Y position to center text block at the bottom of the image
-//        int y = image.getHeight() - textHeight - 10; // 10 is a bottom margin
-//
-//        // Draw each line
-//        for (String line : lines) {
-//            int lineWidth = fm.stringWidth(line);
-//            int x = (imageWidth - lineWidth) / 2; // Center the line on the X axis
-//            g2d.drawString(line, x, y += fm.getAscent());
-//            y += fm.getDescent() + fm.getLeading(); // Move to the next line position
-//        }
-//
-//        g2d.dispose();
-//        return image;
-//    }
-//
-//    // Utility method to wrap text into lines
-//    private static List<String> wrapText(String text, FontMetrics fm, int maxWidth) {
-//        List<String> lines = new ArrayList<>();
-//        String[] words = text.split(" ");
-//        StringBuilder line = new StringBuilder(words[0]);
-//
-//        for (int i = 1; i < words.length; i++) {
-//            if (fm.stringWidth(line + " " + words[i]) < maxWidth) {
-//                line.append(" ").append(words[i]);
-//            } else {
-//                lines.add(line.toString());
-//                line = new StringBuilder(words[i]);
-//            }
-//        }
-//
-//        lines.add(line.toString());
-//        return lines;
-//    }
+
 }
