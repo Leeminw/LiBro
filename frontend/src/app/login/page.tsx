@@ -36,7 +36,7 @@ const GoogleLoginButton = () => {
       style={{ width: "70%", height: "7%", border: "1px solid #D9D9D9" }}
       onClick={() => {
         window.location.href =
-          "http://localhost:8080/oauth2/authorization/google";
+          "https://j10a301.p.ssafy.io/oauth2/authorization/google";
       }}
     >
       <div
@@ -59,7 +59,7 @@ const NaverLoginButton = () => {
     <Button
       onClick={() => {
         window.location.href =
-          "http://localhost:8080/oauth2/authorization/naver";
+          "https://j10a301.p.ssafy.io/oauth2/authorization/naver";
       }}
       className="bg-[#03C75A] text-white font-bold py-2 px-4 rounded flex items-center m-2 transition-transform hover:scale-105 duration-200"
       style={{ width: "70%", height: "7%", backgroundColor: "#03C75A" }} // 배경색 및 버튼 크기 수정
@@ -87,7 +87,7 @@ const KakaoLoginButton = () => {
     <Button
       onClick={() => {
         window.location.href =
-          "http://localhost:8080/oauth2/authorization/kakao";
+          "https://j10a301.p.ssafy.io/oauth2/authorization/kakao";
       }}
       className="text-black font-bold py-2 px-4 rounded flex items-center m-2 transition-transform hover:scale-105 duration-200"
       style={{ width: "70%", height: "7%", backgroundColor: "#FDE500" }} // 배경색 및 버튼 크기 수정
