@@ -73,7 +73,6 @@ export default function Home() {
               {bookList.map((id, idx) => (
                 <Shorts
                   key={id.isbn}
-                  idx={idx}
                   shortsLoad={currentLoad[idx]}
                   bookDetail={id}
                 />
