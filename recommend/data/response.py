@@ -14,6 +14,7 @@ def make_response_entity(data : dict , status : HTTPStatus ) :
         ensure_ascii=False,
         indent=4
     )
-
-    response = Response(payload, content_type="application/json; charset=utf-8")
-    return response
+    
+    response_data = Response(response=payload, content_type="application/json; charset=utf-8", status=status )
+    
+    return response_data

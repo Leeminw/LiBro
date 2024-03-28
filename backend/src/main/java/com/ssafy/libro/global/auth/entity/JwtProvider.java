@@ -15,7 +15,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.TimeUnit;
-
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 @Component
 @Slf4j
 public class JwtProvider {
@@ -42,7 +43,7 @@ public class JwtProvider {
                 .claim("type", "access")
                 .claim("role", role)
                 .setExpiration(new Date(System.currentTimeMillis() + accessExpTime))
-                .signWith(SECRET_KEY)
+                .signWith(SECRET_KEY,SignatureAlgorithm.HS512)
                 .compact();
         System.out.println("accessToken : " + accessToken);
         return accessToken;
