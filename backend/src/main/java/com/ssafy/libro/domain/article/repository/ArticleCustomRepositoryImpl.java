@@ -68,7 +68,7 @@ public class ArticleCustomRepositoryImpl implements ArticleCustomRepository {
     }
 
     private static BooleanExpression equalBoardType(Long boardId) {
-        if (boardId == null) return null;
+        if (boardId == 0 || boardId == null) return null;
         return article.board.id.eq(boardId);
     }
 

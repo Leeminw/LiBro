@@ -117,7 +117,7 @@ public class UserBookServiceImpl implements UserBookService{
 
         userBook.updateDelete();
         userBookRepository.save(userBook);
-        
+
     }
 
     @Override
@@ -211,6 +211,8 @@ public class UserBookServiceImpl implements UserBookService{
                 .orElseThrow(() -> new UserBookNotFoundException("no data"));
         long read = userBookRepository.countUserBookByUserReadComplete(user)
                 .orElse(0L);
+
+        log.info("호출당함...");
 
         return UserBookRatioResponseDto.builder()
                 .type("user")
