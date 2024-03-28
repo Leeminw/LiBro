@@ -37,7 +37,8 @@ public class ShortsController {
     @PostMapping("/api/v1/shorts/create")
     public ResponseEntity<?> createShorts(@RequestBody ShortsRequestDto requestDto) throws IOException {
         ShortsResponseDto responseDto = shortsService.createShorts(requestDto);
-        String filename = responseDto.getResource().getFilename();
+        String filename = responseDto.getFilename();
+
         return ResponseEntity.status(HttpStatus.OK)
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
@@ -51,8 +52,10 @@ public class ShortsController {
                 .title(bookResponseDto.getTitle())
                 .content(bookResponseDto.getSummary())
                 .build();
+
         ShortsResponseDto responseDto = shortsService.createShorts(shortsRequestDto);
-        String filename = responseDto.getResource().getFilename();
+        String filename = responseDto.getFilename();
+
         return ResponseEntity.status(HttpStatus.OK)
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
