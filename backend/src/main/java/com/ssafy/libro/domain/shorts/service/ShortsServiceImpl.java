@@ -72,17 +72,17 @@ public class ShortsServiceImpl implements ShortsService {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     private ShortsResponseDto createOrGetShorts(String title, String content) throws IOException {
         PromptResponseDto promptResponseDto = promptService.translateText2Prompt(new PromptRequestDto(title, content));
-//        List<String> encodedImages = requestStableDiffusion(promptResponseDto.getEngPrompt());
-//        List<byte[]> decodedImages = decodeImages(encodedImages);
+        List<String> encodedImages = requestStableDiffusion(promptResponseDto.getEngPrompt());
+        List<byte[]> decodedImages = decodeImages(encodedImages);
 
         /* Local 환경 테스트용 임시 코드*/
-        String[] imageFiles = {"00017-977685478.png", "00034-4170023442.png", "00042-3231078231.png"};
+        /*String[] imageFiles = {"00017-977685478.png", "00034-4170023442.png", "00042-3231078231.png"};
         List<byte[]> decodedImages = new ArrayList<>();
         for (String imageFile : imageFiles) {
             Path imageFilePath = Paths.get(imageFile);
             byte[] imageBytes = Files.readAllBytes(imageFilePath);
             decodedImages.add(imageBytes);
-        }
+        }*/
         /* Local 환경 테스트용 임시 코드*/
 
         // saveImages(decodedImages);
