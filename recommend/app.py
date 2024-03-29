@@ -23,10 +23,10 @@ def get_bearer_token() -> str:
 def validateToken(token) -> tuple: 
     try :
         secret = get_jwt_secret_key()
+
         decoded = jwt.decode(token, secret, algorithms=["HS512"] )
         user_id = decoded["id"] 
         exp =  decoded["exp"]
-        print('exp:' , exp)
         seoul_timezone = pytz.timezone('Asia/Seoul')
         current_time = datetime.now(seoul_timezone).timestamp()
 
@@ -59,9 +59,10 @@ def random_book() :
 def get_book_list() :
     user_id = -1    
     token = get_bearer_token()
-
+    print('token' , token)
     if token :
         info = validateToken(token)
+        print('info' , info)
         if(info[0]) :
             user_id =  info[1]
         else :
