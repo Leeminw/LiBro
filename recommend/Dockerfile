@@ -14,10 +14,10 @@ RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
 #cron 설치
-RUN apt-get update && apt-get -y install cron
+# RUN apt-get update && apt-get -y install cron
 
-COPY cronjob /etc/cron.d/cronjob
-RUN crontab /etc/cron.d/cronjob
+# COPY cronjob /etc/cron.d/cronjob
+# RUN crontab /etc/cron.d/cronjob
 
 # 최초 1회 학습 실행
 RUN python -m train
