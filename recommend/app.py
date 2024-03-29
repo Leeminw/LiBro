@@ -10,11 +10,12 @@ import pytz
 from flask_cors import CORS
 from apscheduler.schedulers.background import BackgroundScheduler
 from train import train
+import os
 
 def my_job():
-    print('train start')
+    print('train start, pid : ', os.getpid())
     # train()
-    print('train end')
+    # print('train end')
 
 scheduler = BackgroundScheduler()
 scheduler.add_job(func=my_job, trigger="interval", seconds=10)  # 10초마다 실행
