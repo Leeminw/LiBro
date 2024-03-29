@@ -14,11 +14,11 @@ import os
 
 def my_job():
     print('train start, pid : ', os.getpid())
-    # train()
-    # print('train end')
+    train()
+    print('train end')
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(func=my_job, trigger="interval", seconds=10)  # 10초마다 실행
+scheduler.add_job(func=my_job, trigger="interval", seconds=60*60)  # 10초마다 실행
 if not scheduler.state:
     scheduler.start()
 
