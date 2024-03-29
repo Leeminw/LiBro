@@ -34,6 +34,7 @@ def get_book_list(engine : Engine, recommended : list) -> List[dict] :
         )
 
         result = con.execute(statement)
+        cnt = 0
         response = []
         keys = result.keys()
         for r in result :   
@@ -44,8 +45,7 @@ def get_book_list(engine : Engine, recommended : list) -> List[dict] :
                     response_data[key] = response_data[key].strftime("%Y-%m-%d %H:%M:%S")
                     
             response.append(response_data)
-        
-    return response
+        return response
 
 def get_user_book_matrix(engine : Engine) -> pd.DataFrame:
     with engine.connect() as con :
@@ -53,7 +53,7 @@ def get_user_book_matrix(engine : Engine) -> pd.DataFrame:
             '''
             SELECT user_id, book_id, rating
             FROM user_book
-            WHERE is_deleted = false
+            WHERE is_deleted = false or is_deleted is NULL
             '''
         )
         result = con.execute(statement)
@@ -63,13 +63,14 @@ def get_user_book_matrix(engine : Engine) -> pd.DataFrame:
         return df.fillna(0)
 
 
+
 def get_user_book_count_distinct(engine : Engine) -> int :
     with engine.connect() as con :
         statement = text(
             '''
             SELECT count(distinct book_id)
             FROM user_book
-            WHERE is_deleted = false
+            WHERE is_deleted = false or is_deleted is NULL
             '''
         )
         result = con.execute(statement)
