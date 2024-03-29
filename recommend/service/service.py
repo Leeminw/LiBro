@@ -7,6 +7,13 @@ import pickle
 import numpy as np
 from lightfm import LightFM
 
+
+def get_exist_shorts() -> List[dict] :
+    engine = get_db()
+    choosed = (1,2,3,4,5,6,7,8,9,10)
+    response_data = get_book_list(engine,choosed)
+    return response_data
+
 def get_random_book_list(size : int ) -> List[dict] :
     engine = get_db()
     total_count = get_total_book_count(engine=engine)
