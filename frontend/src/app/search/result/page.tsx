@@ -16,7 +16,7 @@ import Image from "next/image";
 const ResultPage = () => {
   const params = useSearchParams();
   const query = params.get("query");
-  const [bookList, setBookList] = useState<Book[]>([]);
+  const [bookList, setBookList] = useState<NaverBook[]>([]);
   const [start, setStart] = useState(Number(params.get("start")));
   const [curpage, setCurpage] = useState(Math.floor(start / 10) + 1);
   const scrollRef = useRef<HTMLDivElement>(null);
