@@ -2,7 +2,7 @@
 
 IMAGE_NAME="server/frontend"
 CONTAINER_NAME="server-frontend"
-CONTAINER_ID=$(sudo docker ps -aqf "name=$CONTAINER_NAME")
+CONTAINER_ID=$(docker ps -aqf "name=$CONTAINER_NAME")
 
 
 echo "<<< Frontend Deploy Process Start >>>"
@@ -19,7 +19,7 @@ echo ">>> DOCKER CONTAINER $CONTAINER_NAME 존재 여부 검사 시작..."
 if [ ! -z "$CONTAINER_ID" ]; then
     echo ">>> DOCKER CONTAINER $CONTAINER_NAME 존재 확인."
     echo ">>> DOCKER CONTAINER $CONTAINER_NAME 중지 시작..."
-    sudo docker stop $CONTAINER_ID || {
+    docker stop $CONTAINER_ID || {
         echo ">>> DOCKER CONTAINER $CONTAINER_NAME 중지 실패."
         exit 1
     }
@@ -27,7 +27,7 @@ if [ ! -z "$CONTAINER_ID" ]; then
 
 
     echo ">>> DOCKER CONTAINER $CONTAINER_NAME 삭제 시작..."
-    sudo docker rm -f $CONTAINER_ID || {
+    docker rm -f $CONTAINER_ID || {
         echo ">>> DOCKER CONTAINER $CONTAINER_NAME 삭제 실패."
         exit 1
     }
@@ -40,7 +40,7 @@ echo -e "\n\n\n"
 
 ## Run Docker Container
 echo ">>> DOCKER CONTAINER $CONTAINER_NAME 실행 시작..."
-sudo docker run -d \
+docker run -d \
     -p 3000:3000 -v ./:/home/app \
     --name $CONTAINER_NAME $IMAGE_NAME || {
         echo ">>> DOCKER IMAGE $IMAGE_NAME 실행 실패."
