@@ -5,13 +5,20 @@ import {Button} from "@/components/ui/button";
 import Image from "next/image";
 import {Input} from "@/components/ui/input";
 import React, {useState} from "react";
-import {useQueries} from "@tanstack/react-query";
-import {getCompleteBookList, getCompleteRatio, getUserInform, getWrittenComment} from "@/lib/axiois-mypage";
+import {useMutation, useQueries, useQueryClient} from "@tanstack/react-query";
+import {
+    editUserProfile,
+    getCompleteBookList,
+    getCompleteRatio,
+    getUserInform,
+    getWrittenComment
+} from "@/lib/axiois-mypage";
 import useUserState from "@/lib/login-state";
 import {useRouter} from "next/navigation";
 import {toast} from "@/components/ui/use-toast";
 import {Progress} from "@/components/ui/progress";
-import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTrigger} from "@/components/ui/dialog";
+import {Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTrigger} from "@/components/ui/dialog";
+import {uploadToS3} from "@/lib/axios-fileupload";
 
 interface Modal {
     isOpen: boolean;
@@ -88,6 +95,8 @@ export default function Myinfo() {
     const {getUserInfo, deleteUserInfo} = useUserState();
     const userId = getUserInfo().id;
     const router = useRouter();
+    const queryClient = useQueryClient();
+    // 임시 닉네임 상태
 
     const results = useQueries({
         queries: [
@@ -116,70 +125,73 @@ export default function Myinfo() {
     const hasError = results.some((query) => query.isError);
     const isSuccess = results.every((query) => query.isSuccess);
 
-
-// 임시 닉네임 상태
-    const [tempNickName, setTempNickName] = useState("");
-    const [isModalOpen, setIsModalOpen] = useState(false);
-
-    function Modal({isOpen, isClose, children}: Modal) {
-        if (!isOpen) return null;
-
-        return (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-                <div className="bg-white p-4 rounded w-3/7">
-                    {children}
-                    <div className="flex justify-around">
-                        <Button onClick={handleUpdateAndClose}
-                                className="w-1/3 h-1/4 mt-4 bg-[#9268EB] font-bold">수정</Button>
-                        <Button onClick={isClose} className="w-1/3 h-1/4 mt-4 bg-[#A4A4A4] font-bold">닫기</Button>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
-
-    // 모달 제어 함수
-    const openModal = () => {
-        setIsModalOpen(true);
-        setTempNickName("");
-    };
-    const isClose = () => setIsModalOpen(false);
-
-// 유저 정보 업데이트 함수
-//     const updateUser = (updates: Partial<User>) => setUser({ ...user, ...updates });
-
-// 닉네임 임시 변경 핸들러
-    const handleTempNickNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setTempNickName(event.target.value); // 추출한 값을 사용하여 상태 업데이트
-    };
-
-// 닉네임 업데이트 및 모달 닫기
-    const handleUpdateAndClose = () => {
-        // updateUser({ nickName: tempNickName });
-        isClose();
-    };
-
-    const logout = () => {
-        deleteUserInfo();
-        router.push("/");
-        toast({
-            title: "로그아웃",
-            description: `정상적으로 로그아웃 되었습니다.`,
-        });
-    }
-
-
-    if (isLoading) return <>Loading...</>;
-    if (hasError) return <>Error</>;
-
     const [userInfo, completeRatio, bookReviews, writtenComment] = results.map(result => result.data);
 
     const reviewList = bookReviews && bookReviews.map((r: {
         rating: number;
     }) => r.rating).filter((r: null | number) => r !== null);
-    const reviewCount = reviewList.length;
-    console.log(reviewCount)
+    const reviewCount = reviewList && reviewList.length;
+
+    const [tempNickName, setTempNickName] = useState("");
+    const [tempProfile, setTempProfile] = useState("");
+
+    const editMutation = useMutation({
+        mutationFn: (param: UserProfileEdit) => editUserProfile(param),
+        onSuccess: (data, variables, context) => {
+            toast({
+                title: "프로필이 정상적으로 변경 완료 되었습니다.",
+            })
+            queryClient.invalidateQueries({queryKey: ['myinfo']})
+        },
+        onError: (error, variables, context) => {
+            toast({
+                title: "수정 중 에러가 발생 되었습니다.",
+            })
+        }
+    });
+
+    // 닉네임 임시 변경 핸들러
+    const handleTempNickNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setTempNickName(event.target.value); // 추출한 값을 사용하여 상태 업데이트
+    };
+
+    const fileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const files = event.target.files;
+        if (files && files.length > 0) {
+            const file = files[0] as File;
+            uploadFile(file);
+        } else {
+            console.error('파일이 선택되지 않았습니다.');
+        }
+    }
+
+    const uploadFile = async (file: File) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        const result = await uploadToS3(formData);
+        setTempProfile(result.uploadedFileName);
+    };
+
+    const openDialog = (event: React.MouseEvent<HTMLButtonElement>) => {
+        setTempProfile(userInfo.profile);
+        setTempNickName(userInfo.nickName);
+    }
+
+    const closeDialog = (event: React.MouseEvent<HTMLButtonElement>) => {
+        setTempProfile("");
+        setTempNickName("");
+    }
+
+    const submitEdit = (event: React.MouseEvent<HTMLButtonElement>) => {
+        const newProfile: UserProfileEdit = {
+            profile: tempProfile,
+            nickName: tempNickName
+        };
+        editMutation.mutate(newProfile)
+    }
+
+    if (isLoading) return <>Loading...</>;
+    if (hasError) return <>Error</>;
 
     return isSuccess && (
         <>
@@ -191,7 +203,8 @@ export default function Myinfo() {
                             <AvatarFallback></AvatarFallback>
                         </Avatar>
                         <Dialog>
-                            <DialogTrigger asChild>
+                            <DialogClose onClick={closeDialog}></DialogClose>
+                            <DialogTrigger asChild onClick={openDialog}>
                                 <Button
                                     className="mt-4 bg-[#9268EB] text-white font-bold hover:bg-[#9268EB] hover:text-current">Edit
                                     Profile</Button>
@@ -201,14 +214,22 @@ export default function Myinfo() {
                                 <div className='flex justify-center items-center w-full'>
                                     <div className="relative"> {/* 여기에 relative 추가 */}
                                         <Avatar className="h-16 w-16 mt-2">
-                                            <AvatarImage src={userInfo.profile}
-                                                         alt="@defaultUser"/>
+                                            <AvatarImage src={tempProfile}
+                                                         alt="@defaultUser">
+                                            </AvatarImage>
                                             <AvatarFallback></AvatarFallback>
                                         </Avatar>
                                         <Button
-                                            className="absolute bottom-0 right-0 bg-[#9268EB] rounded-full p-0.5 w-6 h-6"> {/* 배경 동그라미와 위치 조정 */}
-                                            <Image src='mdi_pencil.svg' alt='pencil' width={20} height={20}
-                                                   className="bg-[#9268EB] rounded-full"/>
+                                            className="absolute bottom-0 right-0 bg-[#9268EB] rounded-full p-0.5 w-6 h-6 hover:bg-white"
+                                            disabled={editMutation.isPaused}
+                                        > {/* 배경 동그라미와 위치 조정 */}
+                                            <div className="relative w-6 h-6 flex justify-center items-center">
+                                                <Image src='mdi_pencil.svg' alt='pencil' width={20} height={20}
+                                                       className="bg-[#9268EB] rounded-full absolute cursor-pointer"/>
+                                                <Input type="file" onChange={fileUpload} title={""}
+                                                       className="absolute opacity-0"/>
+
+                                            </div>
                                         </Button>
                                     </div>
                                 </div>
@@ -221,7 +242,9 @@ export default function Myinfo() {
                                     />
                                 </div>
                                 <DialogFooter>
-                                    <Button type="submit">수정하기</Button>
+                                    <DialogClose>
+                                        <Button type="submit" onClick={submitEdit}>수정하기</Button>
+                                    </DialogClose>
                                 </DialogFooter>
                             </DialogContent>
                         </Dialog>
@@ -302,7 +325,7 @@ export default function Myinfo() {
                 {[5, 4, 3, 2, 1].map((rating: number) => {
                     const ScorePerRating: number = reviewList.filter((r: number) => r === rating).length / reviewCount * 100;
                     return (
-                        <div className="flex items-center mt-4">
+                        <div key={rating} className="flex items-center mt-4">
                             <StarFillIcon className="text-[#FFCA28] w-4 h-4 mr-1"/>
                             <p className="text-sm w-4 font-medium text-blue-600 dark:text-blue-500 select-none">
                                 {rating}
