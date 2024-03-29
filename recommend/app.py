@@ -13,12 +13,13 @@ from train import train
 
 def my_job():
     print('train start')
-    train()
+    # train()
     print('train end')
-    
-scheduler = BackgroundScheduler()
-scheduler.add_job(func=my_job, trigger="interval", seconds=60*60)  # 10초마다 실행
 
+scheduler = BackgroundScheduler()
+scheduler.add_job(func=my_job, trigger="interval", seconds=10)  # 10초마다 실행
+if not scheduler.state:
+    scheduler.start()
 
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
@@ -91,6 +92,5 @@ def get_book_list() :
 
 if __name__ == '__main__':
     # scheduler.start()
-    if not scheduler.state:
-        scheduler.start()
+
     app.run(debug=True)
