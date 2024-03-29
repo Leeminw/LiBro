@@ -1,6 +1,8 @@
 package com.ssafy.libro.domain.user.service;
 
+import com.ssafy.libro.domain.user.dto.OAuthUser;
 import com.ssafy.libro.domain.user.dto.UserJoinRequestDto;
+import com.ssafy.libro.domain.user.dto.UserProfileEditRequestDto;
 import com.ssafy.libro.domain.user.entity.User;
 import com.ssafy.libro.domain.user.exception.UserNotFoundException;
 import com.ssafy.libro.domain.user.repository.UserRepository;
@@ -58,6 +60,13 @@ public class UserServiceImpl implements UserService {
             }
         }
         return false;
+    }
+
+    @Override
+    public void editProfile(UserProfileEditRequestDto requestDto) {
+        User user = loadUser();
+        user.editProfile(requestDto);
+        userRepository.save(user);
     }
 
     //  요청할 떄 헤더에서 baerer token 뜯어
