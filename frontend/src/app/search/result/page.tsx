@@ -90,7 +90,7 @@ const ResultPage = () => {
                   className="w-full h-full select-none max-w-36 p-4 drop-shadow-md"
                 />
                 <div className="py-4 pr-4 flex flex-col">
-                  <p className="text-sm text-gray-900 break-words line-clamp-4">
+                  <p className="text-base font-semibold text-gray-900 break-words line-clamp-4">
                     {book.title}
                   </p>
                   <p className="text-sm text-gray-500 mt-2">{book.author.split("^").join(", ")}</p>

@@ -1,6 +1,6 @@
 interface Book {
   author: string;
-  created_date: string;
+  created_date: string|null;
   id: number;
   isbn: number;
   price: number;
@@ -13,7 +13,23 @@ interface Book {
   thumbnail: string;
   title: string;
   translator: string | null;
-  updated_date: string;
+  updated_date: string | null;
+}
+
+interface AddBook {
+  author: string;
+  isbn: number;
+  price: number;
+  pubDate: string;
+  publisher: string;
+  summary: string;
+  thumbnail: string;
+  title: string;
+}
+
+interface MappingBook {
+  bookId: number;
+  type: string;
 }
 
 interface NaverBook {

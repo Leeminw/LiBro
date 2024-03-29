@@ -15,7 +15,7 @@ const Shorts = ({
   const router = useRouter();
   return (
     <div
-      className={`snap-always snap-center shrink-0 w-full h-full min-h-40 flex items-center justify-center text-4xl font-bold text-white drop-shadow-lg`}
+      className={`snap-always snap-center shrink-0 w-full h-full min-h-60 flex items-center justify-center text-4xl font-bold text-white drop-shadow-lg`}
     >
       {shortsLoad ? (
         <div className="bg-white text-black flex justify-center rounded-lg items-center w-3/4 h-2/3 relative">

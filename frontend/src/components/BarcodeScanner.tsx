@@ -23,8 +23,8 @@ const BarcodeScannerComponent = ({
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const codeReader = new BrowserMultiFormatReader();
   const capture = React.useCallback(() => {
-    const imageSrc = webcamRef?.current?.getScreenshot();
-    // const imageSrc = "testImg1.jpg";
+    // const imageSrc = webcamRef?.current?.getScreenshot();
+    const imageSrc = "testImg1.jpg";
     if (imageSrc) {
       codeReader
         .decodeFromImage(undefined, imageSrc)

@@ -36,7 +36,7 @@ const GoogleLoginButton = () => {
       style={{ width: "70%", height: "7%", border: "1px solid #D9D9D9" }}
       onClick={() => {
         window.location.href =
-          "http://j10a301.p.ssafy.io:8080/oauth2/authorization/google";
+          "http://localhost:8080/oauth2/authorization/google";
       }}
     >
       <div

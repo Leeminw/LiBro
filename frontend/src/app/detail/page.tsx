@@ -24,6 +24,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { useToast } from "@/components/ui/use-toast";
+import booksApi from "@/lib/axios-book";
 
 const DetailPage = () => {
   const URL = "ex0" + 0 + ".mp4";
@@ -78,92 +79,104 @@ const DetailPage = () => {
   };
 
   useEffect(() => {
-    const updateBookDetail = () => {
-      if (isbn) {
-        SearchApi.searchBooks(isbn, 1)
-          .then((data) => {
-            console.log("응답 값", data);
-            setBookDetail({
-              title: data.items[0].title,
-              thumbnail: data.items[0].image,
-              author: data.items[0].author,
-              price: data.items[0].discount,
-              publisher: data.items[0].publisher,
-              pub_date: data.items[0].pubdate,
-              isbn: data.items[0].isbn,
-              summary: data.items[0].description,
-              translator: null,
-              updated_date: "",
-              created_date: "",
-              rating: 0,
-              rating_count: 0,
-              id: 0,
-              shorts_url: "",
-            });
+    const updateBookDetail = async () => {
+      await booksApi
+        .bookSearch("isbn", bookDetail.isbn, 0, 0)
+        .then((response) => {
+          // 데이터가 없는경우 등록
+          console.log(response);
+          if (response.data.length === 0 && isbn) {
+            SearchApi.searchBooks(isbn, 1)
+              .then(async (data) => {
+                console.log("응답 값", data);
+                const bookOutput = {
+                  title: data.items[0].title,
+                  thumbnail: data.items[0].image,
+                  author: data.items[0].author,
+                  price: data.items[0].discount,
+                  publisher: data.items[0].publisher,
+                  pub_date: data.items[0].pubdate,
+                  isbn: data.items[0].isbn,
+                  summary: data.items[0].description,
+                  translator: null,
+                  updated_date: "",
+                  created_date: "",
+                  rating: 0,
+                  rating_count: 0,
+                  id: 0,
+                  shorts_url: "",
+                }
+                await registerBook(bookOutput);
+                setBookLoading(true);
+              })
+              .catch((err) => {
+                toast({
+                  title: "오류",
+                  description:
+                    "도서 정보를 불러오는데 실패했습니다.\n다시 시도해주세요.",
+                });
+                router.back();
+                console.log(err);
+              });
+          }
+          // DB에 도서 정보가 있을경우
+          else {
+            setBookDetail(response.data.data[0]);
             setBookLoading(true);
-          })
-          .catch((err) => {
-            toast({
-              title: "오류",
-              description:
-                "도서 정보를 불러오는데 실패했습니다.\n다시 시도해주세요.",
-            });
-            router.back();
-            console.log(err);
+          }
+        })
+        .catch((error) => {
+          toast({
+            title: "오류",
+            description:
+              "도서 정보를 불러오는데 실패했습니다.\n다시 시도해주세요.",
           });
-      }
+          console.log(error);
+        });
     };
+
+    const registerBook = (bookOutput: Book) => {
+      console.log("output", bookOutput);
+      setBookDetail(bookOutput);
+      const dateString: string = bookOutput.pub_date;
+      const formattedDateString: string = `${dateString.slice(
+        0,
+        4
+      )}-${dateString.slice(4, 6)}-${dateString.slice(6)}`;
+      const isoDateTime: string = new Date(formattedDateString).toISOString();
+      const addBook = {
+        isbn: bookOutput.isbn,
+        title: bookOutput.title,
+        summary: bookOutput.summary,
+        price: bookOutput.price,
+        author: bookOutput.author,
+        publisher: bookOutput.publisher,
+        pubDate: isoDateTime,
+        thumbnail: bookOutput.thumbnail,
+      };
+      // 도서 등록
+      booksApi
+        .registerBook(addBook)
+        .then((bookId) => {
+          setBookDetail((prevState) => ({
+            ...prevState,
+            id: bookId,
+          }));
+        })
+        .catch((error) => {
+          toast({
+            title: "오류",
+            description:
+              "나의 서재에 도서를 담는데 실패했습니다.\n다시 시도해주세요.",
+          });
+        });
+    };
+
     updateBookDetail();
   }, []);
-  const mappingBook = async () => {
-    let response, postResponse;
-    // 검색을 했을때 isbn이 db에 있는지 확인하기
-    try {
-      response = await instance.get("/api/v1/book/search", {
-        params: {
-          key: "isbn",
-          word: bookDetail.isbn,
-          page: 0,
-          size: 0,
-        },
-      });
-      // 데이터가 없는경우 등록
-      if (response.data.data.length === 0) {
-        console.log("do this");
-        const dateString: string = bookDetail.pub_date;
-        const formattedDateString: string = `${dateString.slice(
-          0,
-          4
-        )}-${dateString.slice(4, 6)}-${dateString.slice(6)}`;
-        const isoDateTime: String = new Date(formattedDateString).toISOString();
-        const addBook = {
-          isbn: bookDetail.isbn,
-          title: bookDetail.title,
-          summary: bookDetail.summary,
-          price: bookDetail.price,
-          author: bookDetail.author,
-          publisher: bookDetail.publisher,
-          pubDate: isoDateTime,
-          thumbnail: bookDetail.thumbnail,
-        };
-        postResponse = await instance.post("api/v1/book", addBook);
-      }
-      // mapping
-      const data = postResponse?.data.data || response.data.data[0];
-      console.log(data);
-      const bookId = data.id;
-      // // 이미 되어있는지 확인하기 todo
-      console.log(bookId);
-      // mapping
-      const mappingResponse = await instance.post("/api/v1/userbook", {
-        bookId: bookId,
-        type: "관심",
-      });
 
-      console.log(mappingResponse.data);
-    } catch (error: any) {
-      console.log(error);
-    }
+  const mappingBook = async (bookId: number) => {
+    booksApi.userBookMapping({ bookId: bookId, type: "관심" });
   };
 
   return (
@@ -518,7 +531,7 @@ const DetailPage = () => {
         {bookLoading ? (
           <Button
             className="bg-[#9268EB] hover:bg-[#bfa1ff] sticky bottom-20 left-full max-w-md drop-shadow-lg rounded-full z-20 w-12 h-12 mr-3"
-            onClick={() => mappingBook()}
+            onClick={() => mappingBook(bookDetail.id)}
           >
             <FaPlus size={30} />
           </Button>
