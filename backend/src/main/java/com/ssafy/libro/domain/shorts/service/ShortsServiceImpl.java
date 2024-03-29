@@ -63,13 +63,17 @@ public class ShortsServiceImpl implements ShortsService {
             log.info(String.format("Start Creating Shorts and Save into S3 Server: BookId = %05d", book.getId()));
             log.info(String.format("Start Creating Shorts and Save into S3 Server: Title = %s", book.getTitle()));
             log.info(String.format("Start Creating Shorts and Save into S3 Server: Summary = %s", book.getSummary()));
-            ShortsRequestDto shortsRequestDto = ShortsRequestDto.builder()
-                    .title(book.getTitle())
-                    .content(book.getSummary())
-                    .build();
-            ShortsResponseDto shortsResponseDto = createShorts(shortsRequestDto);
-            String s3Url = uploadVideoToS3(shortsResponseDto.getResource(), shortsResponseDto.getFilename());
-            bookRepository.save(book.updateShortsUrl(s3Url));
+            try {
+                ShortsRequestDto shortsRequestDto = ShortsRequestDto.builder()
+                        .title(book.getTitle())
+                        .content(book.getSummary())
+                        .build();
+                ShortsResponseDto shortsResponseDto = createShorts(shortsRequestDto);
+                String s3Url = uploadVideoToS3(shortsResponseDto.getResource(), shortsResponseDto.getFilename());
+                bookRepository.save(book.updateShortsUrl(s3Url));
+            } catch (IOException e) {
+                log.error(e.getMessage());
+            }
             log.info(String.format("Complete Creating Shorts and Save into S3 Server: BookId = %05d", book.getId()));
             log.info(String.format("Complete Creating Shorts and Save into S3 Server: Title = %s", book.getTitle()));
             log.info(String.format("Complete Creating Shorts and Save into S3 Server: Summary = %s", book.getSummary()));
