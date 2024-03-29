@@ -20,6 +20,6 @@ COPY cronjob /etc/cron.d/cronjob
 CMD crontab /etc/cron.d/cronjob
 
 # 최초 1회 학습 실행
-CMD python -m app.train
+CMD python -m train
 # Gunicorn을 사용하여 Flask 애플리케이션을 실행합니다.
 CMD ["gunicorn", "-b", "0.0.0.0:5000", "app:app"]
