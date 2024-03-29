@@ -1,8 +1,6 @@
 import {AxiosRequestConfig} from "axios"
 import instance from '@/lib/interceptor'
 
-const baseURL = 'http://localhost:8080/api'
-
 const config = {
     headers: {
         'Content-Type': 'application/json',
