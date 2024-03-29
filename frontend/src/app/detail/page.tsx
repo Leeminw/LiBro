@@ -4,14 +4,14 @@ import SubHeader from "@/components/SubHeader";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import DetailAnalyze from "@/components/components/detailAnalyze";
-import { SearchApi } from "@/lib/axios-search";
-import { FaPlus, FaStar } from "react-icons/fa6";
-import { RiPencilFill } from "react-icons/ri";
-import { dateFormatter } from "@/lib/date-formatter";
-import { useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { FaPlus, FaStar } from "react-icons/fa6";
+import { RiPencilFill } from "react-icons/ri";
+import { SearchApi } from "@/lib/axios-search";
+import { dateFormatter } from "@/lib/date-formatter";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
 import instance from "@/lib/interceptor";
@@ -23,21 +23,31 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { useToast } from "@/components/ui/use-toast";
 
 const DetailPage = () => {
   const URL = "ex0" + 0 + ".mp4";
   const isbn = useSearchParams().get("isbn");
   const ratingRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+  const { toast } = useToast();
   const [bookLoading, setBookLoading] = useState<boolean>(false);
   const [bookDetail, setBookDetail] = useState<Book>({
     title: "",
-    image: "",
+    thumbnail: "",
     author: "",
-    discount: 0,
+    price: 0,
     publisher: "",
-    pubdate: "",
+    pub_date: "",
     isbn: 0,
-    description: "",
+    summary: "",
+    translator: null,
+    updated_date: "",
+    created_date: "",
+    rating: 0,
+    rating_count: 0,
+    id: 0,
+    shorts_url: "",
   });
   const [start, setStart] = useState<number>(1);
   const [curpage, setCurpage] = useState<number>(1);
@@ -73,10 +83,34 @@ const DetailPage = () => {
         SearchApi.searchBooks(isbn, 1)
           .then((data) => {
             console.log("응답 값", data);
-            setBookDetail(data.items[0]);
+            setBookDetail({
+              title: data.items[0].title,
+              thumbnail: data.items[0].image,
+              author: data.items[0].author,
+              price: data.items[0].discount,
+              publisher: data.items[0].publisher,
+              pub_date: data.items[0].pubdate,
+              isbn: data.items[0].isbn,
+              summary: data.items[0].description,
+              translator: null,
+              updated_date: "",
+              created_date: "",
+              rating: 0,
+              rating_count: 0,
+              id: 0,
+              shorts_url: "",
+            });
             setBookLoading(true);
           })
-          .catch((err) => console.log(err));
+          .catch((err) => {
+            toast({
+              title: "오류",
+              description:
+                "도서 정보를 불러오는데 실패했습니다.\n다시 시도해주세요.",
+            });
+            router.back();
+            console.log(err);
+          });
       }
     };
     updateBookDetail();
@@ -96,7 +130,7 @@ const DetailPage = () => {
       // 데이터가 없는경우 등록
       if (response.data.data.length === 0) {
         console.log("do this");
-        const dateString: string = bookDetail.pubdate;
+        const dateString: string = bookDetail.pub_date;
         const formattedDateString: string = `${dateString.slice(
           0,
           4
@@ -105,12 +139,12 @@ const DetailPage = () => {
         const addBook = {
           isbn: bookDetail.isbn,
           title: bookDetail.title,
-          summary: bookDetail.description,
-          price: bookDetail.discount,
+          summary: bookDetail.summary,
+          price: bookDetail.price,
           author: bookDetail.author,
           publisher: bookDetail.publisher,
           pubDate: isoDateTime,
-          thumbnail: bookDetail.image,
+          thumbnail: bookDetail.thumbnail,
         };
         postResponse = await instance.post("api/v1/book", addBook);
       }
@@ -141,14 +175,14 @@ const DetailPage = () => {
             <div
               className="w-full h-40 flex relative"
               style={{
-                backgroundImage: `url(${bookDetail.image})`,
+                backgroundImage: `url(${bookDetail.thumbnail})`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }}
             >
               <div className="w-full h-full backdrop-blur-lg backdrop-brightness-75 flex absolute pr-2">
                 <Image
-                  src={bookDetail.image}
+                  src={bookDetail.thumbnail}
                   alt=""
                   width={100}
                   height={200}
@@ -186,7 +220,7 @@ const DetailPage = () => {
                 <p className="text-lg text-gray-800 font-semibold">책 소개</p>
                 <hr className="mt-2 mb-3" />
                 <p className="text-xs text-gray-600 leading-6 indent-1.5">
-                  {bookDetail.description}
+                  {bookDetail.summary}
                 </p>
               </div>
 
@@ -197,9 +231,9 @@ const DetailPage = () => {
                   <p className="w-1/3 my-1">ISBN</p>
                   <p className="w-2/3 my-1">{bookDetail.isbn}</p>
                   <p className="w-1/3 my-1">발행 일자</p>
-                  <p className="w-2/3 my-1">{bookDetail.pubdate}</p>
+                  <p className="w-2/3 my-1">{bookDetail.pub_date}</p>
                   <p className="w-1/3 my-1">가격</p>
-                  <p className="w-2/3 my-1">{bookDetail.discount}원</p>
+                  <p className="w-2/3 my-1">{bookDetail.price}원</p>
                 </div>
               </div>
 
