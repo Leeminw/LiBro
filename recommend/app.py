@@ -7,11 +7,11 @@ from flask import request
 from config.db import get_jwt_secret_key
 from datetime import datetime, timezone
 import pytz
-
+from flask_cors import CORS
 
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
-
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 
 def get_bearer_token() -> str:
