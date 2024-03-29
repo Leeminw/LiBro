@@ -8,6 +8,17 @@ from config.db import get_jwt_secret_key
 from datetime import datetime, timezone
 import pytz
 from flask_cors import CORS
+from apscheduler.schedulers.background import BackgroundScheduler
+from train import train
+
+def my_job():
+    print('train start')
+    train()
+    print('train end')
+    
+scheduler = BackgroundScheduler()
+scheduler.add_job(func=my_job, trigger="interval", seconds=60*60)  # 10초마다 실행
+
 
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
@@ -79,4 +90,7 @@ def get_book_list() :
     return make_response_entity(result,HTTPStatus.OK)
 
 if __name__ == '__main__':
+    # scheduler.start()
+    if not scheduler.state:
+        scheduler.start()
     app.run(debug=True)
