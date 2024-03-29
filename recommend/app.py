@@ -42,19 +42,20 @@ def validateToken(token) -> tuple:
 
 @app.route('/')
 def random_book() :
-    token = get_bearer_token()
-    if(token is None) :
-        return make_response_entity("fail" , HTTPStatus.UNAUTHORIZED)
+    # token = get_bearer_token()
+    # if(token is None) :
+    #     return make_response_entity("fail" , HTTPStatus.UNAUTHORIZED)
     
-    info = validateToken(token)
-    if(not info[0]) :
-        return make_response_entity("fail", HTTPStatus.UNAUTHORIZED)
-    
-
-    return make_response_entity(info,HTTPStatus.OK)
+    # info = validateToken(token)
+    # if(not info[0]) :
+    #     return make_response_entity("fail", HTTPStatus.UNAUTHORIZED)
+    result = get_recommend_book_list(user_id=10,size=10)
 
 
-@app.route('/flask/api/v1/recommend')
+    return make_response_entity(result,HTTPStatus.OK)
+
+
+@app.route('/flask/api/v1/recommend/<userId>')
 def get_book_list() :
     user_id = -1    
     token = get_bearer_token()
@@ -63,6 +64,8 @@ def get_book_list() :
         info = validateToken(token)
         if(info[0]) :
             user_id =  info[1]
+        else :
+            make_response_entity(info[1], HTTPStatus.UNAUTHORIZED)
 
     if(user_id != -1 ) :
         # 토큰에서 정보를 못얻는경우 랜덤 책 리스트 반환
