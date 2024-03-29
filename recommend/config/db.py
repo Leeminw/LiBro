@@ -19,3 +19,8 @@ def get_db() -> Engine:
 def get_model_url() -> str :
     load_dotenv(override=True)
     return os.getenv("MODEL_URL")
+
+
+def get_jwt_secret_key() -> str :
+    load_dotenv(override=True)
+    return os.getenv("JWT_SECRET")

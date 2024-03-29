@@ -1,12 +1,12 @@
 package com.ssafy.libro.domain.shorts.service;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.ssafy.libro.domain.book.entity.Book;
 import com.ssafy.libro.domain.book.exception.BookNotFoundException;
 import com.ssafy.libro.domain.book.repository.BookRepository;
 import com.ssafy.libro.domain.shorts.dto.*;
-import com.ssafy.libro.domain.shorts.repository.TaskJpaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bytedeco.javacv.*;
@@ -15,6 +15,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
@@ -53,8 +54,28 @@ public class ShortsServiceImpl implements ShortsService {
     private final BookRepository bookRepository;
     private final PromptServiceImpl promptService;
 
-    private final TaskServiceImpl taskService;
-    private final TaskJpaRepository taskJpaRepository;
+    @Scheduled(cron = "0 */1 * * * *", zone = "Asia/Seoul")
+    private void autoCreateShorts4ExistsBook() throws IOException {
+        List<Book> books = bookRepository.findAllByShortsUrlIsNull().orElseThrow(
+                () -> new BookNotFoundException(""));
+
+        for (Book book : books) {
+            log.info(String.format("Start Creating Shorts and Save into S3 Server: BookId = %05d", book.getId()));
+            log.info(String.format("Start Creating Shorts and Save into S3 Server: Title = %s", book.getTitle()));
+            log.info(String.format("Start Creating Shorts and Save into S3 Server: Summary = %s", book.getSummary()));
+            ShortsRequestDto shortsRequestDto = ShortsRequestDto.builder()
+                    .title(book.getTitle())
+                    .content(book.getSummary())
+                    .build();
+            ShortsResponseDto shortsResponseDto = createShorts(shortsRequestDto);
+            String s3Url = uploadVideoToS3(shortsResponseDto.getResource(), shortsResponseDto.getFilename());
+            bookRepository.save(book.updateShortsUrl(s3Url));
+            log.info(String.format("Complete Creating Shorts and Save into S3 Server: BookId = %05d", book.getId()));
+            log.info(String.format("Complete Creating Shorts and Save into S3 Server: Title = %s", book.getTitle()));
+            log.info(String.format("Complete Creating Shorts and Save into S3 Server: Summary = %s", book.getSummary()));
+            log.info(String.format("Complete Creating Shorts and Save into S3 Server: S3 URL = %s", book.getShortsUrl()));
+        }
+    }
 
     @Override
     public ShortsResponseDto createShorts(ShortsRequestDto requestDto) throws IOException {
@@ -152,7 +173,7 @@ public class ShortsServiceImpl implements ShortsService {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
 
-        // String url = "http://127.0.0.1:7860/sdapi/v1/txt2img";
+//         String url = "http://127.0.0.1:7860/sdapi/v1/txt2img";
         String url = "http://222.107.238.44:7860/sdapi/v1/txt2img";
         DiffusionRequestDto diffusionRequestDto = new DiffusionRequestDto().updatePrompt(prompt);
         log.info(diffusionRequestDto.toString());
@@ -268,8 +289,9 @@ public class ShortsServiceImpl implements ShortsService {
     }
 
     private static List<byte[]> createSubtitledImages(List<byte[]> decodedImages, String sentences) throws IOException {
-        String[] subtitles = sentences.split(",");
+        String[] subtitles = sentences.split("(?<=[.!?])\\s*|\\n+");
         int cntSubtitledImages = lcm(decodedImages.size(), subtitles.length);
+        log.info(Arrays.toString(subtitles));
 
         // 이미지 & 자막의 반복 비율 계산
         int imageRepeatRate = cntSubtitledImages / decodedImages.size();
@@ -294,8 +316,9 @@ public class ShortsServiceImpl implements ShortsService {
     private static BufferedImage overlayTextOnImage(BufferedImage image, String text) {
         Graphics2D g2d = image.createGraphics();
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        Font font = new Font("Noto Sans CJK KR", Font.BOLD, 125);
-        // Font font = new Font("Malgun Gothic", Font.BOLD, 125);
+//        Font font = new Font("Noto Sans CJK KR", Font.BOLD, 64);
+        Font font = new Font("Nanum Pen Script", Font.BOLD, 54);
+//        Font font = new Font("Nanum Pen", Font.BOLD, 54);
         g2d.setFont(font);
 
         FontMetrics fm = g2d.getFontMetrics();
@@ -363,7 +386,7 @@ public class ShortsServiceImpl implements ShortsService {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    private String uploadVideoToS3(File videoFile) {
+    public String uploadVideoToS3(File videoFile) {
         if (!videoFile.exists()) {
             log.error("Video file does not exist: {}", videoFile.getAbsolutePath());
             return null;
@@ -372,7 +395,21 @@ public class ShortsServiceImpl implements ShortsService {
         amazonS3.putObject(new PutObjectRequest(bucketName, s3Key, videoFile));
         log.info("Uploaded video to S3: {}", s3Key);
 
-        return String.format("https://%s.s3.%s.amazonaws.com/%s", bucketName, amazonS3.getRegionName(), s3Key); // 최종 URL 리턴
+        // return uploaded file S3 URL
+        return String.format("https://%s.s3.%s.amazonaws.com/%s", bucketName, amazonS3.getRegionName(), s3Key);
+    }
+
+    public String uploadVideoToS3(Resource resource, String filename) throws IOException {
+        try (InputStream inputStream = resource.getInputStream()) {
+            ObjectMetadata metadata = new ObjectMetadata();
+            metadata.setContentLength(inputStream.available());
+
+
+            String s3Key = S3KEY_PREFIX + filename;
+            amazonS3.putObject(new PutObjectRequest(bucketName, s3Key, inputStream, metadata));
+
+            return String.format("https://%s.s3.%s.amazonaws.com/%s", bucketName, amazonS3.getRegionName(), s3Key);
+        }
     }
 
     public void cleanupTemporaryDirectory(Path path) throws IOException {
