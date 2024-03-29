@@ -61,19 +61,19 @@ def get_book_list() :
     token = get_bearer_token()
     print('token' , token)
     if token :
-        info = validateToken(token)
+        info : tuple = validateToken(token)
         print('info' , info)
         if(info[0]) :
             user_id =  info[1]
         else :
             make_response_entity(info[1], HTTPStatus.UNAUTHORIZED)
 
-    if(user_id != -1 ) :
+    if(user_id == -1 ) :
         # 토큰에서 정보를 못얻는경우 랜덤 책 리스트 반환
         result = get_random_book_list(10)
     else :
         # 추천 도서 리스트 
-        result = get_recommend_book_list(user_id=int(info[1]),size=10)
+        result = get_recommend_book_list(user_id=int(user_id),size=10)
             
 
     return make_response_entity(result,HTTPStatus.OK)
