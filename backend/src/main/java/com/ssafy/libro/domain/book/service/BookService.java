@@ -3,15 +3,38 @@ package com.ssafy.libro.domain.book.service;
 import com.ssafy.libro.domain.book.dto.BookCreateRequestDto;
 import com.ssafy.libro.domain.book.dto.BookDetailResponseDto;
 import com.ssafy.libro.domain.book.dto.BookUpdateRequestDto;
+import com.ssafy.libro.domain.book.entity.Book;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 public interface BookService {
      BookDetailResponseDto createBook(BookCreateRequestDto requestDto);
      BookDetailResponseDto updateBook(BookUpdateRequestDto requestDto);
-     void deleteBook(Long id);
+     BookDetailResponseDto deleteBook(Long id);
+
+     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+     List<BookDetailResponseDto> getAllByShortsUrlIsNull();
+     List<BookDetailResponseDto> getAllByShortsUrlIsNotNull();
+
+     BookDetailResponseDto getByIsbn(String isbn);
+     List<BookDetailResponseDto> getAllByIsbn(String isbn);
+     Page<BookDetailResponseDto> getAllByIsbn(String isbn, Pageable pageable);
+     Page<BookDetailResponseDto> getAllByTitleContaining(String title, Pageable pageable);
+     Page<BookDetailResponseDto> getAllByAuthorContaining(String author, Pageable pageable);
+     Page<BookDetailResponseDto> getAllBySummaryContaining(String summary, Pageable pageable);
+
+
+     Page<BookDetailResponseDto> getByPriceGreaterThanEqual(Integer price);
+     Page<BookDetailResponseDto> getByRatingGreaterThanEqual(Double rating);
+     Page<BookDetailResponseDto> getByPriceBetween(Integer minPrice, Integer maxPrice);
+     Page<BookDetailResponseDto> getByRatingBetween(Double minRating, Double maxRating);
+
+
+     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
      BookDetailResponseDto getBook(Long id);
      List<BookDetailResponseDto> getBooks();
 
@@ -21,6 +44,7 @@ public interface BookService {
 
      void updateBooksByApi(String query) throws IOException;
 
+     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // List<BookCreateResponseDto> getBooksByTitle(String title);
     // List<BookCreateResponseDto> getBooksByAuthor(String author);
     // List<BookCreateResponseDto> getBooksByPublisher(String publisher);

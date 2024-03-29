@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -46,8 +45,71 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public void deleteBook(Long id) {
+    public BookDetailResponseDto deleteBook(Long id) {
+        Book book = bookRepository.findById(id).orElseThrow(
+                () -> new BookNotFoundException(id));
         bookRepository.deleteById(id);
+        return new BookDetailResponseDto(book);
+    }
+
+    @Override
+    public List<BookDetailResponseDto> getAllByShortsUrlIsNull() {
+        return null;
+    }
+
+    @Override
+    public List<BookDetailResponseDto> getAllByShortsUrlIsNotNull() {
+        return null;
+    }
+
+    @Override
+    public BookDetailResponseDto getByIsbn(String isbn) {
+        return null;
+    }
+
+    @Override
+    public List<BookDetailResponseDto> getAllByIsbn(String isbn) {
+        return null;
+    }
+
+    @Override
+    public Page<BookDetailResponseDto> getAllByIsbn(String isbn, Pageable pageable) {
+        return null;
+    }
+
+    @Override
+    public Page<BookDetailResponseDto> getAllByTitleContaining(String title, Pageable pageable) {
+        return null;
+    }
+
+    @Override
+    public Page<BookDetailResponseDto> getAllByAuthorContaining(String author, Pageable pageable) {
+        return null;
+    }
+
+    @Override
+    public Page<BookDetailResponseDto> getAllBySummaryContaining(String summary, Pageable pageable) {
+        return null;
+    }
+
+    @Override
+    public Page<BookDetailResponseDto> getByPriceGreaterThanEqual(Integer price) {
+        return null;
+    }
+
+    @Override
+    public Page<BookDetailResponseDto> getByRatingGreaterThanEqual(Double rating) {
+        return null;
+    }
+
+    @Override
+    public Page<BookDetailResponseDto> getByPriceBetween(Integer minPrice, Integer maxPrice) {
+        return null;
+    }
+
+    @Override
+    public Page<BookDetailResponseDto> getByRatingBetween(Double minRating, Double maxRating) {
+        return null;
     }
 
     @Override
@@ -66,9 +128,10 @@ public class BookServiceImpl implements BookService {
     @Override
     public List<BookDetailResponseDto> getBooksByTitle(String title, Pageable pageable) {
         log.debug("service page : {} , size : {}", pageable.getPageNumber(), pageable.getPageSize());
-        Page<Book> bookList = bookRepository.findBookByTitleContaining(title, pageable);
+        Page<Book> bookList = bookRepository.findAllByTitleContaining(title, pageable).orElseThrow(
+                () -> new BookNotFoundException(title));
         List<BookDetailResponseDto> responseDto = new ArrayList<>();
-        for(Book book : bookList.getContent()){
+        for (Book book : bookList.getContent()) {
             log.debug("requested data : {}", book);
 
             responseDto.add(new BookDetailResponseDto(book));
@@ -79,9 +142,10 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public List<BookDetailResponseDto> getBooksByAuthor(String author, Pageable pageable) {
-        Page<Book> bookList = bookRepository.findBookByAuthorContaining(author,pageable);
+        Page<Book> bookList = bookRepository.findAllByAuthorContaining(author, pageable).orElseThrow(
+                () -> new BookNotFoundException(author));
         List<BookDetailResponseDto> responseDto = new ArrayList<>();
-        for(Book book : bookList){
+        for (Book book : bookList) {
             responseDto.add(new BookDetailResponseDto(book));
         }
         return responseDto;
@@ -89,10 +153,10 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public List<BookDetailResponseDto> getBooksByIsbn(String isbn) {
-        List<Book> bookList = bookRepository.findBookByIsbn(isbn)
+        List<Book> bookList = bookRepository.findAllByIsbn(isbn)
                 .orElseThrow(() -> new BookNotFoundException(isbn));
         List<BookDetailResponseDto> responseDto = new ArrayList<>();
-        for(Book book : bookList){
+        for (Book book : bookList) {
             responseDto.add(new BookDetailResponseDto(book));
         }
         return responseDto;
@@ -132,8 +196,8 @@ public class BookServiceImpl implements BookService {
 
             // 응답 파싱 및 데이터베이스 저장 로직 추가
             Gson gson = new Gson();
-            ApiResponseList responseList = gson.fromJson(response.toString(), ApiResponseList.class);
-            for (ApiResponseItem item : responseList.getItems()) {
+            NaverAPIResponseList responseList = gson.fromJson(response.toString(), NaverAPIResponseList.class);
+            for (NaverAPIResponseItem item : responseList.getItems()) {
                 BookCreateRequestDto requestDto = BookCreateRequestDto.builder()
                         .isbn(item.getIsbn())
                         .title(item.getTitle())
