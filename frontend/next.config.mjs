@@ -13,11 +13,11 @@ const nextConfig = {
             },
             {
                 source: "/api/:path*",
-                destination: "http://j10a301.p.ssafy.io:8080:/api/:path*"
+                destination: "http://j10a301.p.ssafy.io:8080/api/:path*"
             },
             {
                 source: "/flask/:path*",
-                destination: "http://j10a301.p.ssafy.io:5000:/flask/:path*"
+                destination: "http://j10a301.p.ssafy.io:5000/flask/:path*"
             },
             
         ]
