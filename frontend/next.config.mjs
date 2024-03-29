@@ -13,7 +13,7 @@ const nextConfig = {
             },
             {
                 source: "/api/:path*",
-                destination: "http://j10a301.p.ssafy.io/api/:path*",
+                destination: "http://j10a301.p.ssafy.io:8080/api/:path*",
             }
         ]
     }
