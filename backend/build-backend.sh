@@ -7,13 +7,13 @@ CONTAINER_NAME="server-backend"
 CONTAINER_ID=$(docker ps -aqf "name=$CONTAINER_NAME")
 
 
-echo "<<< Backend Build Start >>>"
+echo -e "\n<<<<<<<<<< Backend Build Start >>>>>>>>>>\n"
 
 
 echo ">>> CURRENT DOCKER INFORMATION:"
 echo ">>> DOCKER IMAGE NAME: $IMAGE_NAME"
 echo ">>> DOCKER IMAGE ID: $IMAGE_ID"
-echo -e "\n"
+echo ""
 
 
 # Stop & Remove Existing Container
@@ -36,7 +36,7 @@ if [ ! -z "$CONTAINER_ID" ]; then
     echo ">>> DOCKER CONTAINER $CONTAINER_NAME 삭제 완료."
 fi
 echo ">>> DOCKER CONTAINER $CONTAINER_NAME 존재 여부 검사 완료."
-echo -e "\n"
+echo ""
 
 
 # Remove Existing Docker Image
@@ -51,7 +51,7 @@ if [ ! -z "$IMAGE_ID" ]; then
     echo ">>> DOCKER IMAGE $IMAGE_NAME 삭제 완료."
 fi
 echo ">>> DOCKER IMAGE $IMAGE_NAME 존재 여부 검사 완료."
-echo -e "\n"
+echo ""
 
 
 ## Build Docker Image
@@ -61,7 +61,7 @@ docker build -t $IMAGE_NAME . || {
     exit 1
 }
 echo ">>> DOCKER IMAGE $IMAGE_NAME 빌드 완료."
-echo -e "\n"
+echo ""
 
 
-echo "<<< Backend Build Complete Successfully >>>"
+echo -e "\n<<<<<<<<<< Backend Build Complete Successfully >>>>>>>>>>\n"
