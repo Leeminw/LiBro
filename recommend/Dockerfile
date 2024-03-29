@@ -17,9 +17,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN apt-get update && apt-get -y install cron
 
 COPY cronjob /etc/cron.d/cronjob
-CMD crontab /etc/cron.d/cronjob
+RUN crontab /etc/cron.d/cronjob
 
 # 최초 1회 학습 실행
-CMD python -m train
+RUN python -m train
 # Gunicorn을 사용하여 Flask 애플리케이션을 실행합니다.
 CMD ["gunicorn", "-b", "0.0.0.0:5000", "app:app"]
