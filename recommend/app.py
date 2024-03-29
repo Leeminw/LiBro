@@ -1,6 +1,6 @@
 from flask import Flask
 from http import HTTPStatus
-from service.service import get_random_book_list, get_recommend_book_list
+from service.service import get_random_book_list, get_recommend_book_list, get_exist_shorts
 from data.response import make_response_entity
 import jwt
 from flask import request
@@ -49,13 +49,13 @@ def random_book() :
     # info = validateToken(token)
     # if(not info[0]) :
     #     return make_response_entity("fail", HTTPStatus.UNAUTHORIZED)
-    result = get_recommend_book_list(user_id=10,size=10)
-
+    # result = get_recommend_book_list(user_id=10,size=10)
+    result = get_exist_shorts()
 
     return make_response_entity(result,HTTPStatus.OK)
 
 
-@app.route('/flask/api/v1/recommend/<userId>')
+@app.route('/flask/api/v1/recommend')
 def get_book_list() :
     user_id = -1    
     token = get_bearer_token()
