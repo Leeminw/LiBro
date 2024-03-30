@@ -22,4 +22,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 # 최초 1회 학습 실행
 RUN python -m train
 # Gunicorn을 사용하여 Flask 애플리케이션을 실행합니다.
-CMD ["gunicorn", "-b", "0.0.0.0:5000", "app:app"]
+CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "app:app"]
