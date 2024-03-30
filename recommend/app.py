@@ -14,6 +14,7 @@ import os
 import cv2
 from pyzbar.pyzbar import decode
 import numpy as np
+
 def read_isbn_barcode(image_file):
     # 이미지를 읽어옵니다.
     image = cv2.imdecode(np.fromstring(image_file.read(), np.uint8), cv2.IMREAD_UNCHANGED)    
@@ -118,4 +119,4 @@ def get_isbn() :
 
 if __name__ == '__main__':
 
-    app.run(debug=True)
+    app.run(debug=False, host='0.0.0.0', port=5000 )
