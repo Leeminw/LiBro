@@ -3,7 +3,7 @@ import instance from "./interceptor";
 
 const booksApi = {
   // 나의 서재 페이지 등록 책 전체 조회
-  bookSearch: async (key: string, word: number, page: number, size: number) => {
+  bookSearch: async (key: string, word: string | null, page: number, size: number) => {
     try {
       const response = await axios.get("/api/v1/book/search", {
         params: {
@@ -22,7 +22,7 @@ const booksApi = {
   },
   registerBook: async (addBook: AddBook) => {
     try {
-      const response = await axios.post("api/v1/book", addBook);
+      const response = await axios.post("/api/v1/book", addBook);
       const data = response?.data.data || response.data.data[0];
       console.log(data);
       const bookId = data.id;
@@ -36,7 +36,7 @@ const booksApi = {
   },
   userBookMapping: async (value: MappingBook) => {
     try {
-      const response = await instance.post("api/v1/userbook", value);
+      const response = await instance.post("/api/v1/userbook", value);
       console.log(response);
       return response;
     } catch (error) {

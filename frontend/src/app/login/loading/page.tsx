@@ -21,11 +21,15 @@ const LoginPage = () => {
           console.log("응답 값", data);
           if (data !== undefined && data.status === "success") {
             localStorage.setItem("id", data.data.id);
+            localStorage.setItem("email", data.data.email);
+            localStorage.setItem("name", data.data.name);
+            localStorage.setItem("profile", data.data.profile);
+            localStorage.setItem("nickname", data.data.nickname);
             setUserInfo({
               id: data.data.id,
               email: data.data.email,
               name: data.data.name,
-              profile: data.profile,
+              profile: data.data.profile,
               nickname: data.data.name,
             });
             toast({
