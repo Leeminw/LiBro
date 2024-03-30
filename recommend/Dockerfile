@@ -12,7 +12,7 @@ RUN pip install --upgrade pip
 
 # 필요한 라이브러리를 설치합니다. requirements.txt 파일이 있어야 합니다.
 RUN pip install --no-cache-dir -r requirements.txt
-
+RUN apt-get install libgl1-mesa-glx
 #cron 설치
 # RUN apt-get update && apt-get -y install cron
 
