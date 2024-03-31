@@ -29,9 +29,9 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     Optional<Page<Book>> findAllBySummaryContaining(String summary, Pageable pageable);
 
 
-    Optional<Page<Book>> findByPriceGreaterThanEqual(Integer price);
-    Optional<Page<Book>> findByRatingGreaterThanEqual(Double rating);
-    Optional<Page<Book>> findByPriceBetween(Integer minPrice, Integer maxPrice);
-    Optional<Page<Book>> findByRatingBetween(Double minRating, Double maxRating);
+    Optional<Page<Book>> findByPriceGreaterThanEqual(Integer price, Pageable pageable);
+    Optional<Page<Book>> findByRatingGreaterThanEqual(Double rating, Pageable pageable);
+    Optional<Page<Book>> findByPriceBetween(Integer minPrice, Integer maxPrice, Pageable pageable);
+    Optional<Page<Book>> findByRatingBetween(Double minRating, Double maxRating, Pageable pageable);
 
 }
