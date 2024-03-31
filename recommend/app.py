@@ -11,6 +11,21 @@ from flask_cors import CORS
 from apscheduler.schedulers.background import BackgroundScheduler
 from train import train
 import os
+import cv2
+from pyzbar.pyzbar import decode
+import numpy as np
+
+def read_isbn_barcode(image_file):
+    # 이미지를 읽어옵니다.
+    image = cv2.imdecode(np.fromstring(image_file.read(), np.uint8), cv2.IMREAD_UNCHANGED)    
+    barcodes = decode(image)
+    
+    if barcodes:
+        decoded_string = barcodes[0].data.decode('utf-8')
+        if decoded_string.startswith("978") or decoded_string.startswith("979"):
+            return decoded_string
+    
+    return None
 
 def my_job():
     print('train start, pid : ', os.getpid())
@@ -18,7 +33,7 @@ def my_job():
     print('train end')
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(func=my_job, trigger="interval", seconds=60*60)  # 10초마다 실행
+scheduler.add_job(func=my_job, trigger="interval", seconds=60*60)  # 한시간마다 실행
 if not scheduler.state:
     scheduler.start()
 
@@ -55,14 +70,7 @@ def validateToken(token) -> tuple:
 
 @app.route('/')
 def random_book() :
-    # token = get_bearer_token()
-    # if(token is None) :
-    #     return make_response_entity("fail" , HTTPStatus.UNAUTHORIZED)
-    
-    # info = validateToken(token)
-    # if(not info[0]) :
-    #     return make_response_entity("fail", HTTPStatus.UNAUTHORIZED)
-    # result = get_recommend_book_list(user_id=10,size=10)
+
     result = get_exist_shorts()
 
     return make_response_entity(result,HTTPStatus.OK)
@@ -91,7 +99,24 @@ def get_book_list() :
 
     return make_response_entity(result,HTTPStatus.OK)
 
-if __name__ == '__main__':
-    # scheduler.start()
 
-    app.run(debug=True)
+
+@app.route('/flask/api/v1/isbn', methods=['POST'])
+def get_isbn() :
+    if 'image' not in request.files :
+        return make_response_entity("no data", HTTPStatus.BAD_REQUEST)
+    
+    image_file = request.files['image']
+
+    if image_file.filename == '' :
+        return make_response_entity("no data", HTTPStatus.BAD_REQUEST)
+
+    isbn = read_isbn_barcode(image_file)
+    if isbn : 
+        return make_response_entity({'isbn' : isbn}, HTTPStatus.OK)
+    else :
+        return make_response_entity("not isbn barcode", HTTPStatus.BAD_REQUEST)
+
+if __name__ == '__main__':
+
+    app.run(debug=False, host='0.0.0.0', port=5000 )
