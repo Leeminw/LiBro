@@ -2,7 +2,7 @@
 import Shorts from "@/components/Shorts";
 import { useEffect, useRef, useState } from "react";
 import SubHeader from "@/components/SubHeader";
-import { SearchApi } from "@/lib/axios-search";
+import { ShortsApi } from "@/lib/axios-shorts";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Home() {
@@ -16,26 +16,26 @@ export default function Home() {
       setPageLoad(true);
     } else {
       const requestBooks = async () => {
-        await SearchApi.searchBooks("플라톤", 1)
+        await ShortsApi.loadShorts(!!localStorage.getItem("accessToken"))
           .then((data) => {
             console.log("응답 값", data);
-            const updateBookList = data.items.map((item: Book) => ({
+            const updateBookList = data.data.map((item: Book) => ({
               title: item.title,
-              image: item.image,
+              image: item.thumbnail,
               author: item.author,
               publisher: item.publisher,
               isbn: item.isbn,
-              src: "ex00.mp4",
+              src: item.shorts_url,
             }));
-            // 일단 10개까지만 로드
-            setBookList(updateBookList.slice(0, 10));
+            // 일단 50개까지만 로드
+            setBookList(updateBookList.slice(0, 50));
             setCurrentLoad(
-              Array(updateBookList.slice(0, 10).length).fill(false)
+              Array(updateBookList.slice(0, 50).length).fill(false)
             );
             setCurrentLoad((current) =>
-              current.map((item, index) => (index === 0 ? true : item))
+              current.map((item, index) => (index < 5 ? true : item))
             );
-            loadComplete(updateBookList.slice(0, 10).length);
+            loadComplete(updateBookList.slice(0, 50).length);
           })
           .catch((err) => console.log(err));
       };
@@ -51,7 +51,9 @@ export default function Home() {
         const scrollRatio = element.scrollTop / totalScrollHeight;
         const currentIndex = Math.round(scrollRatio * (bookLength - 1));
         setCurrentLoad((current) =>
-          current.map((item, index) => (index === currentIndex ? true : item))
+          current.map((item, index) =>
+            index + 2 >= currentIndex && index - 2 <= currentIndex ? true : item
+          )
         );
         // console.log("currentIndex", currentIndex);
       }

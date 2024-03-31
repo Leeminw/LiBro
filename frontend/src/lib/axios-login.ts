@@ -1,9 +1,7 @@
 import axios from "axios";
 import instance from "./interceptor";
 import useUserState from "./login-state";
-const apiClient = axios.create({
-  baseURL: "http://localhost:8080",
-});
+const apiClient = axios.create();
 
 const LoginApi = {
   loadUser: async (token: string) => {

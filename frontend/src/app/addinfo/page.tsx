@@ -156,8 +156,9 @@ const UserInfo = () => {
     localStorage.setItem("refreshToken", refreshToken ? refreshToken : "");
     LoginApi.addInfo(values)
       .then(() => {
-        
-        router.push(`/login/loading?accessToken=${accessToken}&refreshToken=${refreshToken}`);
+        router.push(
+          `/login/loading?accessToken=${accessToken}&refreshToken=${refreshToken}`
+        );
       })
       .catch((error) => {
         localStorage.removeItem("accessToken");
@@ -188,6 +189,11 @@ const UserInfo = () => {
                         className="px-4 border-[#9268EB] rounded w-full"
                         placeholder="닉네임"
                         type="name"
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            checkAndAdvanceStage;
+                          }
+                        }}
                         {...field}
                       />
                     </FormControl>
@@ -211,7 +217,10 @@ const UserInfo = () => {
                   <div className="w-1/2 mr-2">
                     <FormItem>
                       <FormLabel>성별</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
                         <FormControl>
                           <SelectTrigger {...field}>
                             <SelectValue placeholder="성별" />
@@ -234,7 +243,10 @@ const UserInfo = () => {
                   <div className="w-1/2">
                     <FormItem>
                       <FormLabel>연령대</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="나이" />
