@@ -555,7 +555,7 @@ const DetailPage = () => {
                   {start + 50 <= rating.length && (
                     <PaginationItem>
                       <PaginationNext
-                        className="rounded-full"
+                        className="rounded-full scale-50"
                         onClick={() => {
                           ratingRef.current?.scrollIntoView({
                             behavior: "smooth",

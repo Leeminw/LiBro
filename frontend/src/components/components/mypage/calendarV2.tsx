@@ -251,7 +251,7 @@ const Cal = () => {
                     onClick={() => handleDayClick({ day, otherMonth })}
                     style={backgroundImageStyle}
                     key={dayIndex}
-                    className={`relative flex justify-start items-start px-1 py-1 w-16 h-20 min-w-[calc(100%/7)] text-xs bg-white ${dayColor} border-r border-gray-300 rounded-none font-bold  ${
+                    className={`relative flex justify-start items-start w-16 h-20 min-w-[calc(100%/7)] text-xs bg-white ${dayColor} border-r border-gray-300 rounded-none font-bold  ${
                       otherMonth
                         ? "text-gray-400 bg-gray-200 hover:bg-gray-400 hover:text-white"
                         : "hover:bg-gray-400 hover:text-white"
@@ -266,7 +266,11 @@ const Cal = () => {
                         {imageCount}
                       </div>
                     )}
-                    <div>{day}</div>
+                    <div
+                      className={`absolute top-0 left-0 flex items-center justify-center  rounded-full w-6 h-6 m-0.5`}
+                    >
+                      {imageCount === 0 && day}
+                    </div>
                   </Button>
                 );
               })}
