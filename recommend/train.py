@@ -39,7 +39,7 @@ def train() :
     data_values = df['rating'].values
 
     sparse_matrix = coo_matrix((data_values, (df['user_id'] , df['book_id'])))
-    print(sparse_matrix)
+    # print(sparse_matrix)
     model.fit(sparse_matrix, epochs=30)
     
 

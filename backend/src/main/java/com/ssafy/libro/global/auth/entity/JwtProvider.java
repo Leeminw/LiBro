@@ -69,7 +69,7 @@ public class JwtProvider {
                 .claim("type", "refresh")
                 .claim("role", role)
                 .setExpiration(new Date(System.currentTimeMillis() + refreshExpTime))
-                .signWith(SECRET_KEY)
+                .signWith(SECRET_KEY,SignatureAlgorithm.HS512)
                 .compact();
         // redis 서버에 refresh 토큰 저장
         redisTemplate.opsForValue().set(

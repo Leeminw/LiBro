@@ -2,6 +2,7 @@ package com.ssafy.libro.domain.user.entity;
 
 import com.ssafy.libro.domain.article.entity.Article;
 import com.ssafy.libro.domain.user.dto.UserJoinRequestDto;
+import com.ssafy.libro.domain.user.dto.UserProfileEditRequestDto;
 import com.ssafy.libro.domain.userbook.entity.UserBook;
 import com.ssafy.libro.domain.usergroup.entity.UserGroup;
 import com.ssafy.libro.global.util.entity.StringListConverter;
@@ -87,5 +88,10 @@ public class User {
         this.age = user.getAge();
         this.interest = user.getInterest();
         this.role = Role.USER;
+    }
+
+    public void editProfile(UserProfileEditRequestDto user){
+        this.profile = user.getProfile();
+        this.nickname = user.getNickName();
     }
 }

@@ -109,6 +109,7 @@ public class BookController {
     public ResponseEntity<?> getBooksByTitle(
             @RequestParam String key, @RequestParam String word, @RequestParam Integer page, @RequestParam Integer size) {
         List<BookDetailResponseDto> responseDto = null;
+        log.debug("searchByTitle : "+key+" : "+word);
         log.debug("controller page : {} , size : {}", page, size);
         if ("isbn".equals(key)) {
             // isbn 조회

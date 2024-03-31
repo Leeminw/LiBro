@@ -32,7 +32,18 @@ const storage = createJSONStorage(() => localStorage) as PersistStorage<UserStat
 const useUserState = create(
   persist<UserState>(
     (set, get) => ({
-      userInfo: defaultState,
+      userInfo:
+        typeof window !== "undefined" && !!localStorage.getItem("accessToken")
+          ? {
+              id: localStorage.getItem("id")
+                ? parseInt(localStorage.getItem("id")!, 10)
+                : defaultState.id,
+              email: localStorage.getItem("email") || defaultState.email,
+              name: localStorage.getItem("name") || defaultState.name,
+              profile: localStorage.getItem("profile") || defaultState.profile,
+              nickname: localStorage.getItem("nickname") || defaultState.nickname,
+            }
+          : defaultState,
       isLogin: typeof window !== "undefined" ? !!localStorage.getItem("accessToken") : false,
       getUserInfo: () => {
         return get().userInfo;
@@ -43,6 +54,10 @@ const useUserState = create(
       deleteUserInfo: () => {
         LoginApi.logoutUser();
         localStorage.removeItem("id");
+        localStorage.removeItem("email");
+        localStorage.removeItem("name");
+        localStorage.removeItem("profile");
+        localStorage.removeItem("nickname");
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
         set({ userInfo: defaultState });
