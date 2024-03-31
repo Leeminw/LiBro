@@ -71,11 +71,16 @@ const config = {
           "0%": { opacity: "0", transform: "translateY(-10px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
+        "modal-overlay-on": {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "fade-up": "fade-up 1s ease-out",
+        "modal-overlay-on": "modal-overlay-on 0.2s ease-in-out",
       },
       backgroundImage: {
         "bg-svg": "url('/BG.svg')", // 배경 이미지로 사용할 SVG 파일 경로를 지정합니다.
