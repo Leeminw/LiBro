@@ -3,38 +3,58 @@ package com.ssafy.libro.domain.book.service;
 import com.ssafy.libro.domain.book.dto.BookCreateRequestDto;
 import com.ssafy.libro.domain.book.dto.BookDetailResponseDto;
 import com.ssafy.libro.domain.book.dto.BookUpdateRequestDto;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
 public interface BookService {
-     BookDetailResponseDto createBook(BookCreateRequestDto requestDto);
-     BookDetailResponseDto updateBook(BookUpdateRequestDto requestDto);
-     void deleteBook(Long id);
-     BookDetailResponseDto getBook(Long id);
-     List<BookDetailResponseDto> getBooks();
+    BookDetailResponseDto createBook(BookCreateRequestDto requestDto);
+    BookDetailResponseDto updateBook(BookUpdateRequestDto requestDto);
+    BookDetailResponseDto deleteBook(Long id);
 
-    // List<BookCreateResponseDto> getBooksByTitle(String title);
-    // List<BookCreateResponseDto> getBooksByAuthor(String author);
-    // List<BookCreateResponseDto> getBooksByPublisher(String publisher);
-    // List<BookCreateResponseDto> getBooksByIsbn(String isbn);
-    // List<BookCreateResponseDto> getBooksByRating(Double rating);
-    // List<BookCreateResponseDto> getBooksByRatingCount(Integer ratingCount);
-    // List<BookCreateResponseDto> getBooksByPrice(Integer price);
-    // List<BookCreateResponseDto> getBooksByPubDate(LocalDateTime pubDate);
-    // List<BookCreateResponseDto> getBooksBySummary(String summary);
-    // List<BookCreateResponseDto> getBooksByTranslator(String translator);
-    // List<BookCreateResponseDto> getBooksByTitleAndAuthor(String title, String author);
-    // List<BookCreateResponseDto> getBooksByTitleAndPublisher(String title, String publisher);
-    // List<BookCreateResponseDto> getBooksByTitleAndIsbn(String title, String isbn);
-    // List<BookCreateResponseDto> getBooksByTitleAndRating(String title, Double rating);
-    // List<BookCreateResponseDto> getBooksByTitleAndRatingCount(String title, Integer ratingCount);
-    // List<BookCreateResponseDto> getBooksByTitleAndPrice(String title, Integer price);
-    // List<BookCreateResponseDto> getBooksByTitleAndPubDate(String title, LocalDateTime pubDate);
-    // List<BookCreateResponseDto> getBooksByTitleAndSummary(String title, String summary);
-    // List<BookCreateResponseDto> getBooksByTitleAndTranslator(String title, String translator);
-    // List<BookCreateResponseDto> getBooksByAuthorAndPublisher(String author, String publisher);
-    // List<BookCreateResponseDto> getBooksByAuthorAndIsbn(String author, String isbn);
-    // List<BookCreateResponseDto> getBooksByAuthorAndRating(String author, Double rating);
-    // List<BookCreateResponseDto> getBooksByAuthorAndRatingCount(String author, Integer ratingCount);
-    // List<BookCreateResponseDto> getBooksBy
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    List<BookDetailResponseDto> searchAllByShortsUrlIsNull();
+    List<BookDetailResponseDto> searchAllByShortsUrlIsNotNull();
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    BookDetailResponseDto findBookById(Long id);
+    BookDetailResponseDto findBookByIsbn(String isbn);
+    List<BookDetailResponseDto> findAllBooks();
+    List<BookDetailResponseDto> findAllByIsbn(String isbn);
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    Page<BookDetailResponseDto> findAllBooks(Pageable pageable);
+    Page<BookDetailResponseDto> findAllByIsbn(String isbn, Pageable pageable);
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    Page<BookDetailResponseDto> searchBooksByTitleContaining(String title, Pageable pageable);
+    Page<BookDetailResponseDto> searchBooksByAuthorContaining(String author, Pageable pageable);
+    Page<BookDetailResponseDto> searchBooksBySummaryContaining(String summary, Pageable pageable);
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    Page<BookDetailResponseDto> filterBooksByPriceGreaterThanEqual(Integer price, Pageable pageable);
+    Page<BookDetailResponseDto> filterBooksByRatingGreaterThanEqual(Double rating, Pageable pageable);
+    Page<BookDetailResponseDto> filterBooksByPriceBetween(Integer minPrice, Integer maxPrice, Pageable pageable);
+    Page<BookDetailResponseDto> filterBooksByRatingBetween(Double minRating, Double maxRating, Pageable pageable);
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //List<BookDetailResponseDto> searchBooksByTitleContainingAndAuthorContaining(String title, String author);
+    //List<BookDetailResponseDto> searchBooksByTitleContainingAndSummaryContaining(String title, String summary);
+    //List<BookDetailResponseDto> searchBooksByTitleContainingAndPublisherContaining(String title, String publisher);
+    //List<BookDetailResponseDto> searchBooksBySummaryContainingAndAuthorContaining(String summary, String author);
+    //List<BookDetailResponseDto> searchBooksBySummaryContainingAndPublisherContaining(String summary, String publisher);
+    //List<BookDetailResponseDto> searchBooksByAuthorContainingAndPublisherContaining(String author, String publisher);
+    //List<BookDetailResponseDto> filterBooksByTitleContainingAndPriceBetween(String title, Integer minPrice, Integer maxPrice);
+    //List<BookDetailResponseDto> filterBooksByAuthorContainingAndPriceBetween(String author, Integer minPrice, Integer maxPrice);
+    //List<BookDetailResponseDto> filterBooksBySummaryContainingAndPriceBetween(String summary, Integer minPrice, Integer maxPrice);
+    //List<BookDetailResponseDto> filterBooksByPublisherContainingAndPriceBetween(String publisher, Integer minPrice, Integer maxPrice);
+    //List<BookDetailResponseDto> filterBooksByTitleContainingAndRatingGreaterThanEqual(String title, Double rating);
+    //List<BookDetailResponseDto> filterBooksByTitleContainingAndRatingCountGreaterThanEqual(String title, Integer ratingCount);
+    //List<BookDetailResponseDto> filterBooksByAuthorContainingAndRatingGreaterThanEqual(String author, Double rating);
+    //List<BookDetailResponseDto> filterBooksByAuthorContainingAndRatingCountGreaterThanEqual(String author, Integer ratingCount);
+    //List<BookDetailResponseDto> filterBooksBySummaryContainingAndRatingGreaterThanEqual(String summary, Double rating);
+    //List<BookDetailResponseDto> filterBooksBySummaryContainingAndRatingCountGreaterThanEqual(String summary, Integer ratingCount);
+    //List<BookDetailResponseDto> filterBooksByPublisherContainingAndRatingGreaterThanEqual(String publisher, Double rating);
+    //List<BookDetailResponseDto> filterBooksByPublisherContainingAndRatingCountGreaterThanEqual(String publisher, Integer ratingCount);
 }

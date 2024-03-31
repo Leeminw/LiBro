@@ -1,18 +1,26 @@
 package com.ssafy.libro.domain.user.entity;
 
+import com.ssafy.libro.domain.article.entity.Article;
+import com.ssafy.libro.domain.user.dto.UserJoinRequestDto;
+import com.ssafy.libro.domain.user.dto.UserProfileEditRequestDto;
 import com.ssafy.libro.domain.userbook.entity.UserBook;
+import com.ssafy.libro.domain.usergroup.entity.UserGroup;
+import com.ssafy.libro.global.util.entity.StringListConverter;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
+@ToString
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,31 +33,65 @@ public class User {
     private String email;
 
     @Column
-    private String picture;
+    private String authId;
+    @Column
+    private String authType;
+
+    @Column
+    private String profile;
+
+    @Column
+    private String nickname;
+
+    @Column
+    private Character gender;
+
+    @Column
+    private Integer age;
+
+    @Column
+    private Boolean isDeleted;
+
+    @CreationTimestamp
+    @Column
+    private LocalDateTime createdDate;
+
+    @Column
+    private LocalDateTime updatedDate;
+
+    @Convert(converter = StringListConverter.class)
+    @Column
+    private List<String> interest;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY,targetEntity = UserBook.class)
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER,targetEntity = UserBook.class)
     private List<UserBook> userBookList;
 
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
+    private List<Article> articles;
 
-    @Builder
-    public User(String name, String email, String picture, Role role) {
-        this.name = name;
-        this.email = email;
-        this.picture = picture;
-        this.role = role;
-    }
 
-    public User update(String name, String picture) {
-        this.name = name;
-        this.picture = picture;
-        return this;
-    }
+    @Builder.Default
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserGroup> userGroupList = new ArrayList<>();
 
     public String getRoleKey() {
         return this.role.getKey();
+    }
+
+    public void updateUserJoin(UserJoinRequestDto user) {
+        this.nickname = user.getNickname();
+        this.gender = user.getGender();
+        this.age = user.getAge();
+        this.interest = user.getInterest();
+        this.role = Role.USER;
+    }
+
+    public void editProfile(UserProfileEditRequestDto user){
+        this.profile = user.getProfile();
+        this.nickname = user.getNickName();
     }
 }
