@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ApiResponseItem {
+public class NaverAPIResponseItem {
     private String title;
     private String link;
     private String image;
