@@ -54,7 +54,7 @@ public class ShortsServiceImpl implements ShortsService {
     private final BookRepository bookRepository;
     private final PromptServiceImpl promptService;
 
-//    @Scheduled(cron = "0 */1 * * * *", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 */1 * * * *", zone = "Asia/Seoul")
     private void autoCreateShorts4ExistsBook() throws IOException {
         List<Book> books = bookRepository.findAllByShortsUrlIsNull().orElseThrow(
                 () -> new BookNotFoundException(""));
@@ -71,8 +71,10 @@ public class ShortsServiceImpl implements ShortsService {
                 ShortsResponseDto shortsResponseDto = createShorts(shortsRequestDto);
                 String s3Url = uploadVideoToS3(shortsResponseDto.getResource(), shortsResponseDto.getFilename());
                 bookRepository.save(book.updateShortsUrl(s3Url));
-            } catch (IOException e) {
+
+            } catch (Exception e) {
                 log.error(e.getMessage());
+                continue;
             }
             log.info(String.format("Complete Creating Shorts and Save into S3 Server: BookId = %05d", book.getId()));
             log.info(String.format("Complete Creating Shorts and Save into S3 Server: Title = %s", book.getTitle()));
