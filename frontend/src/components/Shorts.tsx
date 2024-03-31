@@ -12,7 +12,7 @@ const Shorts = ({ bookDetail, shortsLoad }: { bookDetail: BookShorts; shortsLoad
       className={`snap-always snap-center shrink-0 w-full h-full min-h-60 flex items-center justify-center text-4xl font-bold text-white drop-shadow-lg`}
     >
       {shortsLoad ? (
-        <div className="bg-white text-black flex justify-center rounded-lg items-center w-5/6 h-3/4 relative">
+        <div className="bg-white text-black flex justify-center rounded-lg items-center w-5/6 h-2/3 relative -translate-y-1">
           {/* 북마크 버튼 */}
           <div
             className="bg-black/50 hover:bg-black/30 rounded-full p-2 backdrop-blur-md absolute top-2 right-2 z-10 cursor-pointer transition-colors duration-150"

@@ -28,6 +28,14 @@ import { Book } from "lucide-react";
 import { list } from "postcss";
 import instance from "@/lib/interceptor";
 import SubHeader from "@/components/SubHeader";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 interface User {
   profileUrl: string;
@@ -238,7 +246,7 @@ const Library = () => {
   }
 
   // hover 제어
-  const [hoveredBook, setHoveredBook] = useState(0);
+  const [hoveredBook, setHoveredBook] = useState(-1);
 
   // 모달시작
 
@@ -743,14 +751,17 @@ const Library = () => {
   };
   // 여기까지
   return (
-    <div className="bg-bg-svg bg-no-repeat bg-cover scrollbar-hide relative min-h-screen">
+    <div className="bg-bg-svg bg-no-repeat bg-cover scrollbar-hide overflow-y-scroll relative h-screen pb-28">
       <SubHeader title="나의 서재" backArrow={false} />
-      <div className="flex w-full justify-between items-center h-12 bg-black/60 backdrop-blur-md pl-3 py-3 text-white text-sm">
+      <div className="absolute flex w-full justify-between items-center h-12 bg-black/60 backdrop-blur-md pl-3 py-3 text-white text-sm mt-24 top-2">
         <div className="pl-3">전체 {books.length}권</div>
         <div className="flex w-2/5 pr-2">
           <Select onValueChange={(value) => setArrange(value)}>
-            <SelectTrigger id="arrangeSelect" className="w-full h-1/5 text-gray-900 border-none">
-              <SelectValue placeholder="최근 담은 순" />
+            <SelectTrigger
+              id="arrangeSelect"
+              className="w-full h-1/5 text-gray-900 border-none text-xs"
+            >
+              <SelectValue className="" placeholder="최근 담은 순" />
             </SelectTrigger>
             <SelectContent position="popper">
               <SelectItem value="최근 담은 순">최근 담은 순</SelectItem>
@@ -762,7 +773,7 @@ const Library = () => {
           </Select>
         </div>
       </div>
-      <div className="px-3 pt-20">
+      <div className="px-3 pt-40">
         <div className="flex items-center justify-between rounded-lg px-3 mx-3 bg-white h-10">
           <Input
             value={searchTerm}
@@ -784,48 +795,38 @@ const Library = () => {
           </div>
         </div>
         <div className="p-1">
-          <div className="grid grid-cols-4 ">
+          <div className="grid md:grid-cols-4 grid-cols-3">
             {currentBooks.map((book: BookData, index) => (
-              <div
-                key={index}
-                className="group relative my-2 pt-2 pb-2 px-2 shadow border-b-4 border-white min-h-20 "
-                onMouseEnter={() => setHoveredBook(index)}
-                onMouseLeave={() => setHoveredBook(-99)}
-                onClick={() => openModal(book)}
-              >
-                <div className={`w-full h-full ${book.complete ? "ring ring-green-400" : ""}`}>
-                  {" "}
-                  {/* overflow-hidden 추가 */}
-                  <Image
-                    src={book.image}
-                    alt={`Book ${index + 1}`}
-                    width={200}
-                    height={400}
-                    layout="responsive"
-                  />{" "}
-                  {/* object-cover 추가 */}
-                </div>
-                {hoveredBook === index && (
-                  <div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-75 flex justify-start">
-                    <div>
-                      <p className="text-white text-sm mx-2 my-6 ">{book.title}</p>
+              <>
+                <div
+                  key={index}
+                  className="drop-shadow-xl shadow-border pb-2 border-b-8 border-white flex justify-center items-end h-fit"
+                  onClick={() => openModal(book)}
+                >
+                  <div className="w-full h-40 mt-4 mx-1 bg-gray-200 flex items-end">
+                    <Image
+                      src={book.image}
+                      alt={`Book ${index + 1}`}
+                      width={400}
+                      height={400}
+                      className="w-full h-full"
+                    />
+                    <div className="absolute top-4 left-0 w-full h-40 bg-black bg-opacity-60 flex justify-start transition-opacity opacity-0 hover:opacity-100 duration-500 cursor-pointer">
+                      <p className="text-white text-sm mx-2 my-6 line-clamp-6 text-ellipsis break-words">
+                        {book.title}
+                      </p>
                     </div>
-                    <div className="absolute top-12 left-0  flex justify-start">
-                      <p className="text-white text-sm mx-2 my-6 ">{book.complete ? "" : ``}</p>
-                    </div>
-                    {/* <div className="absolute top-16 left-0 flex justify-start">
-                                            <p className="text-white text-sm mx-2 my-6 ">{book.complete ? '' : `${book.currentpage} / ${book.finalpage}`}</p>
-                                        </div> */}
                   </div>
-                )}
-              </div>
+                </div>
+              </>
             ))}
-            {/* 책의 수가 최대 페이지 수에 미치지 못할 경우, 빈 자리를 채우기 위한 처리 */}
             {Array.from({ length: 12 - currentBooks.length }, (_, index) => (
               <div
                 key={`empty-${index}`}
-                className="my-2 p-1 shadow border-b-4 border-white w-33 h-33 flex justify-center items-center"
-              ></div>
+                className="drop-shadow-xl pb-2 shadow-border border-b-8 border-white flex justify-center items-end h-fit"
+              >
+                <div className="w-full h-40 mt-4 mx-1"></div>
+              </div>
             ))}
           </div>
 
@@ -833,7 +834,7 @@ const Library = () => {
             <BookModal userBook={selectedBook} onClose={closeModal} />
           )}
 
-          <nav>
+          <nav className="pt-4">
             <ul className="pagination flex items-center justify-center">
               {pageNumbers.map((number) => (
                 <li
