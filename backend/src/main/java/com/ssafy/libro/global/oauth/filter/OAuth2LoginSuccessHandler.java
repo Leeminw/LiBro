@@ -33,7 +33,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
             input.add(user.getRole().getTitle());
             String token = jwtProvider.createAccessToken(user.getId(), input);
             String refreshToken = jwtProvider.createRefreshToken(user.getId(), input);
-            String redirectURL = UriComponentsBuilder.fromUriString("http://j10a301.p.ssafy.io/addinfo")
+            String redirectURL = UriComponentsBuilder.fromUriString("https://j10a301.p.ssafy.io/addinfo")
                     .queryParam("accessToken", token)
                     .queryParam("refreshToken", refreshToken)
                     .build()
@@ -47,7 +47,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
             input.add(user.getRole().getTitle());
             String token = jwtProvider.createAccessToken(user.getId(), input);
             String refreshToken = jwtProvider.createRefreshToken(user.getId(), input);
-            String redirectURL = UriComponentsBuilder.fromUriString("http://j10a301.p.ssafy.io/login/loading")
+            String redirectURL = UriComponentsBuilder.fromUriString("https://j10a301.p.ssafy.io/login/loading")
                     .queryParam("accessToken", token)
                     .queryParam("refreshToken", refreshToken)
                     .build()
