@@ -19,7 +19,7 @@ public class DiffusionRequestDto {
     @Builder.Default
     private String negative_prompt = "(EasyNegative, AuroraNegative, ng_deepnegative_v1_75t, " +
             "bad-image-v2-39000, negative_hand-neg, badhandv4), " +
-            "(worst quality, bad quality, poor quality, normal quality, low quality:1.5), " +
+            "(worst quality:2, bad quality:2, poor quality:2, normal quality:2, low quality:2), " +
             "(username, watermark, signature, time signature, timestamp, artist name, copyright name, copyright), " +
             "(bad anatomy, extra digits, fewer digits), (bad fingers, bad hands, bad arms, bad legs, bad body), " +
             "(extra fingers, extra hands, extra arms, extra legs), missing fingers, " +
@@ -52,9 +52,36 @@ public class DiffusionRequestDto {
     @Builder.Default
     private String sampler_index = "DPM++ SDE Karras";
 
-    public DiffusionRequestDto updatePrompt(String prompt) {
+    public DiffusionRequestDto updateAnimePrompt(String prompt) {
         this.prompt = "(HDR, UHD, 64K), (best quality, masterpiece), anime style, " + prompt +
                 ", professional, (hyper detailed, ultra detailed, highly detailed), fantasy world";
+        this.steps = 10;
+        this.cfg_scale = 9.0;
+        this.denoising_strength = 0.25;
+        this.hr_second_pass_steps = 8;
+        this.sampler_index = "DPM++ SDE KArras";
+        this.override_settings = Map.of(
+                "sd_model_checkpoint", "animePastelDream_softBakedVae: 4be38c1a17",
+                "sd_lora", "more_details",
+                "sd_vae", "vaeFtMse840000Ema_v100.pt"
+        );
         return this;
     }
+
+    public DiffusionRequestDto updateRealismPrompt(String prompt) {
+        this.prompt = "(HDR, UHD, 64K), (best quality, masterpiece), hyper realism, " + prompt +
+                ", professional, (hyper detailed, ultra detailed, highly detailed), fantasy world";
+        this.steps = 28;
+        this.cfg_scale = 5.0;
+        this.denoising_strength = 0.3;
+        this.hr_second_pass_steps = 15;
+        this.sampler_index = "DPM++ 2M SDE KArras";
+        this.override_settings = Map.of(
+                "sd_model_checkpoint", "xxmix9realistic_v40: 18ed2b6c48",
+                "sd_lora", "more_details",
+                "sd_vae", "vaeFtMse840000Ema_v100.pt"
+        );
+        return this;
+    }
+
 }
