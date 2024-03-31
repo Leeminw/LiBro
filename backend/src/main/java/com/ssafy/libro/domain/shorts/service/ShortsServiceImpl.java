@@ -180,7 +180,7 @@ public class ShortsServiceImpl implements ShortsService {
 
 //         String url = "http://127.0.0.1:7860/sdapi/v1/txt2img";
         String url = "http://222.107.238.44:7860/sdapi/v1/txt2img";
-        DiffusionRequestDto diffusionRequestDto = new DiffusionRequestDto().updatePrompt(prompt);
+        DiffusionRequestDto diffusionRequestDto = new DiffusionRequestDto().updateAnimePrompt(prompt);
         HttpEntity<DiffusionRequestDto> request = new HttpEntity<>(diffusionRequestDto, httpHeaders);
         try {
             log.info("[Request Stable Diffusion Create Images] {}", diffusionRequestDto.toString());
