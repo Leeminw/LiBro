@@ -21,11 +21,9 @@ import {
   CarouselPrevious,
   type CarouselApi,
 } from "@/components/ui/carousel";
-
+import { IoIosArrowForward } from "react-icons/io";
 import { userBooks } from "@/lib/axios-userBook";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Book } from "lucide-react";
-import { list } from "postcss";
 import instance from "@/lib/interceptor";
 import SubHeader from "@/components/SubHeader";
 
@@ -100,11 +98,16 @@ const Library = () => {
     readRate: 0,
     bookRate: 1,
   });
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const scrollTop = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = 0;
+    }
+  };
 
   // 책 페이지
   const [currentPage, setCurrentPage] = useState(1);
   const booksPerPage = 12;
-  const numberOfRows = 3; // 총 행의 수
   const router = useRouter();
 
   const [books, setBooks] = useState([]);
@@ -184,49 +187,10 @@ const Library = () => {
       });
   }, []);
 
-  // 모달 열릴 시 특정 등록 책 조회
-  // useEffect(() => {
-  //     if (isModalOpen) {
-  //         userBooks.bookDetail()
-  //           .then((response) => {
-  //             // 요청이 성공적으로 완료되면 데이터를 상태에 저장
-  //           console.log(response.data);
-  //           // todo userBookId를 넘겨서 조회하면되고.
-  //         })
-  //           .catch((error) => {
-  //             // 요청이 실패하면 에러 처리
-  //           console.error('There was an error!', error);
-  //         });
-  //     }
-  // })
-
   // 현재 페이지에 보여줄 책들을 계산합니다.
   const indexOfLastBook = currentPage * booksPerPage;
   const indexOfFirstBook = indexOfLastBook - booksPerPage;
   const currentBooks = processedBooks.slice(indexOfFirstBook, indexOfLastBook);
-
-  // const sliderRef = useRef(null);
-  // const handleMouseDown = (e) => {
-  //     const startX = e.pageX;
-
-  //     const handleMouseUp = (e: React.MouseEvent<HTMLElement>) => {
-  //         const endX = e.pageX;
-  //         // 오른쪽에서 왼쪽으로 드래그 했을 때
-  //         if (startX - endX > 50) {
-  //             // 다음 페이지로 넘김
-  //             setCurrentPage((prevPage) => Math.min(prevPage + 1, currentBooks.length / 4 - 1));
-  //         }
-  //         // 왼쪽에서 오른쪽으로 드래그 했을 때
-  //         else if (endX - startX > 50) {
-  //             // 이전 페이지로 넘김
-  //             setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
-  //         }
-
-  //         document.removeEventListener('mouseup', handleMouseUp);
-  //     };
-
-  //     document.addEventListener('mouseup', handleMouseUp);
-  // };
 
   // 페이지 번호를 클릭했을 때 현재 페이지를 업데이트합니다.
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
@@ -237,19 +201,12 @@ const Library = () => {
     pageNumbers.push(i);
   }
 
-  // hover 제어
-  const [hoveredBook, setHoveredBook] = useState(0);
-
-  // 모달시작
-
-  //
-
-  //
-  // // 모달 상태와 선택된 책 정보를 관리하기 위한 상태 추가
+  // 모달 상태와 선택된 책 정보를 관리하기 위한 상태 추가
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedBook, setSelectedBook] = useState<UserBook | null>(null);
   const [bookHistory, setBookHistory] = useState<History | null>(null);
-  // // 모달을 여는 함수
+
+  // 모달을 여는 함수
   const openModal = async (book: BookData) => {
     console.log("userbookId", book.userBookId);
     const { data } = await instance.get("/api/v1/userbook/detail/" + book.userBookId);
@@ -266,7 +223,7 @@ const Library = () => {
     setIsModalOpen(true);
   };
 
-  // // 모달을 닫는 함수
+  // 모달을 닫는 함수
   const closeModal = async () => {
     // 완독 갱신
     await userBooks
@@ -348,46 +305,50 @@ const Library = () => {
 
     const Header = () => {
       return (
-        <div className="relative h-24">
+        <div className="relative h-32">
           {/* 블러 처리된 배경 이미지 */}
           <div
-            className="absolute inset-0 bg-cover bg-center blur-sm "
+            className="absolute inset-0 bg-cover bg-center"
             style={{ backgroundImage: `url(${userBook.book.image})` }}
-          ></div>
-          <div className="absolute inset-0 bg-black opacity-30">
-            {/* 이 div는 검은색 반투명 오버레이 역할을 합니다. */}
-          </div>
-
-          {/* 선명한 책 이미지와 정보 */}
-          <div className="relative flex items-start">
-            <Image
-              src={userBook.book.image}
-              alt="Book Cover"
-              width={70}
-              height={105}
-              className="h-auto rounded shadow-lg my-6 ml-6"
-            />
-            <div className="ml-4 mt-8">
-              <h2 className="text-white text-md font-bold">{userBook.book.title}</h2>
-              <div className="flex items-center mt-2">
-                <p className="text-xs text-gray-300">저자 {userBook.book.author} |</p>
-                <p className="text-xs text-gray-300 ml-1">출판사 {userBook.book.publisher}</p>
-              </div>
-              <div className="flex mt-6">
-                <Link
-                  href={`/detail?isbn=${userBook.book.isbn}`}
-                  className="text-[#9268EB] text-xs"
+          >
+            <div className="w-full h-full inset-0 bg-black/40 backdrop-blur-md">
+              {/* 선명한 책 이미지와 정보 */}
+              <div className="relative flex items-end h-32">
+                <Button
+                  className="absolute right-0 top-0 text-white hover:bg-white/30 w-10 p-2.5"
+                  variant="ghost"
+                  onClick={onClose}
                 >
-                  도서 정보 보기 {">"}
-                </Link>
+                  <Image src="x-white.svg" alt="search" width={40} height={40} />
+                </Button>
+                <div className="absolute drop-shadow-lg">
+                  <Image
+                    src={userBook.book.image}
+                    alt="Book Cover"
+                    width={70}
+                    height={105}
+                    className="rounded w-full h-full max-h-32 translate-y-4 ml-4"
+                  />
+                </div>
+                <div className="pl-28 h-20 flex flex-col pr-2 translate-y-6">
+                  <h2 className="text-white text-md font-bold line-clamp-2">
+                    {userBook.book.title}
+                  </h2>
+                  <div className="flex items-center mt-2">
+                    <p className="text-xs text-gray-300 line-clamp-1">
+                      저자 {userBook.book.author} | 출판사 {userBook.book.publisher}
+                    </p>
+                  </div>
+                  <div className="flex mt-4">
+                    <Link
+                      href={`/detail?isbn=${userBook.book.isbn}`}
+                      className="text-[#9268EB] text-sm font-semibold"
+                    >
+                      도서 정보 보기 {">"}
+                    </Link>
+                  </div>
+                </div>
               </div>
-              <Button
-                className="absolute right-0 top-0 text-white"
-                variant="ghost"
-                onClick={onClose}
-              >
-                <Image src="x-white.svg" alt="search" width={20} height={20} />
-              </Button>
             </div>
           </div>
         </div>
@@ -396,10 +357,10 @@ const Library = () => {
 
     const Record = () => {
       return (
-        <div className="mx-6 mt-10">
+        <div className="mx-6 mt-14">
           <h1 className="text-xl font-bold mb-3">독서 기록</h1>
           <div className="flex justify-start items-center">
-            <Button className="flex justify-start items-center font-bold text-xs text-gray-500 bg-white border border-gray-300 shadow-lg w-full ">
+            <Button className="flex justify-start items-center font-bold text-xs text-gray-500 bg-white border border-gray-300 shadow-lg w-full hover:bg-gray-100 ">
               {bookHistory ? (
                 bookHistory.endDate ? (
                   <p>
@@ -445,8 +406,8 @@ const Library = () => {
             <button
               key={i}
               onClick={() => setRating(i)} // 클릭 시 별점 상태 업데이트
-              className={`w-8 h-8 mx-0.5 ${
-                rating >= i ? "fill-current text-[#FFCA28]" : "text-black"
+              className={`w-7 h-7 mx-0.5 ${
+                rating >= i ? "fill-current text-[#FFCA28]" : "text-yellow-500"
               }`}
             >
               {rating >= i ? (
@@ -536,17 +497,17 @@ const Library = () => {
             // 리뷰가 없을때
             !userBook.rating && !userBook.ratingComment ? (
               <>
-                <div className="flex items-start justify-between mb-1">
-                  <div className="mr-2 text-m font-bold">{renderStars()}</div>
-                  <div className="flex">
+                <div className="flex items-end justify-between mb-2">
+                  <div className="mr-2 text-m font-bold flex items-end">{renderStars()}</div>
+                  <div className="flex items-center">
                     <Input
                       type="checkbox"
                       id="spoilerCheckbox"
                       checked={isSpoiler}
                       onChange={handleCheckboxChange}
-                      className="w-3 h-3 text-blue-600 bg-gray-100 rounded border-gray-300 focus:ring-blue-500"
+                      className="w-4 h-4 text-blue-600 bg-gray-100 rounded border-gray-300 focus:ring-blue-500"
                     />
-                    <label htmlFor="spoilerCheckbox" className="ml-2 text-xs font-bold">
+                    <label htmlFor="spoilerCheckbox" className="ml-2 text-sm font-bold">
                       스포일러 포함
                     </label>
                   </div>
@@ -688,7 +649,7 @@ const Library = () => {
       if (!bookHistory || bookHistory.endDate) {
         // 독서 기록이 없을 때
         return (
-          <div className="flex justify-center">
+          <div className="flex justify-center pb-4">
             <button
               className="w-full p-1.5 mx-6 text-center bg-[#9268EB] rounded-md"
               onClick={() => startReading(userBook.userBookId)}
@@ -730,8 +691,12 @@ const Library = () => {
     };
 
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-        <div className="bg-white rounded-md w-1/2 h-3/4 overflow-y-auto">
+      <div
+        className={`fixed w-full h-full inset-0 bg-black z-40 bg-opacity-50 flex justify-center items-center px-4 overflow-y-hidden animate-modal-overlay-on`}
+      >
+        <div
+          className={`bg-white rounded-md w-full max-w-md h-3/4 overflow-y-auto duration-500 transition-all animate-fade-up`}
+        >
           <Header />
           <Record />
           <Review />
@@ -743,14 +708,20 @@ const Library = () => {
   };
   // 여기까지
   return (
-    <div className="bg-bg-svg bg-no-repeat bg-cover scrollbar-hide relative min-h-screen">
+    <div
+      ref={scrollRef}
+      className="bg-bg-svg bg-no-repeat bg-cover scrollbar-hide overflow-y-scroll relative h-screen"
+    >
       <SubHeader title="나의 서재" backArrow={false} />
-      <div className="flex w-full justify-between items-center h-12 bg-black/60 backdrop-blur-md pl-3 py-3 text-white text-sm">
+      <div className="absolute flex w-full justify-between items-center h-12 bg-black/60 backdrop-blur-md pl-3 py-3 text-white text-sm mt-24 top-2">
         <div className="pl-3">전체 {books.length}권</div>
         <div className="flex w-2/5 pr-2">
           <Select onValueChange={(value) => setArrange(value)}>
-            <SelectTrigger id="arrangeSelect" className="w-full h-1/5 text-gray-900 border-none">
-              <SelectValue placeholder="최근 담은 순" />
+            <SelectTrigger
+              id="arrangeSelect"
+              className="w-full h-1/5 text-gray-900 border-none text-xs"
+            >
+              <SelectValue className="" placeholder="최근 담은 순" />
             </SelectTrigger>
             <SelectContent position="popper">
               <SelectItem value="최근 담은 순">최근 담은 순</SelectItem>
@@ -762,70 +733,65 @@ const Library = () => {
           </Select>
         </div>
       </div>
-      <div className="px-3 pt-20">
-        <div className="flex items-center justify-between rounded-lg px-3 mx-3 bg-white h-10">
+      <div className="px-3 pt-44 pb-28">
+        <div className="flex items-center justify-end rounded-lg mx-3 bg-white h-10 relative">
           <Input
             value={searchTerm}
-            className="flex-1 border-none h-10 py-2"
+            className="flex-1 border-none h-10 py-2 pr-24"
             placeholder="제목, 작가, 출판사 등으로 검색"
             onChange={handleSearch}
           />
-          <div className="flex items-center">
+          <div className="flex items-center absolute justify-end h-full">
             <Button
-              className="text-gray-500 border-r border-gray-500 rounded-none px-2 py-2 h-6"
+              className="text-gray-500 rounded-full h-full"
               variant="ghost"
               onClick={() => setSearchTerm("")}
             >
               <Image src="xd.svg" alt="search" width={14} height={14} />
             </Button>
-            <Button className="text-gray-500 px-2 py-2 h-6" variant="ghost">
+            <div className="border-l h-2/3 border-gray-400"></div>
+            <Button className="text-gray-500 h-full" variant="ghost">
               <Image src="search1.svg" alt="search" width={16} height={16} />
             </Button>
           </div>
         </div>
-        <div className="p-1">
-          <div className="grid grid-cols-4 ">
+        <div className="p-1 flex flex-col items-center">
+          <div className="grid md:grid-cols-4 grid-cols-3">
             {currentBooks.map((book: BookData, index) => (
-              <div
-                key={index}
-                className="group relative my-2 pt-2 pb-2 px-2 shadow border-b-4 border-white min-h-20 "
-                onMouseEnter={() => setHoveredBook(index)}
-                onMouseLeave={() => setHoveredBook(-99)}
-                onClick={() => openModal(book)}
-              >
-                <div className={`w-full h-full ${book.complete ? "ring ring-green-400" : ""}`}>
-                  {" "}
-                  {/* overflow-hidden 추가 */}
-                  <Image
-                    src={book.image}
-                    alt={`Book ${index + 1}`}
-                    width={200}
-                    height={400}
-                    layout="responsive"
-                  />{" "}
-                  {/* object-cover 추가 */}
-                </div>
-                {hoveredBook === index && (
-                  <div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-75 flex justify-start">
-                    <div>
-                      <p className="text-white text-sm mx-2 my-6 ">{book.title}</p>
+              <>
+                <div
+                  key={index}
+                  className="drop-shadow-xl shadow-border pb-2 border-b-8 border-white flex justify-center items-end h-fit"
+                  onClick={() => openModal(book)}
+                >
+                  <div
+                    className={`w-full h-40 mt-4 mx-1 bg-gray-200 flex items-end ${
+                      book.complete && "border-4 border-lime-500 border-opacity-70"
+                    }`}
+                  >
+                    <Image
+                      src={book.image}
+                      alt={`Book ${index + 1}`}
+                      width={400}
+                      height={400}
+                      className="w-full h-full"
+                    />
+                    <div className="absolute top-4 left-0 w-full h-40 bg-black bg-opacity-60 flex justify-start transition-opacity opacity-0 hover:opacity-100 duration-500 cursor-pointer">
+                      <p className="text-white text-sm mx-2 my-6 line-clamp-6 text-ellipsis break-words">
+                        {book.title}
+                      </p>
                     </div>
-                    <div className="absolute top-12 left-0  flex justify-start">
-                      <p className="text-white text-sm mx-2 my-6 ">{book.complete ? "" : ``}</p>
-                    </div>
-                    {/* <div className="absolute top-16 left-0 flex justify-start">
-                                            <p className="text-white text-sm mx-2 my-6 ">{book.complete ? '' : `${book.currentpage} / ${book.finalpage}`}</p>
-                                        </div> */}
                   </div>
-                )}
-              </div>
+                </div>
+              </>
             ))}
-            {/* 책의 수가 최대 페이지 수에 미치지 못할 경우, 빈 자리를 채우기 위한 처리 */}
             {Array.from({ length: 12 - currentBooks.length }, (_, index) => (
               <div
                 key={`empty-${index}`}
-                className="my-2 p-1 shadow border-b-4 border-white w-33 h-33 flex justify-center items-center"
-              ></div>
+                className="drop-shadow-xl pb-2 shadow-border border-b-8 border-white flex justify-center items-end h-fit"
+              >
+                <div className="w-full h-40 mt-4 mx-1"></div>
+              </div>
             ))}
           </div>
 
@@ -833,39 +799,33 @@ const Library = () => {
             <BookModal userBook={selectedBook} onClose={closeModal} />
           )}
 
-          <nav>
+          <nav className="mt-4 py-1 px-2 w-fit bg-white rounded-full flex items-center">
             <ul className="pagination flex items-center justify-center">
               {pageNumbers.map((number) => (
                 <li
                   key={number}
-                  className={`page-item mx-1 ${
-                    currentPage === number ? "text-white font-bold" : "text-gray-400"
+                  className={`page-item mx-0.5 ${
+                    currentPage === number
+                      ? "text-white bg-[#9268EB] rounded-full w-10 h-10 flex justify-center items-center font-bold"
+                      : "text-gray-900 w-10 h-10 rounded-full hover:bg-gray-200 flex justify-center items-center cursor-pointer transition-all duration-300"
                   }`}
+                  onClick={() => {
+                    scrollTop();
+                    paginate(number);
+                  }}
                 >
-                  <a
-                    onClick={(e) => {
-                      e.preventDefault();
-                      paginate(number);
-                    }}
-                    href="#"
-                    className="page-link"
-                  >
-                    {number}
-                  </a>
+                  {number}
                 </li>
               ))}
               {pageNumbers.length > 0 && (
-                <li className="page-item mx-1 text-white font-bold">
-                  <a
-                    onClick={(e) => {
-                      e.preventDefault();
-                      paginate(pageNumbers[pageNumbers.length - 1]);
-                    }}
-                    href="#"
-                    className="page-link"
-                  >
-                    {"->"}
-                  </a>
+                <li
+                  className="page-item mx-1 text-gray-900 w-10 h-10 rounded-full hover:bg-gray-200 font-bold cursor-pointer flex justify-center items-center transition-all duration-300"
+                  onClick={(e) => {
+                    scrollTop();
+                    paginate(pageNumbers[pageNumbers.length - 1]);
+                  }}
+                >
+                  <IoIosArrowForward />
                 </li>
               )}
             </ul>
