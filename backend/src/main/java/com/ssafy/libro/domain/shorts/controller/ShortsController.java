@@ -38,15 +38,9 @@ public class ShortsController {
                 .body(responseDto.getResource());
     }
 
-    @GetMapping("/api/v1/shorts")
-    public ResponseEntity<?> getShortsByBookId(@RequestParam("book-id") Long bookId) throws IOException {
-        BookDetailResponseDto bookResponseDto = bookService.findBookById(bookId);
-        ShortsRequestDto shortsRequestDto = ShortsRequestDto.builder()
-                .title(bookResponseDto.getTitle())
-                .content(bookResponseDto.getSummary())
-                .build();
-
-        ShortsResponseDto responseDto = shortsService.createShorts(shortsRequestDto);
+    @GetMapping("/api/v1/shorts/create")
+    public ResponseEntity<?> createShortsByBookId(@RequestParam("book-id") Long bookId) throws IOException {
+        ShortsResponseDto responseDto = shortsService.createShortsByBookId(bookId);
         String filename = responseDto.getFilename();
 
         return ResponseEntity.status(HttpStatus.OK)
