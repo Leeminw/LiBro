@@ -6,7 +6,7 @@ const SubHeader = ({ title, backArrow }: { title: string; backArrow: boolean }) 
   const router = useRouter();
   return (
     <>
-      <div className="border-b border-gray-200 bg-white w-full flex h-12 items-center mt-12 pl-2 text-md font-semibold text-[#333333] absolute z-10">
+      <div className="border-b border-gray-200 bg-white w-full flex h-14 items-center mt-12 pl-2 text-md font-semibold text-[#333333] absolute z-10">
         {backArrow ? (
           <FaChevronLeft
             className="cursor-pointer mx-1"
@@ -16,7 +16,9 @@ const SubHeader = ({ title, backArrow }: { title: string; backArrow: boolean }) 
             }}
           />
         ) : null}
-        <div className="ml-2 select-none line-clamp-1 text-ellipsis pr-2">{title}</div>
+        <div className="ml-2 select-none line-clamp-1 text-ellipsis pr-2 text-lg font-bold animate-fade-up ">
+          {title}
+        </div>
       </div>
       <div className="h-10 absolute"></div>
     </>

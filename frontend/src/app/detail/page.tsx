@@ -5,16 +5,12 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import DetailAnalyze from "@/components/components/detailAnalyze";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { FaPlus, FaStar } from "react-icons/fa6";
-import { RiPencilFill } from "react-icons/ri";
 import { SearchApi } from "@/lib/axios-search";
-import { dateFormatter } from "@/lib/date-formatter";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
-import instance from "@/lib/interceptor";
 import {
   Pagination,
   PaginationContent,
@@ -25,6 +21,7 @@ import {
 } from "@/components/ui/pagination";
 import { useToast } from "@/components/ui/use-toast";
 import booksApi from "@/lib/axios-book";
+import { ToastAction } from "@/components/ui/toast";
 
 const DetailPage = () => {
   const URL = "ex0" + 0 + ".mp4";
@@ -162,8 +159,7 @@ const DetailPage = () => {
               })
               .catch((err) => {
                 toast({
-                  title: "오류",
-                  description: "도서 정보를 불러오는데 실패했습니다.\n다시 시도해주세요.",
+                  description: "도서 정보를 불러오는데 실패했습니다.",
                 });
                 router.back();
                 console.log(err);
@@ -177,8 +173,7 @@ const DetailPage = () => {
         })
         .catch((error) => {
           toast({
-            title: "오류",
-            description: "도서 정보를 불러오는데 실패했습니다.\n다시 시도해주세요.",
+            description: "도서 정보를 불러오는데 실패했습니다.",
           });
           console.log(error);
         });
@@ -220,12 +215,30 @@ const DetailPage = () => {
   }, []);
 
   const mappingBook = async (bookId: number) => {
-    booksApi.userBookMapping({ bookId: bookId, type: "관심" }).catch((error) => {
-      toast({
-        title: "오류",
-        description: "나의 서재에 도서를 담는데 실패했습니다.\n다시 시도해주세요.",
+    booksApi
+      .userBookMapping({ bookId: bookId, type: "관심" })
+      .then(() => {
+        toast({
+          title: "나의 서재에 도서를 담았습니다.",
+          description: "나의 서재로 이동하시겠습니까?",
+          action: (
+            <ToastAction
+              altText="move"
+              toastActionClick={() => {
+                router.push("/library");
+              }}
+            >
+              이동
+            </ToastAction>
+          ),
+        });
+      })
+      .catch((error) => {
+        toast({
+          title: "나의 서재에 도서를 담는데 실패했습니다.",
+          description: "잠시 후 다시 시도해주세요.",
+        });
       });
-    });
   };
 
   return (
@@ -310,9 +323,9 @@ const DetailPage = () => {
                 <hr className="mt-2 mb-4" />
                 <div ref={analyzeRef} id="analyze">
                   <div className="w-full flex justify-between px-1 pb-1">
-                    <Label className="text-xs text-gray-800">완독율</Label>
-                    <Label className="text-xs text-gray-800">
-                      {(analyzePer[0] / analyzePer[1]) * 100}%
+                    <Label className="text-sm text-gray-800 flex items-center">완독율</Label>
+                    <Label className="text-lg text-gray-800">
+                      {analyzePer[1] === 0 ? 0 : (analyzePer[0] / analyzePer[1]) * 100}%
                     </Label>
                   </div>
                   <Progress

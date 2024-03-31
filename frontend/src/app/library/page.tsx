@@ -27,6 +27,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Book } from "lucide-react";
 import { list } from "postcss";
 import instance from "@/lib/interceptor";
+import SubHeader from "@/components/SubHeader";
 
 interface User {
   profileUrl: string;
@@ -742,24 +743,13 @@ const Library = () => {
   };
   // 여기까지
   return (
-    <div className="bg-white h-full pt-12 overflow-auto ">
-      <div className="pt-4 mb-3 px-3">
-        <div className="text-xl font-bold ml-2 ">나의 서재</div>
-      </div>
-      <div className="flex justify-between items-center bg-black opacity-70 pl-3 py-3 text-white text-sm">
+    <div className="bg-bg-svg bg-no-repeat bg-cover scrollbar-hide relative min-h-screen">
+      <SubHeader title="나의 서재" backArrow={false} />
+      <div className="flex w-full justify-between items-center h-12 bg-black/60 backdrop-blur-md pl-3 py-3 text-white text-sm">
         <div className="pl-3">전체 {books.length}권</div>
-        <div className="flex justify-between pr-2">
+        <div className="flex w-2/5 pr-2">
           <Select onValueChange={(value) => setArrange(value)}>
-            <SelectTrigger
-              id="arrangeSelect"
-              style={{
-                backgroundColor: "black",
-                color: "white",
-                borderColor: "black",
-                width: "100%",
-                height: "20%",
-              }}
-            >
+            <SelectTrigger id="arrangeSelect" className="w-full h-1/5 text-gray-900 border-none">
               <SelectValue placeholder="최근 담은 순" />
             </SelectTrigger>
             <SelectContent position="popper">
@@ -772,7 +762,7 @@ const Library = () => {
           </Select>
         </div>
       </div>
-      <div className="bg-bg-svg p-3">
+      <div className="px-3 pt-20">
         <div className="flex items-center justify-between rounded-lg px-3 mx-3 bg-white h-10">
           <Input
             value={searchTerm}
@@ -798,7 +788,7 @@ const Library = () => {
             {currentBooks.map((book: BookData, index) => (
               <div
                 key={index}
-                className="group relative my-2 pt-2 pb-2 px-2 shadow border-b-4 border-white"
+                className="group relative my-2 pt-2 pb-2 px-2 shadow border-b-4 border-white min-h-20 "
                 onMouseEnter={() => setHoveredBook(index)}
                 onMouseLeave={() => setHoveredBook(-99)}
                 onClick={() => openModal(book)}
@@ -809,13 +799,12 @@ const Library = () => {
                   <Image
                     src={book.image}
                     alt={`Book ${index + 1}`}
-                    width={100}
-                    height={150}
+                    width={200}
+                    height={400}
                     layout="responsive"
                   />{" "}
                   {/* object-cover 추가 */}
                 </div>
-
                 {hoveredBook === index && (
                   <div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-75 flex justify-start">
                     <div>

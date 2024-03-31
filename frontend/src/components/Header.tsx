@@ -138,6 +138,7 @@ const Header = () => {
               searchOpen ? "bg-[#7449d1]" : "bg-transparent"
             } hover:bg-[#7449d1] border-none`}
             onClick={() => {
+              if (!searchOpen) searchRef.current?.focus();
               setMenuOpen(searchOpen ? false : true);
               setSearchOpen(!searchOpen);
             }}

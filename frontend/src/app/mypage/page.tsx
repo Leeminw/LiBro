@@ -30,19 +30,6 @@ const Mypage = () => {
       <div className="p-4">
         <div className="mb-2 pb-2 ">
           <div className="text-xl font-bold ml-2 ">마이페이지</div>
-          <Button
-            className="aspect-square mr-1 w-20 min-w-20 bg-gray-400 hover:bg-gray-300"
-            onClick={() => {
-              deleteUserInfo();
-              router.push("/");
-              toast({
-                title: "로그아웃",
-                description: `정상적으로 로그아웃 되었습니다.`,
-              });
-            }}
-          >
-            로그아웃
-          </Button>
         </div>
 
         <Tabs defaultValue="mypage" className="w-full">
