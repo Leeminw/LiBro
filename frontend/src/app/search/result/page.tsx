@@ -20,9 +20,9 @@ const ResultPage = () => {
   const [start, setStart] = useState(Number(params.get("start")));
   const [curpage, setCurpage] = useState(Math.floor(start / 10) + 1);
   const [pageLoad, setPageLoad] = useState<boolean>(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
+  const scrollRef = useRef<HTMLDivElement>(null);
   const scrollTop = () => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = 0;

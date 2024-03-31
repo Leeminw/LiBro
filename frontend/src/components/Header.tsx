@@ -116,7 +116,7 @@ const Header = () => {
   };
 
   return (
-    <div className="max-w-md w-full z-50 flex absolute flex-col items-center">
+    <div className="max-w-md w-full z-30 flex absolute flex-col items-center">
       <div className="bg-[#9268EB] max-w-md w-full z-50 h-12 flex justify-center items-center">
         {/* Logo */}
         <div className="flex font-bold text-xl w-full justify-center text-white">
