@@ -55,7 +55,7 @@ public class ShortsServiceImpl implements ShortsService {
     private final PromptServiceImpl promptService;
 
     @Scheduled(cron = "0 */1 * * * *", zone = "Asia/Seoul")
-    private void autoCreateShorts4ExistsBook() throws IOException {
+    private void autoCreateShorts4ExistsBook() {
         List<Book> books = bookRepository.findAllByShortsUrlIsNull().orElseThrow(
                 () -> new BookNotFoundException(""));
 
@@ -71,7 +71,6 @@ public class ShortsServiceImpl implements ShortsService {
                 ShortsResponseDto shortsResponseDto = createShorts(shortsRequestDto);
                 String s3Url = uploadVideoToS3(shortsResponseDto.getResource(), shortsResponseDto.getFilename());
                 bookRepository.save(book.updateShortsUrl(s3Url));
-
             } catch (Exception e) {
                 log.error(e.getMessage());
                 continue;
@@ -89,7 +88,7 @@ public class ShortsServiceImpl implements ShortsService {
     }
 
     @Override
-    public ShortsResponseDto getShortsByBookId(Long bookId) throws IOException {
+    public ShortsResponseDto createShortsByBookId(Long bookId) throws IOException {
         Book book = bookRepository.findById(bookId).orElseThrow(() -> new BookNotFoundException(bookId));
         return createOrGetShorts(book.getTitle(), book.getSummary());
     }
@@ -181,10 +180,10 @@ public class ShortsServiceImpl implements ShortsService {
 
 //         String url = "http://127.0.0.1:7860/sdapi/v1/txt2img";
         String url = "http://222.107.238.44:7860/sdapi/v1/txt2img";
-        DiffusionRequestDto diffusionRequestDto = new DiffusionRequestDto().updatePrompt(prompt);
-        log.info(diffusionRequestDto.toString());
+        DiffusionRequestDto diffusionRequestDto = new DiffusionRequestDto().updateAnimePrompt(prompt);
         HttpEntity<DiffusionRequestDto> request = new HttpEntity<>(diffusionRequestDto, httpHeaders);
         try {
+            log.info("[Request Stable Diffusion Create Images] {}", diffusionRequestDto.toString());
             ResponseEntity<DiffusionResponseDto> response = restTemplate.postForEntity(url, request, DiffusionResponseDto.class);
             return Optional.ofNullable(response.getBody())
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "No response body"));
@@ -221,6 +220,7 @@ public class ShortsServiceImpl implements ShortsService {
         Path outputPath = Paths.get("outputs");
         Files.createDirectories(outputPath);
 
+        log.info("[Generate Video From Created Images] {}", sentences);
         File videoFile = sentences == null || sentences.isEmpty() ?
                 generateVideoFromImages(decodedImages, outputPath) :
                 generateSubtitledVideoFromImages(decodedImages, sentences, outputPath);
@@ -297,7 +297,6 @@ public class ShortsServiceImpl implements ShortsService {
     private static List<byte[]> createSubtitledImages(List<byte[]> decodedImages, String sentences) throws IOException {
         String[] subtitles = sentences.split("(?<=[.!?])\\s*|\\n+");
         int cntSubtitledImages = lcm(decodedImages.size(), subtitles.length);
-        log.info(Arrays.toString(subtitles));
 
         // 이미지 & 자막의 반복 비율 계산
         int imageRepeatRate = cntSubtitledImages / decodedImages.size();
@@ -394,14 +393,15 @@ public class ShortsServiceImpl implements ShortsService {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public String uploadVideoToS3(File videoFile) {
         if (!videoFile.exists()) {
-            log.error("Video file does not exist: {}", videoFile.getAbsolutePath());
+            log.error("[uploadVideoToS3] Video file does not exist: {}", videoFile.getAbsolutePath());
             return null;
         }
+
         String s3Key = S3KEY_PREFIX + videoFile.getName();
         amazonS3.putObject(new PutObjectRequest(bucketName, s3Key, videoFile));
-        log.info("Uploaded video to S3: {}", s3Key);
 
         // return uploaded file S3 URL
+        log.info("[uploadVideoToS3] Upload Video to S3 Server: {}", s3Key);
         return String.format("https://%s.s3.%s.amazonaws.com/%s", bucketName, amazonS3.getRegionName(), s3Key);
     }
 
@@ -410,20 +410,21 @@ public class ShortsServiceImpl implements ShortsService {
             ObjectMetadata metadata = new ObjectMetadata();
             metadata.setContentLength(inputStream.available());
 
-
             String s3Key = S3KEY_PREFIX + filename;
             amazonS3.putObject(new PutObjectRequest(bucketName, s3Key, inputStream, metadata));
 
+            log.info("[uploadVideoToS3] Upload Video to S3 Server: {}", s3Key);
             return String.format("https://%s.s3.%s.amazonaws.com/%s", bucketName, amazonS3.getRegionName(), s3Key);
         }
     }
 
     public void cleanupTemporaryDirectory(Path path) throws IOException {
+        log.info("[cleanupTemporaryDirectory] {}", path.toString());
         try (Stream<Path> stream = Files.walk(path)) {
             stream.sorted(Comparator.reverseOrder()).map(Path::toFile)
                     .forEach(file -> {
                         if (!file.delete())
-                            log.error("Failed to delete {}", file.getAbsolutePath());
+                            log.error("[cleanupTemporaryDirectory] Failed to delete {}", file.getAbsolutePath());
                     });
         }
     }
