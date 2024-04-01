@@ -59,12 +59,10 @@ const DetailPage = () => {
   const [ageGender, setAgeGender] = useState<[AgeGender] | null>(null);
   const [ratingCount, setRatingCount] = useState<[RatingSummary] | null>(null);
 
-  const [rating, setRating] = useState<[RatingComment] | null>(null);
+  const [rating, setRating] = useState<RatingComment[]>([]);
 
   const [analyzePer, setAnalyzePer] = useState<number[]>([0, 0]);
-  const [chartPer, setChartPer] = useState<number[]>([
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  ]);
+  const [chartPer, setChartPer] = useState<number[]>([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
   const [ratingPer, setRatingPer] = useState<number[]>([0, 0, 0, 0, 0, 0]);
 
   const ratingPaging = (input: number, isNext: boolean) => {
@@ -116,33 +114,30 @@ const DetailPage = () => {
       }
     });
   };
-  // set rating 
+  // set rating
   const updateBookRatio = async (value: number) => {
-    const response = await booksApi.bookRatio(value)
-    console.log("read-ratio", response.data.data)
-    setReadRatio(response.data.data)
-  }
-  // set age-gender 
+    const response = await booksApi.bookRatio(value);
+    console.log("read-ratio", response.data.data);
+    setReadRatio(response.data.data);
+  };
+  // set age-gender
   const updateAgeGender = async (value: number) => {
-    const response = await booksApi.bookAgeGender(value)
-    console.log("age-gender", response.data.data)
-    setAgeGender(response.data.data)
-  }
+    const response = await booksApi.bookAgeGender(value);
+    console.log("age-gender", response.data.data);
+    setAgeGender(response.data.data);
+  };
   // set rating count
   const updateRatingCount = async (value: number) => {
-    const response = await booksApi.ratingCount(value)
-    console.log("rating count", response.data.data)
-    setRatingCount(response.data.data)
-  }
+    const response = await booksApi.ratingCount(value);
+    console.log("rating count", response.data.data);
+    setRatingCount(response.data.data);
+  };
   // set rating comment
   const updateRatingComment = async (value: number) => {
-    const response = await booksApi.ratincComment(value)
-    console.log("rating comment", response.data.data)
-    setRating(response.data.data)
-  }
-
-
-
+    const response = await booksApi.ratincComment(value);
+    console.log("rating comment", response.data.data);
+    setRating(response.data.data);
+  };
 
   useEffect(() => {
     const updateBookDetail = async () => {
@@ -203,10 +198,10 @@ const DetailPage = () => {
       console.log("output", bookOutput);
       setBookDetail(bookOutput);
       const dateString: string = bookOutput.pub_date;
-      const formattedDateString: string = `${dateString.slice(
-        0,
-        4
-      )}-${dateString.slice(4, 6)}-${dateString.slice(6)}`;
+      const formattedDateString: string = `${dateString.slice(0, 4)}-${dateString.slice(
+        4,
+        6
+      )}-${dateString.slice(6)}`;
       const isoDateTime: string = new Date(formattedDateString).toISOString();
       const addBook = {
         isbn: bookOutput.isbn,
@@ -243,39 +238,37 @@ const DetailPage = () => {
           description: "나의 서재로 이동하시겠습니까?",
           action: (
             <ToastAction
-              altText= "move"
+              altText="move"
               toastActionClick={() => {
-  router.push("/library");
-}}
+                router.push("/library");
+              }}
             >
-  이동
-  < /ToastAction>
+              이동
+            </ToastAction>
           ),
         });
       })
-      .catch ((error) => {
-  toast({
-    title: "나의 서재에 도서를 담는데 실패했습니다.",
-    description: "잠시 후 다시 시도해주세요.",
-  });
-});
+      .catch((error) => {
+        toast({
+          title: "나의 서재에 도서를 담는데 실패했습니다.",
+          description: "잠시 후 다시 시도해주세요.",
+        });
+      });
   };
 
-return (
-  <>
-  <SubHeader title= "도서 상세 정보" backArrow = { true} />
-    <div
-        ref={ scrollRef }
-className = "pt-24 h-full bg-white max-h-screen flex items-center relative flex-wrap overflow-y-scroll scrollbar-hide"
-  >
-{
-  bookLoading?(
-          <div className = "w-full h-full min-h-screen bg-white flex flex-col relative overflow-hidden mb-24" >
+  return (
+    <>
+      <SubHeader title="도서 상세 정보" backArrow={true} />
       <div
+        ref={scrollRef}
+        className="pt-24 h-full bg-white max-h-screen flex items-center relative flex-wrap overflow-y-scroll scrollbar-hide"
+      >
+        {bookLoading ? (
+          <div className="w-full h-full min-h-screen bg-white flex flex-col relative overflow-hidden mb-24">
+            <div
               className="w-full h-40 flex relative"
-    style = {{
-      backgroundImage: `url(${bookDetail.thumbnail
-})`,
+              style={{
+                backgroundImage: `url(${bookDetail.thumbnail})`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }}
@@ -294,8 +287,7 @@ className = "pt-24 h-full bg-white max-h-screen flex items-center relative flex-
                       {bookDetail.title}
                     </p>
                     <p className="text-gray-300 text-xs mt-1">
-                      저자 {bookDetail.author.split("^").join(", ")} | 출판사{" "}
-                      {bookDetail.publisher}
+                      저자 {bookDetail.author.split("^").join(", ")} | 출판사 {bookDetail.publisher}
                     </p>
                   </div>
                 </div>
@@ -305,9 +297,7 @@ className = "pt-24 h-full bg-white max-h-screen flex items-center relative flex-
             <div className="w-full h-full px-6">
               {bookDetail.shortsUrl && (
                 <>
-                  <p className="mt-4 mb-3 text-lg text-gray-800 font-semibold">
-                    트레일러
-                  </p>
+                  <p className="mt-4 mb-3 text-lg text-gray-800 font-semibold">트레일러</p>
                   <video
                     autoPlay
                     loop
@@ -323,9 +313,7 @@ className = "pt-24 h-full bg-white max-h-screen flex items-center relative flex-
               <div className="mt-8 w-full h-fit">
                 <p className="text-lg text-gray-800 font-semibold">책 소개</p>
                 <hr className="mt-2 mb-3" />
-                <p className="text-xs text-gray-600 leading-6 indent-1.5">
-                  {bookDetail.summary}
-                </p>
+                <p className="text-xs text-gray-600 leading-6 indent-1.5">{bookDetail.summary}</p>
               </div>
 
               <div className="mt-8 w-full h-fit">
@@ -347,14 +335,9 @@ className = "pt-24 h-full bg-white max-h-screen flex items-center relative flex-
                 <hr className="mt-2 mb-4" />
                 <div ref={analyzeRef} id="analyze">
                   <div className="w-full flex justify-between px-1 pb-1">
-                    <Label className="text-sm text-gray-800 flex items-center">
-                      완독율
-                    </Label>
+                    <Label className="text-sm text-gray-800 flex items-center">완독율</Label>
                     <Label className="text-lg text-gray-800">
-                      {analyzePer[1] === 0
-                        ? 0
-                        : (analyzePer[0] / analyzePer[1]) * 100}
-                      %
+                      {analyzePer[1] === 0 ? 0 : (analyzePer[0] / analyzePer[1]) * 100}%
                     </Label>
                   </div>
                   <Progress
@@ -362,22 +345,14 @@ className = "pt-24 h-full bg-white max-h-screen flex items-center relative flex-
                     value={(analyzePer[0] / analyzePer[1]) * 100}
                   />
                   <div className="w-full px-1 flex justify-between pt-1">
-                    <Label className="text-xs text-[#666666]">
-                      완독 수 {analyzePer[0]}
-                    </Label>
-                    <Label className="ml-4 text-xs text-[#666666]">
-                      담은 수 {analyzePer[1]}
-                    </Label>
+                    <Label className="text-xs text-[#666666]">완독 수 {analyzePer[0]}</Label>
+                    <Label className="ml-4 text-xs text-[#666666]">담은 수 {analyzePer[1]}</Label>
                   </div>
                   <div className="w-full flex justify-between px-1 pb-1 mt-6 flex-wrap">
                     <Label className="text-xs text-gray-800 font-semibold pb-2">
                       성별 / 연령대 분석
                     </Label>
-                    <div
-                      ref={chartRef}
-                      className="w-full h-36 flex justify-between"
-                      id="chart"
-                    >
+                    <div ref={chartRef} className="w-full h-36 flex justify-between" id="chart">
                       <div className="w-full h-36 flex flex-col absolute justify-between my-2">
                         <hr className="w-5/6 border-gray-300 mx-6" />
                         <hr className="w-5/6 border-gray-300 mx-6" />
@@ -449,16 +424,11 @@ className = "pt-24 h-full bg-white max-h-screen flex items-center relative flex-
                 <p className="ms-1 text-sm font-medium text-gray-500 dark:text-gray-400">
                   {ratingPer[0]}
                 </p>
-                <p className="ms-1 text-sm font-medium text-gray-500 dark:text-gray-400">
-                  /
-                </p>
-                <p className="ms-1 text-sm font-medium text-gray-500 dark:text-gray-400">
-                  5점
-                </p>
+                <p className="ms-1 text-sm font-medium text-gray-500 dark:text-gray-400">/</p>
+                <p className="ms-1 text-sm font-medium text-gray-500 dark:text-gray-400">5점</p>
               </div>
               <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                {bookDetail.ratingCount == null ? 0 : bookDetail.ratingCount}{" "}
-                개의 리뷰가 있습니다.
+                {bookDetail.ratingCount == null ? 0 : bookDetail.ratingCount} 개의 리뷰가 있습니다.
               </p>
               <div className="flex items-center mt-4">
                 <p className="text-sm w-4 font-medium text-blue-600 dark:text-blue-500 select-none">
@@ -486,11 +456,7 @@ className = "pt-24 h-full bg-white max-h-screen flex items-center relative flex-
                   17%
                 </p>
               </div>
-              <div
-                ref={ratingRef}
-                className="flex items-center mt-4"
-                id="rating"
-              >
+              <div ref={ratingRef} className="flex items-center mt-4" id="rating">
                 <p className="text-sm w-4 font-medium text-blue-600 dark:text-blue-500 select-none">
                   3
                 </p>
@@ -531,26 +497,24 @@ className = "pt-24 h-full bg-white max-h-screen flex items-center relative flex-
               </div>
               <div className="mt-8 w-full h-fit pl-1">
                 {/* 리뷰 */}
-                {rating?
-                  .slice((curpage - 1) * 10, (curpage - 1) * 10 + 10)
-                  .map((key, index) => (
-                    <div
-                      key={key.email}
-                      className="flex flex-col justify-between bg-white border border-gray-200 w-full h-28 rounded-lg drop-shadow-md p-4 my-4"
-                    >
-                      <p className="font-semibold text-sm">
-                        {key.nickname} {key.email} | {key.createdDate}
-                      </p>
-                      <div className="flex">
-                        <FaStar className="w-5 h-5 text-yellow-300 me-1" />
-                        <FaStar className="w-5 h-5 text-yellow-300 me-1" />
-                        <FaStar className="w-5 h-5 text-yellow-300 me-1" />
-                        <FaStar className="w-5 h-5 text-yellow-300 me-1" />
-                        <FaStar className="w-5 h-5 text-gray-300 me-1" />
-                      </div>
-                      <p className="text-sm">{key.ratingComment}</p>
+                {rating.slice((curpage - 1) * 10, (curpage - 1) * 10 + 10).map((key, index) => (
+                  <div
+                    key={key.email}
+                    className="flex flex-col justify-between bg-white border border-gray-200 w-full h-28 rounded-lg drop-shadow-md p-4 my-4"
+                  >
+                    <p className="font-semibold text-sm">
+                      {key.nickName} {key.email} | {key.createdDate}
+                    </p>
+                    <div className="flex">
+                      <FaStar className="w-5 h-5 text-yellow-300 me-1" />
+                      <FaStar className="w-5 h-5 text-yellow-300 me-1" />
+                      <FaStar className="w-5 h-5 text-yellow-300 me-1" />
+                      <FaStar className="w-5 h-5 text-yellow-300 me-1" />
+                      <FaStar className="w-5 h-5 text-gray-300 me-1" />
                     </div>
-                  ))}
+                    <p className="text-sm">{key.ratingComment}</p>
+                  </div>
+                ))}
               </div>
               <Pagination>
                 <PaginationContent>
@@ -572,9 +536,7 @@ className = "pt-24 h-full bg-white max-h-screen flex items-center relative flex-
                   {Array.from(
                     {
                       length:
-                        start + 49 <= rating?.length
-                          ? 5
-                          : Math.ceil((rating?.length % 50) / 10),
+                        start + 49 <= rating?.length ? 5 : Math.ceil((rating?.length % 50) / 10),
                     },
                     (_, index) => (
                       <div key={index}>
