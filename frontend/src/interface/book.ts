@@ -1,19 +1,19 @@
 interface Book {
   author: string;
-  created_date: string|null;
+  createdDate: string|null;
   id: number;
   isbn: number;
   price: number;
   pub_date: string;
   publisher: string;
   rating: number | null;
-  rating_count: number | null;
-  shorts_url: string | null;
+  ratingCount: number | null;
+  shortsUrl: string | null;
   summary: string;
   thumbnail: string;
   title: string;
   translator: string | null;
-  updated_date: string | null;
+  updatedDate: string | null;
 }
 
 interface AddBook {
