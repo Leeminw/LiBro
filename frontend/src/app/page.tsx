@@ -25,7 +25,7 @@ export default function Home() {
               author: item.author,
               publisher: item.publisher,
               isbn: item.isbn,
-              src: item.shorts_url,
+              src: item.shortsUrl,
             }));
             // 일단 50개까지만 로드
             setBookList(updateBookList.slice(0, 50));
