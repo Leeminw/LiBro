@@ -45,24 +45,29 @@ const BarcodeReader: React.FC = () => {
 
     const detectBarcode = async (data: any) => {
         const formData = new FormData();
-        formData.append("file", data);
-        toast({
-            title: "검색완료",
-        })
-        const res = await uploadToBarcodeServer(formData);
+        formData.append("image", data);
 
+        try {
 
-        if (res) {
+            const fetched = await uploadToBarcodeServer(formData);
+            const res = fetched.isbn;
+
+            console.log(res);
+
+            if (res) {
+                toast({
+                    title: "검색 완료",
+                })
+
+                router.push(`/detail?isbn=${res}`);
+            } else {
+                toast({
+                    title: "조회시 아무 것도 찾을 수 없습니다.",
+                })
+            }
+        } catch (ex) {
             toast({
-                title: "검색완료",
-                description: res,
-            })
-
-            router.push(`/detail?isbn=${res}`);
-        } else {
-            toast({
-                title: "조회시 아무 것도 찾을 수 없습니다.",
-                description: res
+                title: "조회시 아무것도 찾을 수 없습니다.",
             })
         }
     }
