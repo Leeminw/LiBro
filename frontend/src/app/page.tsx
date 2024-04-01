@@ -19,7 +19,7 @@ export default function Home() {
         await ShortsApi.loadShorts(!!localStorage.getItem("accessToken"))
           .then((data) => {
             console.log("응답 값", data);
-            const updateBookList = data.data.map((item: Book) => ({
+            const updateBookList = data.data.map((item:MainBook) => ({
               title: item.title,
               image: item.thumbnail,
               author: item.author,
