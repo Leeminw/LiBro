@@ -7,7 +7,7 @@ import Image from "next/image";
 import "react-calendar/dist/Calendar.css";
 
 import { getDaysInMonth, subMonths } from "date-fns";
-import { Calendar } from "@/lib/axios-calendar";
+import { CalendarApi } from "@/lib/axios-calendar";
 import { useQuery } from "@tanstack/react-query";
 
 interface ImageDates {
@@ -83,7 +83,7 @@ const UseCalendar = () => {
 
 const Cal = () => {
   const [select, setSelect] = useState<number[]>([]);
-
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const DAY_LIST = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
   const calendar = UseCalendar();
   const CALENDER_RESULT_LIST = calendar.weekCalendarList;
@@ -105,7 +105,7 @@ const Cal = () => {
     refetch,
   } = useQuery<ImageDates>({
     queryKey: ["myCompleteBooks"],
-    queryFn: () => Calendar.date(CurrentDateYear, CurrentDateMonth),
+    queryFn: () => CalendarApi.date(CurrentDateYear, CurrentDateMonth),
   });
 
   const countBooksForMonth =
@@ -166,9 +166,6 @@ const Cal = () => {
               className="px-0 py-0 w-8 h-8 bg-[#9268EB] mr-3 hover:bg-[#bfa1ff]"
             >
               <Image src="left.svg" alt="left" width={9} height={9} />
-            </Button>
-            <Button className="px-0 py-0 w-8 h-8 bg-[#9268EB] hover:bg-[#bfa1ff] mr-3">
-              <Image src="calendar.svg" alt="calendar" width={21} height={21} />
             </Button>
             <Button
               onClick={() => {
