@@ -16,6 +16,25 @@ interface Book {
   updatedDate: string | null;
 }
 
+interface MainBook {
+  author: string;
+  created_date: string|null;
+  id: number;
+  isbn: number;
+  price: number;
+  pub_date: string;
+  publisher: string;
+  rating: number | null;
+  ratingCount: number | null;
+  shorts_url: string | null;
+  summary: string;
+  thumbnail: string;
+  title: string;
+  translator: string | null;
+  updated_date: string | null;
+}
+
+
 interface AddBook {
   author: string;
   isbn: number;
