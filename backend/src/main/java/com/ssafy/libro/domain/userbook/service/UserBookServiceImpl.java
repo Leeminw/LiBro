@@ -249,7 +249,7 @@ public class UserBookServiceImpl implements UserBookService{
 
         return UserBookRatioResponseDto.builder()
                 .type("user")
-                .ratio(1.0*read/total)
+                .ratio(total == 0? 0 : 1.0*read/total)
                 .totalSize(total)
                 .readSize(read)
                 .build();
@@ -268,7 +268,7 @@ public class UserBookServiceImpl implements UserBookService{
 
         return UserBookRatioResponseDto.builder()
                 .type("book")
-                .ratio(1.0 * read / total)
+                .ratio(total == 0 ? 0 : 1.0 * read / total)
                 .totalSize(total)
                 .readSize(read)
                 .build();
@@ -329,7 +329,7 @@ public class UserBookServiceImpl implements UserBookService{
 
         return UserBookRatioResponseDto.builder()
                 .type("book")
-                .ratio(1.0*read/total)
+                .ratio(total == 0 ? 0 : 1.0*read/total)
                 .totalSize(total)
                 .readSize(read)
                 .build();
@@ -377,6 +377,28 @@ public class UserBookServiceImpl implements UserBookService{
                            .count(count)
                            .build()
            );
+        }
+
+        return responseDtoList;
+    }
+
+    @Override
+    public List<UserBookRatingResponseDto> getUserBookRatingList(Long bookId) {
+        Book book = bookRepository.findById(bookId).orElseThrow(() -> new BookNotFoundException(bookId));
+        List<UserBook> userBookList = userBookRepository.getUserBookRatingList(book).orElseThrow(() -> new UserBookNotFoundException("book :" + book.getId()));
+        List<UserBookRatingResponseDto> responseDtoList = new ArrayList<>();
+        for(UserBook userbook : userBookList){
+
+            responseDtoList.add(
+                    UserBookRatingResponseDto.builder()
+                    .ratingComment(userbook.getRatingComment())
+                    .rating(userbook.getRating())
+                    .ratingSpoiler(userbook.getRatingSpoiler())
+                    .nickName(userbook.getUser().getNickname())
+                    .email(userbook.getUser().getEmail())
+                    .createdDate(userbook.getUpdatedDate())
+                    .build()
+            );
         }
 
         return responseDtoList;
