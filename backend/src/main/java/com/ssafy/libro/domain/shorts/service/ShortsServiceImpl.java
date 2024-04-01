@@ -54,7 +54,9 @@ public class ShortsServiceImpl implements ShortsService {
     private final BookRepository bookRepository;
     private final PromptServiceImpl promptService;
 
-//    @Scheduled(cron = "0 */1 * * * *", zone = "Asia/Seoul")
+    private static Random random = new Random();
+
+    @Scheduled(cron = "0 */1 * * * *", zone = "Asia/Seoul")
     private void autoCreateShorts4ExistsBook() {
         List<Book> books = bookRepository.findAllByShortsUrlIsNull().orElseThrow(
                 () -> new BookNotFoundException(""));
@@ -180,7 +182,10 @@ public class ShortsServiceImpl implements ShortsService {
 
 //         String url = "http://127.0.0.1:7860/sdapi/v1/txt2img";
         String url = "http://222.107.238.44:7860/sdapi/v1/txt2img";
+
         DiffusionRequestDto diffusionRequestDto = new DiffusionRequestDto().updateAnimePrompt(prompt);
+        if (random.nextBoolean()) diffusionRequestDto.updateRealismPrompt(prompt);
+
         HttpEntity<DiffusionRequestDto> request = new HttpEntity<>(diffusionRequestDto, httpHeaders);
         try {
             log.info("[Request Stable Diffusion Create Images] {}", diffusionRequestDto.toString());
