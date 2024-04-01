@@ -10,7 +10,7 @@ import {
 import Webcam from "react-webcam";
 import instance from "@/lib/interceptor"
 import axios from "axios";
-
+import { useRouter } from "next/navigation";
 
 const BarcodeScannerComponent = ({
   width,
@@ -22,6 +22,7 @@ const BarcodeScannerComponent = ({
   onUpdate: (arg0: unknown, arg1?: Result) => void;
 }): React.ReactElement => {
   const [isScanned, setIsScanned] = React.useState<boolean>(false);
+  const router = useRouter();
   const webcamRef = useRef<Webcam>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const codeReader = new BrowserMultiFormatReader();
@@ -40,13 +41,25 @@ const BarcodeScannerComponent = ({
         ia[i] = byteString.charCodeAt(i);
       }
       const blob = new Blob([ab], { type: mimeString });
-
       formData.append('image' ,  blob)
       const response = await axios.post(
-        'http://localhost:5000/flask/api/v1/isbn', imageSrc  
+        'http://j10a301.p.ssafy.io:5000/flask/api/v1/isbn', formData, {
+          headers:{
+            'Content-Type' : 'multipart/form-data'
+          }
+        }  
+      ).then(
+        (response) => {
+          const isbn = response.data
+          router.push(`/detail?isbn=${isbn}`)
+        }
+      ).catch(
+        error => {
+          console.log(error)
+        }
       )
       
-      console.log(response.data)
+      
     }
     
     // if (imageSrc) {

@@ -17,9 +17,7 @@ const Logo = () => {
       style={{ height: "300px" }}
     >
       <div className="flex flex-col items-center justify-center px-4 py-8">
-        <h1 className="text-center text-xl font-bold">
-          내게 맞는 책을 만나다.
-        </h1>
+        <h1 className="text-center text-xl font-bold">내게 맞는 책을 만나다.</h1>
         <p className="mt-2 text-center text-sm">맞춤형 도서 추천, 리뷰 앱</p>
         <h2 className="mt-8 text-5xl font-extrabold text-black">LiBro</h2>
       </div>
@@ -35,19 +33,11 @@ const GoogleLoginButton = () => {
       className="bg-white text-black font-bold py-2 px-4 rounded flex items-center m-2 hover:bg-white transition-transform hover:scale-105 duration-200"
       style={{ width: "70%", height: "7%", border: "1px solid #D9D9D9" }}
       onClick={() => {
-        window.location.href =
-          "http://localhost:8080/oauth2/authorization/google";
+        window.location.href = "http://j10a301.p.ssafy.io:8080/oauth2/authorization/google";
       }}
     >
-      <div
-        className="flex items-center border-r-2 border-gray-300 pr-3"
-        style={{ height: "40px" }}
-      >
-        <img
-          src="/google.svg"
-          alt="Google"
-          className="w-7 h-7 transform scale-140"
-        />
+      <div className="flex items-center border-r-2 border-gray-300 pr-3" style={{ height: "40px" }}>
+        <img src="/google.svg" alt="Google" className="w-7 h-7 transform scale-140" />
       </div>
       <span className="flex-1 text-center">구글 로그인</span>
     </Button>
@@ -58,23 +48,15 @@ const NaverLoginButton = () => {
   return (
     <Button
       onClick={() => {
-        window.location.href =
-          "http://localhost:8080/oauth2/authorization/naver";
+        window.location.href = "http://j10a301.p.ssafy.io:8080/oauth2/authorization/naver";
       }}
       className="bg-[#03C75A] text-white font-bold py-2 px-4 rounded flex items-center m-2 transition-transform hover:scale-105 duration-200"
       style={{ width: "70%", height: "7%", backgroundColor: "#03C75A" }} // 배경색 및 버튼 크기 수정
     >
-      <div
-        className="flex items-center border-r-2 border-white pr-3"
-        style={{ height: "40px" }}
-      >
+      <div className="flex items-center border-r-2 border-white pr-3" style={{ height: "40px" }}>
         {" "}
         {/* Tailwind CSS로 오른쪽 경계선 및 패딩 추가 */}
-        <img
-          src="/naver.svg"
-          alt="Naver"
-          className="w-7 h-7 transform scale-130"
-        />{" "}
+        <img src="/naver.svg" alt="Naver" className="w-7 h-7 transform scale-130" />{" "}
         {/* Tailwind CSS로 크기 및 스케일 조정 */}
       </div>
       <span className="flex-1 text-center">네이버 로그인</span>
@@ -86,23 +68,15 @@ const KakaoLoginButton = () => {
   return (
     <Button
       onClick={() => {
-        window.location.href =
-          "http://localhost:8080/oauth2/authorization/kakao";
+        window.location.href = "http://j10a301.p.ssafy.io:8080/oauth2/authorization/kakao";
       }}
       className="text-black font-bold py-2 px-4 rounded flex items-center m-2 transition-transform hover:scale-105 duration-200"
       style={{ width: "70%", height: "7%", backgroundColor: "#FDE500" }} // 배경색 및 버튼 크기 수정
     >
-      <div
-        className="flex items-center border-r-2 border-white pr-3"
-        style={{ height: "40px" }}
-      >
+      <div className="flex items-center border-r-2 border-white pr-3" style={{ height: "40px" }}>
         {" "}
         {/* Tailwind CSS로 오른쪽 경계선 및 패딩 추가 */}
-        <img
-          src="/kakao.svg"
-          alt="Kakao"
-          className="w-7 h-7 transform scale-130"
-        />{" "}
+        <img src="/kakao.svg" alt="Kakao" className="w-7 h-7 transform scale-130" />{" "}
         {/* Tailwind CSS로 크기 및 스케일 조정 */}
       </div>
       <span className="flex-1 text-center">카카오 로그인</span>
@@ -116,9 +90,7 @@ const SocialLoginButtons = () => {
       <Logo />
 
       <div className="flex justify-center items-center h-50 flex-col">
-        <div className="mb-3 font-bold text-sm">
-          소셜 로그인으로 간편하게 가입하세요!
-        </div>
+        <div className="mb-3 font-bold text-sm">소셜 로그인으로 간편하게 가입하세요!</div>
         <GoogleLoginButton />
         <NaverLoginButton />
         <KakaoLoginButton />

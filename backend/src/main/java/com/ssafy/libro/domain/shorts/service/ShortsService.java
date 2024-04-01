@@ -7,6 +7,6 @@ import java.io.IOException;
 
 public interface ShortsService {
     ShortsResponseDto createShorts(ShortsRequestDto requestDto) throws IOException;
-    ShortsResponseDto getShortsByBookId(Long bookId) throws IOException;
+    ShortsResponseDto createShortsByBookId(Long bookId) throws IOException;
 
 }

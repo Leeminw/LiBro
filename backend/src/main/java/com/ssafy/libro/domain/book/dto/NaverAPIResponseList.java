@@ -8,6 +8,6 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ApiResponseList {
-    private List<ApiResponseItem> items;
+public class NaverAPIResponseList {
+    private List<NaverAPIResponseItem> items;
 }

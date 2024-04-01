@@ -11,15 +11,27 @@ import java.util.Optional;
 
 @Repository
 public interface BookRepository extends JpaRepository<Book, Long> {
-    //저자 검색
-    Page<Book> findBookByAuthorContaining(String author, Pageable pageable);
-    //ISBN 검색
-    Optional<List<Book>> findBookByIsbn(String Isbn);
-    //제목 검색
-    Page<Book> findBookByTitleContaining(String title, Pageable pageable);
 
-    Boolean existsByIsbn(String isbn);
+    Boolean existsBookByIsbn(String isbn);
+    Boolean existsBookByTitle(String title);
+    Boolean existsBookByAuthor(String author);
+
 
     Optional<List<Book>> findAllByShortsUrlIsNull();
+    Optional<List<Book>> findAllByShortsUrlIsNotNull();
+
+
     Optional<Book> findByIsbn(String isbn);
+    Optional<List<Book>> findAllByIsbn(String isbn);
+    Optional<Page<Book>> findAllByIsbn(String isbn, Pageable pageable);
+    Optional<Page<Book>> findAllByTitleContaining(String title, Pageable pageable);
+    Optional<Page<Book>> findAllByAuthorContaining(String author, Pageable pageable);
+    Optional<Page<Book>> findAllBySummaryContaining(String summary, Pageable pageable);
+
+
+    Optional<Page<Book>> findByPriceGreaterThanEqual(Integer price, Pageable pageable);
+    Optional<Page<Book>> findByRatingGreaterThanEqual(Double rating, Pageable pageable);
+    Optional<Page<Book>> findByPriceBetween(Integer minPrice, Integer maxPrice, Pageable pageable);
+    Optional<Page<Book>> findByRatingBetween(Double minRating, Double maxRating, Pageable pageable);
+
 }
