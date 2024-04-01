@@ -354,7 +354,7 @@ export default function Myinfo() {
           </div>
           <div className="w-full bg-[#E5E7EB] rounded-full h-4 my-1">
             <div
-              className="bg-[#9268EB] h-2 rounded"
+              className="bg-[#9268EB] h-4 rounded-full"
               style={{
                 width: `${
                   completeRatio.totalSize === 0
