@@ -70,3 +70,21 @@ interface BookShorts {
   isbn: number;
   src: string;
 }
+
+interface ReadRatio {
+  type: string;
+  ratio : number;
+  totalSize : number;
+  readSize : number;
+}
+
+interface AgeGender {
+  age : number;
+  count : number;
+  gender : string;
+}
+
+interface RatingSummary {
+  score : number;
+  count : number;
+}

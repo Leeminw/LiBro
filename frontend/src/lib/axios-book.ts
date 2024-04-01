@@ -44,6 +44,46 @@ const booksApi = {
       return Promise.reject(error);
     }
   },
+
+  bookRatio: async (value: number) => {
+    try {
+      const response = await axios.get(`
+      /api/v1/userbook/read-ratio/book/${value}`)
+      console.log(response.data)
+      return response
+    }
+    catch (error) {
+      console.error(error);
+      return Promise.reject(error);
+    }
+  },
+
+  bookAgeGender: async (value: number) => {
+    try {
+      const response = await axios.get(`
+      /api/v1/userbook/age-gender/book/${value}`)
+      return response
+    }
+    catch (error) {
+      console.error(error);
+      return Promise.reject(error);
+    }
+
+  },
+  ratingCount: async (value :number) => {
+    try {
+      const response = await axios.get(
+        `/api/v1/userbook/rating/summary/${value}`
+      )
+      return response
+    }
+    catch (error) {
+      console.error(error);
+      return Promise.reject(error)
+    }
+  }
+
+
 };
 
 export default booksApi;

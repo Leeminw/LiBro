@@ -50,9 +50,16 @@ const DetailPage = () => {
     id: 0,
     shortsUrl: "",
   });
+
   const [start, setStart] = useState<number>(1);
   const [curpage, setCurpage] = useState<number>(1);
-  const [rating, setRating] = useState([
+
+  // lmw 데이터들
+  const [readRatio, setReadRatio] = useState<ReadRatio | null>(null);
+  const [ageGender, setAgeGender] = useState<[AgeGender] | null>(null);
+  const [ratingCount, setRatingCount] = useState<[RatingSummary] | null> (null);
+
+    const [rating, setRating] = useState([
     {
       nickname: "A",
       email: "A0@A.com",
@@ -123,6 +130,23 @@ const DetailPage = () => {
       }
     });
   };
+  // set rating 
+  const updateBookRatio = async (value: number) => {
+    const response = await booksApi.bookRatio(value)
+    console.log("read-ratio", response.data.data)
+    setReadRatio(response.data.data)
+  }
+  const updateAgeGender = async (value : number) => {
+    const response = await booksApi.bookAgeGender(value)
+    console.log("age-gender", response.data.data)
+    setAgeGender(response.data.data)
+  }
+  const updateRatingCount = async (value : number) => {
+    const response = await booksApi.ratingCount(value) 
+    console.log("rating count", response.data.data)
+    setRatingCount(response.data.data)
+  }
+
 
   useEffect(() => {
     const updateBookDetail = async () => {
@@ -165,6 +189,9 @@ const DetailPage = () => {
           else {
             setBookDetail(response.data[0]);
             setBookLoading(true);
+            updateBookRatio(response.data[0].id);
+            updateAgeGender(response.data[0].id);
+            updateRatingCount(response.data[0].id);
           }
         })
         .catch((error) => {
