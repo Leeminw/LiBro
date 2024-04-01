@@ -10,8 +10,10 @@ def get_total_book_count(engine : Engine) -> int :
     with engine.connect() as con : 
         statement = text(
                 """
-                SELECT count(*) 
+                SELECT id 
                 FROM book
+                ORDER BY id DESC
+                LIMIT 1
                 """
                 )
 
