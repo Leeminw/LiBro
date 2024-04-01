@@ -9,10 +9,14 @@ COPY . /app
 
 # pip를 업그레이드합니다.
 RUN pip install --upgrade pip
+RUN apt-get update
 
+# opencv용 파일 설치
+RUN apt-get -y install libgl1-mesa-glx
+# pyzbar용 파일 설치
+RUN apt-get -y install libzbar0
 # 필요한 라이브러리를 설치합니다. requirements.txt 파일이 있어야 합니다.
 RUN pip install --no-cache-dir -r requirements.txt
-
 #cron 설치
 # RUN apt-get update && apt-get -y install cron
 
@@ -22,4 +26,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 # 최초 1회 학습 실행
 RUN python -m train
 # Gunicorn을 사용하여 Flask 애플리케이션을 실행합니다.
-CMD ["gunicorn", "-b", "0.0.0.0:5000", "app:app"]
+CMD ["python", "-m", "app"]
