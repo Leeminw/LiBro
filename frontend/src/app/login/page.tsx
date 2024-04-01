@@ -33,7 +33,7 @@ const GoogleLoginButton = () => {
       className="bg-white text-black font-bold py-2 px-4 rounded flex items-center m-2 hover:bg-white transition-transform hover:scale-105 duration-200"
       style={{ width: "70%", height: "7%", border: "1px solid #D9D9D9" }}
       onClick={() => {
-        window.location.href = "http://localhost:8080/oauth2/authorization/google";
+        window.location.href = "http://j10a301.p.ssafy.io:8080/oauth2/authorization/google";
       }}
     >
       <div className="flex items-center border-r-2 border-gray-300 pr-3" style={{ height: "40px" }}>
@@ -48,7 +48,7 @@ const NaverLoginButton = () => {
   return (
     <Button
       onClick={() => {
-        window.location.href = "http://localhost:8080/oauth2/authorization/naver";
+        window.location.href = "http://j10a301.p.ssafy.io:8080/oauth2/authorization/naver";
       }}
       className="bg-[#03C75A] text-white font-bold py-2 px-4 rounded flex items-center m-2 transition-transform hover:scale-105 duration-200"
       style={{ width: "70%", height: "7%", backgroundColor: "#03C75A" }} // 배경색 및 버튼 크기 수정
@@ -68,7 +68,7 @@ const KakaoLoginButton = () => {
   return (
     <Button
       onClick={() => {
-        window.location.href = "http://localhost:8080/oauth2/authorization/kakao";
+        window.location.href = "http://j10a301.p.ssafy.io:8080/oauth2/authorization/kakao";
       }}
       className="text-black font-bold py-2 px-4 rounded flex items-center m-2 transition-transform hover:scale-105 duration-200"
       style={{ width: "70%", height: "7%", backgroundColor: "#FDE500" }} // 배경색 및 버튼 크기 수정
