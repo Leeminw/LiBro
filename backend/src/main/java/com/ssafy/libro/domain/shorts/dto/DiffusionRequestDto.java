@@ -59,7 +59,7 @@ public class DiffusionRequestDto {
         this.cfg_scale = 9.0;
         this.denoising_strength = 0.25;
         this.hr_second_pass_steps = 8;
-        this.sampler_index = "DPM++ SDE KArras";
+        this.sampler_index = "DPM++ SDE Karras";
         this.override_settings = Map.of(
                 "sd_model_checkpoint", "animePastelDream_softBakedVae: 4be38c1a17",
                 "sd_lora", "more_details",
@@ -75,7 +75,7 @@ public class DiffusionRequestDto {
         this.cfg_scale = 5.0;
         this.denoising_strength = 0.3;
         this.hr_second_pass_steps = 15;
-        this.sampler_index = "DPM++ 2M SDE KArras";
+        this.sampler_index = "DPM++ 2M SDE Karras";
         this.override_settings = Map.of(
                 "sd_model_checkpoint", "xxmix9realistic_v40: 18ed2b6c48",
                 "sd_lora", "more_details",
