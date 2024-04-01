@@ -57,24 +57,10 @@ const DetailPage = () => {
   // lmw 데이터들
   const [readRatio, setReadRatio] = useState<ReadRatio | null>(null);
   const [ageGender, setAgeGender] = useState<[AgeGender] | null>(null);
-  const [ratingCount, setRatingCount] = useState<[RatingSummary] | null> (null);
+  const [ratingCount, setRatingCount] = useState<[RatingSummary] | null>(null);
 
-    const [rating, setRating] = useState([
-    {
-      nickname: "A",
-      email: "A0@A.com",
-      rating: 1,
-      comment: "정말 재미없어요",
-      createdDate: "2022-01-03",
-    },
-    {
-      nickname: "A",
-      email: "A1@A.com",
-      rating: 1,
-      comment: "정말 재미없어요",
-      createdDate: "2022-01-03",
-    },
-  ]);
+  const [rating, setRating] = useState<[RatingComment] | null>(null);
+
   const [analyzePer, setAnalyzePer] = useState<number[]>([0, 0]);
   const [chartPer, setChartPer] = useState<number[]>([
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -136,16 +122,26 @@ const DetailPage = () => {
     console.log("read-ratio", response.data.data)
     setReadRatio(response.data.data)
   }
-  const updateAgeGender = async (value : number) => {
+  // set age-gender 
+  const updateAgeGender = async (value: number) => {
     const response = await booksApi.bookAgeGender(value)
     console.log("age-gender", response.data.data)
     setAgeGender(response.data.data)
   }
-  const updateRatingCount = async (value : number) => {
-    const response = await booksApi.ratingCount(value) 
+  // set rating count
+  const updateRatingCount = async (value: number) => {
+    const response = await booksApi.ratingCount(value)
     console.log("rating count", response.data.data)
     setRatingCount(response.data.data)
   }
+  // set rating comment
+  const updateRatingComment = async (value: number) => {
+    const response = await booksApi.ratincComment(value)
+    console.log("rating comment", response.data.data)
+    setRating(response.data.data)
+  }
+
+
 
 
   useEffect(() => {
@@ -192,6 +188,7 @@ const DetailPage = () => {
             updateBookRatio(response.data[0].id);
             updateAgeGender(response.data[0].id);
             updateRatingCount(response.data[0].id);
+            updateRatingComment(response.data[0].id);
           }
         })
         .catch((error) => {
@@ -246,37 +243,39 @@ const DetailPage = () => {
           description: "나의 서재로 이동하시겠습니까?",
           action: (
             <ToastAction
-              altText="move"
+              altText= "move"
               toastActionClick={() => {
-                router.push("/library");
-              }}
+  router.push("/library");
+}}
             >
-              이동
-            </ToastAction>
+  이동
+  < /ToastAction>
           ),
         });
       })
-      .catch((error) => {
-        toast({
-          title: "나의 서재에 도서를 담는데 실패했습니다.",
-          description: "잠시 후 다시 시도해주세요.",
-        });
-      });
+      .catch ((error) => {
+  toast({
+    title: "나의 서재에 도서를 담는데 실패했습니다.",
+    description: "잠시 후 다시 시도해주세요.",
+  });
+});
   };
 
-  return (
-    <>
-      <SubHeader title="도서 상세 정보" backArrow={true} />
+return (
+  <>
+  <SubHeader title= "도서 상세 정보" backArrow = { true} />
+    <div
+        ref={ scrollRef }
+className = "pt-24 h-full bg-white max-h-screen flex items-center relative flex-wrap overflow-y-scroll scrollbar-hide"
+  >
+{
+  bookLoading?(
+          <div className = "w-full h-full min-h-screen bg-white flex flex-col relative overflow-hidden mb-24" >
       <div
-        ref={scrollRef}
-        className="pt-24 h-full bg-white max-h-screen flex items-center relative flex-wrap overflow-y-scroll scrollbar-hide"
-      >
-        {bookLoading ? (
-          <div className="w-full h-full min-h-screen bg-white flex flex-col relative overflow-hidden mb-24">
-            <div
               className="w-full h-40 flex relative"
-              style={{
-                backgroundImage: `url(${bookDetail.thumbnail})`,
+    style = {{
+      backgroundImage: `url(${bookDetail.thumbnail
+})`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }}
@@ -532,7 +531,7 @@ const DetailPage = () => {
               </div>
               <div className="mt-8 w-full h-fit pl-1">
                 {/* 리뷰 */}
-                {rating
+                {rating?
                   .slice((curpage - 1) * 10, (curpage - 1) * 10 + 10)
                   .map((key, index) => (
                     <div
@@ -549,7 +548,7 @@ const DetailPage = () => {
                         <FaStar className="w-5 h-5 text-yellow-300 me-1" />
                         <FaStar className="w-5 h-5 text-gray-300 me-1" />
                       </div>
-                      <p className="text-sm">{key.comment}</p>
+                      <p className="text-sm">{key.ratingComment}</p>
                     </div>
                   ))}
               </div>
@@ -573,9 +572,9 @@ const DetailPage = () => {
                   {Array.from(
                     {
                       length:
-                        start + 49 <= rating.length
+                        start + 49 <= rating?.length
                           ? 5
-                          : Math.ceil((rating.length % 50) / 10),
+                          : Math.ceil((rating?.length % 50) / 10),
                     },
                     (_, index) => (
                       <div key={index}>
@@ -602,7 +601,7 @@ const DetailPage = () => {
                     )
                   )}
                   {/* 다음 버튼 */}
-                  {start + 50 <= rating.length && (
+                  {start + 50 <= rating?.length && (
                     <PaginationItem>
                       <PaginationNext
                         className="rounded-full scale-50"

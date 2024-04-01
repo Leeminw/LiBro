@@ -249,7 +249,7 @@ public class UserBookServiceImpl implements UserBookService{
 
         return UserBookRatioResponseDto.builder()
                 .type("user")
-                .ratio(1.0*read/total)
+                .ratio(total == 0? 0 : 1.0*read/total)
                 .totalSize(total)
                 .readSize(read)
                 .build();
@@ -268,7 +268,7 @@ public class UserBookServiceImpl implements UserBookService{
 
         return UserBookRatioResponseDto.builder()
                 .type("book")
-                .ratio(1.0 * read / total)
+                .ratio(total == 0 ? 0 : 1.0 * read / total)
                 .totalSize(total)
                 .readSize(read)
                 .build();
@@ -329,7 +329,7 @@ public class UserBookServiceImpl implements UserBookService{
 
         return UserBookRatioResponseDto.builder()
                 .type("book")
-                .ratio(1.0*read/total)
+                .ratio(total == 0 ? 0 : 1.0*read/total)
                 .totalSize(total)
                 .readSize(read)
                 .build();
@@ -394,6 +394,9 @@ public class UserBookServiceImpl implements UserBookService{
                     .ratingComment(userbook.getRatingComment())
                     .rating(userbook.getRating())
                     .ratingSpoiler(userbook.getRatingSpoiler())
+                    .nickName(userbook.getUser().getNickname())
+                    .email(userbook.getUser().getEmail())
+                    .createdDate(userbook.getUpdatedDate())
                     .build()
             );
         }

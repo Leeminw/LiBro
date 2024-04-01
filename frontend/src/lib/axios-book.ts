@@ -70,7 +70,7 @@ const booksApi = {
     }
 
   },
-  ratingCount: async (value :number) => {
+  ratingCount: async (value: number) => {
     try {
       const response = await axios.get(
         `/api/v1/userbook/rating/summary/${value}`
@@ -81,8 +81,19 @@ const booksApi = {
       console.error(error);
       return Promise.reject(error)
     }
+  },
+  ratincComment: async (value: number) => {
+    try {
+      const response = await axios.get(
+        `/api/v1/userbook/rating/comment/${value}`
+      )
+      return response
+    }
+    catch (error) {
+      console.error(error);
+      return Promise.reject(error);
+    }
   }
-
 
 };
 

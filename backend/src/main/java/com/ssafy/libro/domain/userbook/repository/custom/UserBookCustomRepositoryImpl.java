@@ -216,6 +216,7 @@ public class UserBookCustomRepositoryImpl implements UserBookCustomRepository{
                 .select(userBook)
                 .from(userBook)
                 .leftJoin(userBook.book, QBook.book).fetchJoin()
+                .leftJoin(userBook.user, user).fetchJoin()
                 .where(QBook.book.eq(book)
                         .and((userBook.isDeleted.eq(false)).or(userBook.isDeleted.isNull()))
                         .and(userBook.ratingComment.isNotNull())

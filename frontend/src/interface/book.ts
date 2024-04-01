@@ -1,6 +1,6 @@
 interface Book {
   author: string;
-  createdDate: string|null;
+  createdDate: string | null;
   id: number;
   isbn: number;
   price: number;
@@ -18,7 +18,7 @@ interface Book {
 
 interface MainBook {
   author: string;
-  created_date: string|null;
+  created_date: string | null;
   id: number;
   isbn: number;
   price: number;
@@ -73,18 +73,27 @@ interface BookShorts {
 
 interface ReadRatio {
   type: string;
-  ratio : number;
-  totalSize : number;
-  readSize : number;
+  ratio: number;
+  totalSize: number;
+  readSize: number;
 }
 
 interface AgeGender {
-  age : number;
-  count : number;
-  gender : string;
+  age: number;
+  count: number;
+  gender: string;
 }
 
 interface RatingSummary {
-  score : number;
-  count : number;
+  score: number;
+  count: number;
+}
+
+interface RatingComment {
+  rating: number;
+  ratingComment: string;
+  ratingSpoiler: boolean;
+  nickName: string;
+  email: string;
+  createdDate: string;
 }
