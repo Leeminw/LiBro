@@ -10,8 +10,10 @@ def get_total_book_count(engine : Engine) -> int :
     with engine.connect() as con : 
         statement = text(
                 """
-                SELECT count(*) 
+                SELECT id 
                 FROM book
+                ORDER BY id DESC
+                LIMIT 1
                 """
                 )
 
@@ -22,7 +24,7 @@ def get_total_book_count(engine : Engine) -> int :
 
 
 
-def get_book_list(engine : Engine, recommended : list) -> List[dict] :
+def get_book_list(engine : Engine, recommended : tuple) -> List[dict] :
     
     with engine.connect() as con :
         statement = text(
@@ -62,7 +64,19 @@ def get_user_book_matrix(engine : Engine) -> pd.DataFrame:
 
         return df.fillna(0)
 
-
+def get_book_matrix(engine : Engine) -> pd.DataFrame: 
+    with engine.connect() as con : 
+        statement = text(
+            '''
+            SELECT id, author, title, rating
+            FROM book
+            '''
+        )
+        result = con.execute(statement)
+        data = result.fetchall()
+        df = pd.DataFrame(data, columns = ['book_id','author', 'title', 'rating'])
+        
+        return df
 
 def get_user_book_count_distinct(engine : Engine) -> int :
     with engine.connect() as con :
