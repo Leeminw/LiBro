@@ -134,4 +134,10 @@ public class UserBookController {
         return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(responseDtoList));
     }
 
+    @GetMapping("/rating/comment/{bookId}")
+    public ResponseEntity<?> getRatingComments(@PathVariable Long bookId){
+        List<UserBookRatingResponseDto> responseDtoList = userBookService.getUserBookRatingList(bookId);
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(""));
+    }
+
 }

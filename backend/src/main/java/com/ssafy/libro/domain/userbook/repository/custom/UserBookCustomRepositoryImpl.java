@@ -173,7 +173,7 @@ public class UserBookCustomRepositoryImpl implements UserBookCustomRepository{
     }
 
     @Override
-    public List<Tuple> getUserGenderAgeCounts(Book entity) {
+    public List<Tuple> getUserGenderAgeCounts(Book book) {
 
         return jpaQueryFactory
                 .select(
@@ -183,8 +183,8 @@ public class UserBookCustomRepositoryImpl implements UserBookCustomRepository{
                 )
                 .from(user)
                 .leftJoin(user.userBookList,userBook)
-                .leftJoin(userBook.book, book)
-                .where(book.eq(entity)
+                .leftJoin(userBook.book, QBook.book)
+                .where(QBook.book.eq(book)
                         .and(
                                 (userBook.isDeleted.eq(false)).or(userBook.isDeleted.isNull())
                         )
@@ -194,19 +194,34 @@ public class UserBookCustomRepositoryImpl implements UserBookCustomRepository{
     }
 
     @Override
-    public List<Tuple> getUserBookRating(Book entity) {
+    public List<Tuple> getUserBookRating(Book book) {
         return jpaQueryFactory
                 .select(
                         userBook.rating.floor(),
                         userBook.count().as("count")
                 )
                 .from(userBook)
-                .leftJoin(userBook.book,book)
-                .where(book.eq(entity).and(
+                .leftJoin(userBook.book, QBook.book)
+                .where(QBook.book.eq(book).and(
                         (userBook.isDeleted.eq(false)).or(userBook.isDeleted.isNull())
                 ))
                 .groupBy(userBook.rating.floor())
                 .fetch();
 
+    }
+
+    @Override
+    public Optional<List<UserBook>> getUserBookRatingList(Book book) {
+        List<UserBook> result = jpaQueryFactory
+                .select(userBook)
+                .from(userBook)
+                .leftJoin(userBook.book, QBook.book).fetchJoin()
+                .where(QBook.book.eq(book)
+                        .and((userBook.isDeleted.eq(false)).or(userBook.isDeleted.isNull()))
+                        .and(userBook.ratingComment.isNotNull())
+                ).fetch();
+
+
+        return Optional.of(result);
     }
 }

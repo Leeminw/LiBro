@@ -382,6 +382,25 @@ public class UserBookServiceImpl implements UserBookService{
         return responseDtoList;
     }
 
+    @Override
+    public List<UserBookRatingResponseDto> getUserBookRatingList(Long bookId) {
+        Book book = bookRepository.findById(bookId).orElseThrow(() -> new BookNotFoundException(bookId));
+        List<UserBook> userBookList = userBookRepository.getUserBookRatingList(book).orElseThrow(() -> new UserBookNotFoundException("book :" + book.getId()));
+        List<UserBookRatingResponseDto> responseDtoList = new ArrayList<>();
+        for(UserBook userbook : userBookList){
+
+            responseDtoList.add(
+                    UserBookRatingResponseDto.builder()
+                    .ratingComment(userbook.getRatingComment())
+                    .rating(userbook.getRating())
+                    .ratingSpoiler(userbook.getRatingSpoiler())
+                    .build()
+            );
+        }
+
+        return responseDtoList;
+    }
+
     private List<UserBookListResponseDto> getUserBookListResponseDtos(List<UserBook> userBookList) {
         List<UserBookListResponseDto> responseDtoList = new ArrayList<>();
         for(UserBook userBook : userBookList){
