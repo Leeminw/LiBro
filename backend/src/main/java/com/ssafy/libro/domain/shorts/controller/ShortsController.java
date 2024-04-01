@@ -1,21 +1,14 @@
 package com.ssafy.libro.domain.shorts.controller;
 
 import com.ssafy.libro.domain.book.dto.BookDetailResponseDto;
-import com.ssafy.libro.domain.book.service.BookService;
 import com.ssafy.libro.domain.book.service.BookServiceImpl;
-import com.ssafy.libro.domain.shorts.dto.PromptRequestDto;
-import com.ssafy.libro.domain.shorts.dto.PromptResponseDto;
 import com.ssafy.libro.domain.shorts.dto.ShortsRequestDto;
 import com.ssafy.libro.domain.shorts.dto.ShortsResponseDto;
 import com.ssafy.libro.domain.shorts.service.PromptServiceImpl;
-import com.ssafy.libro.domain.shorts.service.ShortsService;
 import com.ssafy.libro.domain.shorts.service.ShortsServiceImpl;
 import com.ssafy.libro.domain.shorts.service.TaskServiceImpl;
-import com.ssafy.libro.global.common.ResponseData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -45,15 +38,9 @@ public class ShortsController {
                 .body(responseDto.getResource());
     }
 
-    @GetMapping("/api/v1/shorts")
-    public ResponseEntity<?> getShortsByBookId(@RequestParam("book-id") Long bookId) throws IOException {
-        BookDetailResponseDto bookResponseDto = bookService.getBook(bookId);
-        ShortsRequestDto shortsRequestDto = ShortsRequestDto.builder()
-                .title(bookResponseDto.getTitle())
-                .content(bookResponseDto.getSummary())
-                .build();
-
-        ShortsResponseDto responseDto = shortsService.createShorts(shortsRequestDto);
+    @GetMapping("/api/v1/shorts/create")
+    public ResponseEntity<?> createShortsByBookId(@RequestParam("book-id") Long bookId) throws IOException {
+        ShortsResponseDto responseDto = shortsService.createShortsByBookId(bookId);
         String filename = responseDto.getFilename();
 
         return ResponseEntity.status(HttpStatus.OK)
