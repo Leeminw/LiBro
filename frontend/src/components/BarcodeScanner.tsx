@@ -8,6 +8,9 @@ import {
   Result,
 } from "@zxing/library";
 import Webcam from "react-webcam";
+import instance from "@/lib/interceptor"
+import axios from "axios";
+
 
 const BarcodeScannerComponent = ({
   width,
@@ -22,24 +25,45 @@ const BarcodeScannerComponent = ({
   const webcamRef = useRef<Webcam>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const codeReader = new BrowserMultiFormatReader();
-  const capture = React.useCallback(() => {
-    // const imageSrc = webcamRef?.current?.getScreenshot();
-    const imageSrc = "testImg1.jpg";
-    if (imageSrc) {
-      codeReader
-        .decodeFromImage(undefined, imageSrc)
-        .then((result) => {
-          setIsScanned(true);
-          onUpdate(null, result);
-        })
-        .catch((err) => {
-          onUpdate(err);
-        });
+  const capture = React.useCallback( async () => {
+    const imageSrc = webcamRef?.current?.getScreenshot();
+    // const imageSrc = "testImg1.jpg";
+    
+    if ( imageSrc) {
+      // console.log(imageSrc.length)
+      const formData = new FormData()
+      const byteString = atob(imageSrc.split(',')[1]);
+      const mimeString = imageSrc.split(',')[0].split(':')[1].split(';')[0];
+      const ab = new ArrayBuffer(byteString.length);
+      const ia = new Uint8Array(ab);
+      for (let i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+      }
+      const blob = new Blob([ab], { type: mimeString });
+
+      formData.append('image' ,  blob)
+      const response = await axios.post(
+        'http://localhost:5000/flask/api/v1/isbn', imageSrc  
+      )
+      
+      console.log(response.data)
     }
+    
+    // if (imageSrc) {
+    //   codeReader
+    //     .decodeFromImage(undefined, imageSrc)
+    //     .then((result) => {
+    //       setIsScanned(true);
+    //       onUpdate(null, result);
+    //     })
+    //     .catch((err) => {
+    //       onUpdate(err);
+    //     });
+    // }
   }, [codeReader, onUpdate]);
 
   React.useEffect(() => {
-    intervalRef.current = setInterval(capture, 100);
+    intervalRef.current = setInterval(capture, 1000);
 
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
