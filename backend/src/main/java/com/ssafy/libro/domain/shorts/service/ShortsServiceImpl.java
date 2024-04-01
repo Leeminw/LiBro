@@ -54,7 +54,7 @@ public class ShortsServiceImpl implements ShortsService {
     private final BookRepository bookRepository;
     private final PromptServiceImpl promptService;
 
-    @Scheduled(cron = "0 */1 * * * *", zone = "Asia/Seoul")
+//    @Scheduled(cron = "0 */1 * * * *", zone = "Asia/Seoul")
     private void autoCreateShorts4ExistsBook() {
         List<Book> books = bookRepository.findAllByShortsUrlIsNull().orElseThrow(
                 () -> new BookNotFoundException(""));
