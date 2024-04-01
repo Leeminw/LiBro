@@ -25,8 +25,10 @@ public interface UserBookCustomRepository {
     Optional<Long> countUserBookByUserReadComplete(User user);
 
     Optional<List<UserBook>> findUserBookCommentList(User user);
-    List<Tuple> getUserGenderAgeCounts(Book entity);
-    List<Tuple> getUserBookRating(Book entity);
+    List<Tuple> getUserGenderAgeCounts(Book book);
+    List<Tuple> getUserBookRating(Book book);
+
+    Optional<List<UserBook>> getUserBookRatingList(Book book);
 
 
 }

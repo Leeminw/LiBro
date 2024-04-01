@@ -43,5 +43,7 @@ public interface UserBookService {
     List<UserGenderAgeCountResponseDto> getUserGenderAgeCountList(Long bookId);
     List<UserBookRatingSummary> getUserBookSummaryList(Long bookId);
 
+    List<UserBookRatingResponseDto> getUserBookRatingList(Long bookId);
+
 
 }

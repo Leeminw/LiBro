@@ -48,7 +48,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "cmdk": "^1.0.0",
-    "date-fns": "^3.4.0",
+    "date-fns": "^3.6.0",
     "dayjs": "^1.11.10",
     "dompurify": "^3.0.9",
     "embla-carousel-react": "^8.0.0",
@@ -105,12 +105,11 @@
     "zod": "^3.22.4"
   },
   "proxy": {
-    "/api" : {
-      "target" : "http://localhost:8080"
+    "/api": {
+      "target": "http://j10a301.p.ssafy.io:8080"
     },
     "/flask": {
-      "target" : "http://j10a301.p.ssafy.io:5000"
+      "target": "http://j10a301.p.ssafy.io:5000"
     }
-
   }
 }

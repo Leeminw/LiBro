@@ -353,19 +353,19 @@ const Library = () => {
                     className="rounded w-full h-full max-h-32 translate-y-4 ml-4"
                   />
                 </div>
-                <div className="pl-28 h-20 flex flex-col pr-2 translate-y-5">
+                <div className="pl-32 h-20 flex flex-col pr-2">
                   <h2 className="text-white text-md font-bold line-clamp-2">
                     {userBook.book.title}
                   </h2>
                   <div className="flex items-center mt-2">
                     <p className="text-xs text-gray-300 line-clamp-1">
-                      저자 {userBook.book.author} | 출판사{" "}
-                      {userBook.book.publisher}
+                      저자 {userBook.book.author.split("^").join(", ")} | 출판사{" "}
+                      {userBook.book.publisher.split("^").join(", ")}
                     </p>
                   </div>
                 </div>
               </div>
-              <div className="flex justify-end pl-28">
+              <div className="flex justify-end pl-32">
                 <div>
                   <Link
                     href={`/detail?isbn=${userBook.book.isbn}`}
