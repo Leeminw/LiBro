@@ -22,7 +22,7 @@ def get_total_book_count(engine : Engine) -> int :
 
 
 
-def get_book_list(engine : Engine, recommended : list) -> List[dict] :
+def get_book_list(engine : Engine, recommended : tuple) -> List[dict] :
     
     with engine.connect() as con :
         statement = text(
