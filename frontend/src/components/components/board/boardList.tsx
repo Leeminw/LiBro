@@ -111,7 +111,7 @@ export default function BoardList() {
 
   return (
     <>
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center px-2">
         <div className="w-full">
           <div className="relative  pr-2 py-2 flex items-center">
             <Search className="absolute h-4 w-4 text-muted-foreground ml-2" />
@@ -124,14 +124,14 @@ export default function BoardList() {
             />
           </div>
         </div>
-        <Button onClick={writeHandler}>글쓰기</Button>
+        <Button onClick={writeHandler} className="bg-[#9268EB] hover:bg-[#bfa1ff]">글쓰기</Button>
       </div>
 
-      <Card className="">
+      <Card className="mx-2">
         <CardHeader className="p-3 border-b">
           <div className="flex items-center justify-between">
             <Select onValueChange={handleSortChange}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-[180px] mr-2">
                 <SelectValue placeholder="정렬기준" />
               </SelectTrigger>
               <SelectContent>

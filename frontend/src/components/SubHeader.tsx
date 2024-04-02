@@ -32,7 +32,6 @@ const SubHeader = ({
           {title}
         </div>
       </div>
-      <div className="h-10 absolute"></div>
     </>
   );
 };
