@@ -56,7 +56,7 @@ export default function Writer(props: GroupOwner) {
     };
 
     return (
-        <div className="flex items-center h-3/4 bg-white justify-between p-2 border rounded-md">
+        <div className="flex items-center h-3/4 bg-white justify-between p-2 border rounded-md mx-2">
             <div className="flex items-center space-x-2">
                 <Avatar className="h-12 w-12">
                     <AvatarImage src={profileUrl || "https://github.com/shadcn.png"} alt="@defaultUser" />
@@ -67,8 +67,8 @@ export default function Writer(props: GroupOwner) {
             {
                 (userId == writerId) && (<DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button className="ml-auto w-8 h-8 rounded-full" size="icon" variant="ghost">
-                            <MoreHorizontalIcon className="w-4 h-4"/>
+                        <Button className="ml-auto w-8 h-8 rounded-full mr-1" size="icon" variant="ghost">
+                            <MoreHorizontalIcon className="w-5 h-5"/>
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">

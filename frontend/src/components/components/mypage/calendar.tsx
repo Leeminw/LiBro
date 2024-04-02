@@ -132,8 +132,14 @@ const Cal = ({}: calProps) => {
       // 필요한 경우 상태에 데이터 저장 등의 추가 작업을 수행
     };
 
-    fetchData();
-  }, [CurrentDateYear, CurrentDateMonth]); // 연도나 월이 변경될 때마다 fetchData를 다시 호출
+    useEffect(() => {
+      // 컴포넌트가 마운트될 때 현재 연도와 월에 해당하는 데이터를 API로부터 불러옵니다.
+      const fetchData = async () => {
+        const response = await CalendarApi.date(CurrentDateYear, CurrentDateMonth, 10);
+        console.log(response)
+        setResponse(response.data)
+        // 필요한 경우 상태에 데이터 저장 등의 추가 작업을 수행
+      };
 
   return (
     <>
