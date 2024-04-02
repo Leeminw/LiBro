@@ -84,7 +84,7 @@ export default function Home() {
               ))}
             </>
           ) : (
-            <div className="w-full h-full min-h-screen flex items-center justify-center text-4xl font-bold text-white drop-shadow-lg">
+            <div className="w-full h-full min-h-[95vh] max-h-[95vh] flex items-center justify-center text-4xl font-bold text-white drop-shadow-lg">
               <div className="bg-gray-300 text-black flex justify-end rounded-lg items-start w-3/4 h-2/3 relative animate-pulse">
                 <div className="absolute w-full h-1/3 z-10 bottom-0 cursor-pointer rounded-b-lg bg-gradient-to-t from-black/40 flex p-4">
                   <Skeleton className="h-full min-w-20" />
