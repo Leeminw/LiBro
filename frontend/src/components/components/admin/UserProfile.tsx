@@ -45,13 +45,13 @@ const UserProfile: React.FC<UserProfile> = (props) => {
     });
 
     return (
-        <div className="flex items-center p-4">
+        <div className="flex items-center p-4 border border-gray-200 m-2 rounded-md">
             <Avatar>
                 <AvatarImage alt="User profile" src={profile}/>
                 <AvatarFallback>{name}</AvatarFallback>
             </Avatar>
             <div className="ml-4">
-                <span className="font-medium">{name}</span>
+                <span className="font-semibold">{name}</span>
                 <span className="block text-sm text-gray-500">{dateFormat(createdDate)}</span>
             </div>
 

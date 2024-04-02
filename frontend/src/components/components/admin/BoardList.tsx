@@ -32,7 +32,7 @@ function CategoryItem({category, onEditStart, onDelete}: { category: any, onEdit
     };
 
     return (
-        <div className="flex items-center justify-between p-4">
+        <div className="flex items-center justify-between my-1 mx-1">
             {editing ? (
                 <>
                     <input
@@ -40,22 +40,23 @@ function CategoryItem({category, onEditStart, onDelete}: { category: any, onEdit
                         value={inputValue}
                         onChange={handleChange}
                         autoFocus
-                        className="border border-gray-300 px-2 py-1 rounded-md"
+                        className="border border-gray-300 px-2 py-1 rounded-md w-full mr-2"
                     />
                     <div className="flex items-center space-x-2">
-                        <CheckIcon className="text-green-500 cursor-pointer" onClick={handleEditFinish} />
-                        <XIcon className="text-red-500 cursor-pointer" onClick={handleEditCancel} />
+                        <CheckIcon className="text-green-500 cursor-pointer border-gray-200 border h-full w-8 aspect-square p-1 rounded-md hover:bg-gray-100 transition-colors duration-300" onClick={handleEditFinish} />
+                        <XIcon className="text-red-500 cursor-pointer border-gray-200 border h-full w-8 aspect-square p-1 rounded-md hover:bg-gray-100 transition-colors duration-300" onClick={handleEditCancel} />
                     </div>
                 </>
             ) : (
-                <>
-                    <h2 className="text-lg cursor-pointer"
+                <div className='border border-gray-200 w-full flex py-2 px-4 rounded-md'>
+                    <h2 className="cursor-pointer font-semibold w-fit text-nowrap"
                         onClick={handleEditStart}>{category.name}</h2> {/* Change category.name to category.title */}
+                        <div className='w-full'/>
                     <div className="flex items-center space-x-2">
-                        <FileEditIcon className="text-gray-600 cursor-pointer" onClick={handleEditStart} />
-                        <TrashIcon className="text-gray-600 cursor-pointer" onClick={() => onDelete(category.id)} />
+                        <FileEditIcon className="text-gray-600 cursor-pointer hover:text-gray-300 transition-colors duration-300" onClick={handleEditStart} />
+                        <TrashIcon className="text-gray-600 cursor-pointer hover:text-gray-300 transition-colors duration-300" onClick={() => onDelete(category.id)} />
                     </div>
-                </>
+                </div>
             )}
         </div>
     );
@@ -154,8 +155,8 @@ export default function CategoryList() {
 
     return (
         <div className="flex flex-col bg-white">
-            <div className="flex justify-end p-4">
-                <Button onClick={handleAddTodo} className="bg-purple-600 text-white">추가</Button>
+            <div className="flex justify-end p-2 mt-2">
+                <Button onClick={handleAddTodo} className="bg-[#9268EB] hover:bg-[#bfa1ff] text-white">추가</Button>
             </div>
 
             <ScrollArea className="flex flex-col bg-white h-[calc(90vh-120px)]">
@@ -178,17 +179,17 @@ export default function CategoryList() {
                     </div>
                 )}
                 {addingTodo && (
-                    <div className="flex items-center justify-between p-4">
+                    <div className="flex items-center justify-between p-2">
                         <input
                             type="text"
-                            placeholder="할 일을 입력하세요."
+                            placeholder="게시판 이름을 입력해주세요."
                             value={newTodoTitle}
                             onChange={(e) => setNewCategory(e.target.value)}
-                            className="border border-gray-300 px-2 py-1 rounded-md"
+                            className="border border-gray-300 px-2 rounded-md w-full mr-2 text-sm py-2"
                         />
                         <div className="flex items-center space-x-2">
-                            <CheckIcon className="text-green-500 cursor-pointer" onClick={handleConfirmAddTodo}/>
-                            <XIcon className="text-red-500 cursor-pointer" onClick={handleCancelAddTodo}/>
+                            <CheckIcon className="text-green-500 cursor-pointer border-gray-200 border h-full w-8 aspect-square p-1 rounded-md hover:bg-gray-100 transition-colors duration-300" onClick={handleConfirmAddTodo}/>
+                            <XIcon className="text-red-500 cursor-pointer border-gray-200 border h-full w-8 aspect-square p-1 rounded-md hover:bg-gray-100 transition-colors duration-300" onClick={handleCancelAddTodo}/>
                         </div>
                     </div>
                 )}

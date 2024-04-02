@@ -57,10 +57,10 @@ const JoinedClubCard: React.FC = () => {
     initialPageParam: null,
   });
 
-  const handleSearchKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Enter") {
-      setSearchTerm(event.currentTarget.value);
-    }
+  const handleSearchKeyDown = (
+    event: React.KeyboardEvent<HTMLInputElement>
+  ) => {
+    setSearchTerm(event.currentTarget.value);
   };
 
   const handleSortChange = (event: string) => {
@@ -90,7 +90,7 @@ const JoinedClubCard: React.FC = () => {
   return (
     isSuccess && (
       <>
-        <div className="flex items-center w-full">
+        <div className="flex items-center w-full px-2">
           <Select onValueChange={handleSortChange}>
             <SelectTrigger>
               <SelectValue placeholder="정렬기준" />
@@ -103,23 +103,32 @@ const JoinedClubCard: React.FC = () => {
             </SelectContent>
           </Select>
           {isMember && (
-            <div className="flex justify-end ml-2" suppressHydrationWarning={true}>
+            <div
+              className="flex justify-end ml-2 "
+              suppressHydrationWarning={true}
+            >
               <Link href={"/club/write"}>
-                <Button>커뮤니티 만들기</Button>
+                <Button className="bg-[#9268EB] hover:bg-[#bfa1ff]">
+                  커뮤니티 만들기
+                </Button>
               </Link>
             </div>
           )}
         </div>
 
-        <div className="w-full py-1">
+        <div className="w-full py-1 px-2">
           <div className="relative ">
             <Search className="absolute left-2 top-3 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Search" className="pl-8" onKeyDown={handleSearchKeyDown} />
+            <Input
+              placeholder="Search"
+              className="pl-8"
+              onKeyDown={handleSearchKeyDown}
+            />
           </div>
         </div>
 
-        <Card className="h-full">
-          <ScrollArea className="flex flex-col max-w-md mx-auto bg-white h-[65vh]">
+        <Card className="h-full px-2">
+          <ScrollArea className="flex flex-col max-w-md mx-auto bg-white min-h-[50vh] h-fit">
             {clubs.pages.flatMap((t) => t.content).length === 0 ? (
               <div className="flex flex-grow justify-center items-center h-full">
                 <p className="text-gray-500 text-lg py-4">데이터가 없습니다.</p>
