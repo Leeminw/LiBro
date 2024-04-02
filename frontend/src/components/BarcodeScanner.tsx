@@ -83,7 +83,9 @@ const BarcodeScannerComponent = ({
     intervalRef.current = setInterval(capture, 1000);
     const video = videoRef.current;
     if (video) {
-      navigator.mediaDevices.getUserMedia({ video: true })
+      navigator.mediaDevices.getUserMedia({ video: {
+        facingMode: "environment" // 후면 카메라 요청
+      } })
         .then(stream => {
           video.srcObject = stream;
           video.play();
