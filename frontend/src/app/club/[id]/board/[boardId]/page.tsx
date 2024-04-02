@@ -53,7 +53,7 @@ export default function CommunityPostPage({
 
           <ScrollArea className="flex flex-col max-w-md min-h-[50vh] h-fit mx-2">
             <Card>
-              <CardContent className="px-4">
+              <CardContent className="px-6">
                 <div
                   dangerouslySetInnerHTML={{
                     __html: post.content,

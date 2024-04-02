@@ -68,43 +68,45 @@ export default function CommunityPostPage({
     isFetchingSuccess && (
       <>
         <SubHeader title="커뮤니티 가입하기" backArrow={true} />
-        <div className="pt-24" />
-        <CommunityInformCard
-          clubId={club.clubId}
-          clubName={club.clubName}
-          createdDate={club.createdDate}
-          memberType={"NONE"}
-          memberCount={club.memberCount}
-        />
-        <div className="flex">
-          <GroupOwner nickName={club.clubOwnerName} profileUrl={club.profile}>
-            {isMember ? (
-              <Button
-                className="bg-[#9268EB] text-white px-6 py-2 rounded w-1/3 h-full"
-                onClick={() => mutate()}
-              >
-                가입하기
-              </Button>
-            ) : (
-              <Button className="bg-gray-400 text-white px-6 py-2 rounded w-1/3 h-full">
-                가입하기
-              </Button>
-            )}
-          </GroupOwner>
-        </div>
-        <ScrollArea className="flex flex-col max-w-md mx-auto bg-white h-fit rounded-lg border">
-          <div
-            dangerouslySetInnerHTML={{
-              __html: club.description,
-            }}
-            style={{
-              marginTop: "10px",
-              whiteSpace: "pre-wrap",
-            }}
-            className="mx-3"
+        <div className="pt-28 px-2">
+          <CommunityInformCard
+            clubId={club.clubId}
+            clubName={club.clubName}
+            createdDate={club.createdDate}
+            memberType={"NONE"}
+            memberCount={club.memberCount}
           />
-        </ScrollArea>
-        <div className="pb-20" />
+          <div className="flex">
+            <GroupOwner nickName={club.clubOwnerName} profileUrl={club.profile}>
+              {isMember ? (
+                <Button
+                  className="bg-[#9268EB] text-white px-6 py-2 rounded w-1/3 h-full"
+                  onClick={() => mutate()}
+                >
+                  가입하기
+                </Button>
+              ) : (
+                <Button className="bg-gray-400 text-white px-6 py-2 rounded w-1/3 h-full">
+                  가입하기
+                </Button>
+              )}
+            </GroupOwner>
+          </div>
+          <ScrollArea className="flex flex-col max-w-md mx-auto bg-white h-fit rounded-lg border min-h-32">
+            <div className="font-semibold text-xl pt-4 pl-4">소개</div>
+            <div
+              dangerouslySetInnerHTML={{
+                __html: club.description,
+              }}
+              style={{
+                marginTop: "10px",
+                whiteSpace: "pre-wrap",
+              }}
+              className="pl-4 pb-4"
+            />
+          </ScrollArea>
+          <div className="pb-20" />
+        </div>
       </>
     )
   );
