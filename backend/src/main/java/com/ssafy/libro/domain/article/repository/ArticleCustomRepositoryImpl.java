@@ -30,8 +30,8 @@ public class ArticleCustomRepositoryImpl implements ArticleCustomRepository {
 
         List<BoardCategoryArticlesResponseDto> result = jpaQueryFactory.select(Projections.bean(
                         BoardCategoryArticlesResponseDto.class,
-                        article.user.name,
-                        article.user.profile,
+                        article.user.nickname.as("name"),
+                        article.user.profile.as("picture"),
                         article.title,
                         article.comments.size().as("commentCount"),
                         article.createdDate,
