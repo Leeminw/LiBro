@@ -76,7 +76,7 @@ def get_book_matrix(engine : Engine) -> pd.DataFrame:
         data = result.fetchall()
         df = pd.DataFrame(data, columns = ['book_id','author', 'title', 'rating'])
         
-        return df
+        return df.fillna(0)
 
 def get_user_book_count_distinct(engine : Engine) -> int :
     with engine.connect() as con :
@@ -90,3 +90,18 @@ def get_user_book_count_distinct(engine : Engine) -> int :
         result = con.execute(statement)
         data = result.fetchone()[0]
         return data
+    
+def get_user_matrix(engine : Engine) -> pd.DataFrame :
+    with engine.connect() as con : 
+        statement = text(
+            '''
+            SELECT id, age, gender, interest
+            FROM user
+            WHERE is_deleted = false or is_deleted is NULL
+            '''
+        )
+        result = con.execute(statement)
+        data = result.fetchall()
+        df = pd.DataFrame(data, columns = ['user_id','age', 'gender', 'interest'])
+        
+        return df.fillna(0)
