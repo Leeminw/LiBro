@@ -1,7 +1,6 @@
 package com.ssafy.libro.global.fileupload.service;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.ssafy.libro.global.fileupload.dto.FileUploadResponseDto;
@@ -10,7 +9,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
@@ -39,7 +37,6 @@ public class FileUploadServiceImpl implements FileUploadService {
         objectMetadata.setContentType(contentType);
         amazonS3.putObject(
                 new PutObjectRequest(bucket, fileName, inputStream, objectMetadata)
-                        .withCannedAcl(CannedAccessControlList.PublicRead)	// PublicRead 권한으로 업로드 됨
         );
         return amazonS3.getUrl(bucket, fileName).toString();
     }
