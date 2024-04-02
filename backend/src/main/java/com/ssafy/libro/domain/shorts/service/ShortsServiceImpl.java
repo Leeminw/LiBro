@@ -56,7 +56,7 @@ public class ShortsServiceImpl implements ShortsService {
 
     private static Random random = new Random();
 
-//    @Scheduled(cron = "0 */1 * * * *", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 */1 * * * *", zone = "Asia/Seoul")
     private void autoCreateShorts4ExistsBook() {
         List<Book> books = bookRepository.findAllByShortsUrlIsNull().orElseThrow(
                 () -> new BookNotFoundException(""));
