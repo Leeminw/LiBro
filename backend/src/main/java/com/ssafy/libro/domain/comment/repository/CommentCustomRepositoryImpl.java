@@ -19,7 +19,7 @@ public class CommentCustomRepositoryImpl implements CommentCustomRepository {
         QComment comment = QComment.comment;
 
         return jpaQueryFactory.select(Projections.constructor(CommentDetailResponseDto.class,
-                        comment.user.name,
+                        comment.user.nickname.as("name"),
                         comment.createdDate,
                         comment.content,
                         comment.user.profile,
