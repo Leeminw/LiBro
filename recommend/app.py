@@ -67,7 +67,11 @@ def validateToken(token) -> tuple:
     except Exception as e :
         return False, 'no data'
 
+@app.route('/test')
+def get_recommend() :
+    result = get_recommend_book_list(100,10)
 
+    return make_response_entity(result,HTTPStatus.OK)
 
 @app.route('/')
 def random_book() :

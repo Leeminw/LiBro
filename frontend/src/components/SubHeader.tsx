@@ -2,7 +2,15 @@
 import { FaChevronLeft } from "react-icons/fa6";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef } from "react";
-const SubHeader = ({ title, backArrow }: { title: string; backArrow: boolean }) => {
+const SubHeader = ({
+  title,
+  backArrow,
+  src,
+}: {
+  title: string;
+  backArrow: boolean;
+  src?: string | null;
+}) => {
   const router = useRouter();
   return (
     <>
@@ -12,7 +20,11 @@ const SubHeader = ({ title, backArrow }: { title: string; backArrow: boolean }) 
             className="cursor-pointer mx-1"
             size={"1.2rem"}
             onClick={() => {
-              router.back();
+              if (src) {
+                router.push(src);
+              } else {
+                router.back();
+              }
             }}
           />
         ) : null}
@@ -20,7 +32,6 @@ const SubHeader = ({ title, backArrow }: { title: string; backArrow: boolean }) 
           {title}
         </div>
       </div>
-      <div className="h-10 absolute"></div>
     </>
   );
 };

@@ -343,9 +343,9 @@ export default function Myinfo() {
         </div>
 
         <div className="ml-2 mr-2 mb-6">
-          <div className="flex items-center justify-between">
-            <div className="text-sm font-bold">완독율</div>
-            <div className="text-sm font-bold text-gray-500">
+          <div className="flex items-end justify-between">
+            <div className="text-sm font-bold text-gray-800">완독율</div>
+            <div className="text-lg font-semibold text-gray-800">
               {completeRatio.totalSize === 0
                 ? 0
                 : ((completeRatio.readSize / completeRatio.totalSize) * 100).toFixed(1)}{" "}
@@ -354,7 +354,7 @@ export default function Myinfo() {
           </div>
           <div className="w-full bg-[#E5E7EB] rounded-full h-4 my-1">
             <div
-              className="bg-[#9268EB] h-2 rounded"
+              className="bg-[#9268EB] h-4 rounded-full"
               style={{
                 width: `${
                   completeRatio.totalSize === 0
@@ -370,7 +370,7 @@ export default function Myinfo() {
           <div className="flex items-center justify-between">
             <div className="text-sm font-bold">평균 평점</div>
             <div className="flex items-center">
-              <div className="mr-2 text-m font-bold text-end">
+              <div className="mr-2 text-sm font-bold text-end w-fit">
                 {reviewCount === 0
                   ? 0
                   : (
@@ -402,7 +402,7 @@ export default function Myinfo() {
                   value={reviewCount === 0 ? 0 : ScorePerRating}
                 />
                 <p className="text-sm w-8 text-end font-medium text-gray-500 dark:text-gray-400">
-                  {reviewCount === 0 ? 0 : ScorePerRating}%
+                  {reviewCount === 0 ? 0 : ScorePerRating.toFixed(0)}%
                 </p>
               </div>
             );

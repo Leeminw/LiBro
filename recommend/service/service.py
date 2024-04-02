@@ -35,13 +35,21 @@ def get_recommend_book_list(user_id : int, size : int ) -> List[dict] :
     # print("추천 리스트 ")
     
     all_item_ids=  np.arange(model.item_embeddings.shape[0])
+    all_user_ids= np.arange(model.user_embeddings.shape[0])
+    
+    if user_id >= len(all_user_ids) :
+        choosed = tuple(random.sample(range(0, total_count+1), size))
+       
+        response_data = get_book_list(engine,choosed)
+        return response_data
+
     # user_id는 1기준으로 입력받기 때문에, -1 해준다.
     recommendations = model.predict(user_ids=user_id, item_ids=all_item_ids)
     # 상위 size 개의 도서 id 반환한다. id는 0기준이므로 1씩 증가해서
-
+    
     # 역순으로 정렬 
     recommendations = [ x + 1 for x in recommendations.argsort()[::-1] ]
-    
+
     length = len(recommendations)
 
     choosed = set() 

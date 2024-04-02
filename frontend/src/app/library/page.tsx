@@ -26,6 +26,8 @@ import { userBooks } from "@/lib/axios-userBook";
 import { useRouter, useSearchParams } from "next/navigation";
 import instance from "@/lib/interceptor";
 import SubHeader from "@/components/SubHeader";
+import { useToast } from "@/components/ui/use-toast";
+import { MdDelete } from "react-icons/md";
 
 interface User {
   profileUrl: string;
@@ -89,6 +91,7 @@ interface Review {
 
 const Library = () => {
   const isbn = useSearchParams().get("isbn");
+  const { toast } = useToast();
   const [user, setUser] = useState<User>({
     profileUrl: "https://github.com/shadcn.png",
     id: "",
@@ -98,12 +101,14 @@ const Library = () => {
     readRate: 0,
     bookRate: 1,
   });
+  // 스크롤 최상단 이동
   const scrollRef = useRef<HTMLDivElement>(null);
   const scrollTop = () => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = 0;
     }
   };
+  const [pageLoad, setPageLoad] = useState<boolean>(false);
 
   // 책 페이지
   const [currentPage, setCurrentPage] = useState(1);
@@ -136,10 +141,14 @@ const Library = () => {
     // 그 다음, 정렬 적용
     switch (arrange) {
       case "책 제목 순":
-        updatedBooks.sort((a: BookData, b: BookData) => a.title.localeCompare(b.title, "ko"));
+        updatedBooks.sort((a: BookData, b: BookData) =>
+          a.title.localeCompare(b.title, "ko")
+        );
         break;
       case "저자명 순":
-        updatedBooks.sort((a: BookData, b: BookData) => a.author.localeCompare(b.author, "ko"));
+        updatedBooks.sort((a: BookData, b: BookData) =>
+          a.author.localeCompare(b.author, "ko")
+        );
         break;
       case "출판사 순":
         updatedBooks.sort((a: BookData, b: BookData) =>
@@ -149,7 +158,8 @@ const Library = () => {
       case "최근 발행 순":
         updatedBooks.sort(
           (a: BookData, b: BookData) =>
-            new Date(b.createdDate).getTime() - new Date(a.createdDate).getTime()
+            new Date(b.createdDate).getTime() -
+            new Date(a.createdDate).getTime()
         );
         break;
       // 기본 정렬 로직 또는 기본값 설정이 필요할 경우 추가
@@ -159,8 +169,7 @@ const Library = () => {
     setProcessedBooks(updatedBooks);
   }, [searchTerm, arrange, books]);
 
-  // 등록 책 전체 조회
-  useEffect(() => {
+  const selectAllBooks = () => {
     userBooks
       .books()
       .then((response) => {
@@ -185,6 +194,13 @@ const Library = () => {
         console.log(error);
         router.push("/login");
       });
+  };
+  // 등록 책 전체 조회
+  useEffect(() => {
+    if (!pageLoad) {
+      setPageLoad(true);
+      selectAllBooks();
+    }
   }, []);
 
   // 현재 페이지에 보여줄 책들을 계산합니다.
@@ -209,7 +225,9 @@ const Library = () => {
   // 모달을 여는 함수
   const openModal = async (book: BookData) => {
     console.log("userbookId", book.userBookId);
-    const { data } = await instance.get("/api/v1/userbook/detail/" + book.userBookId);
+    const { data } = await instance.get(
+      "/api/v1/userbook/detail/" + book.userBookId
+    );
     const historyList: History[] = data.data.historyList;
 
     const selectedUserBook: UserBook = {
@@ -305,21 +323,26 @@ const Library = () => {
 
     const Header = () => {
       return (
-        <div className="relative h-32">
+        <div className="relative h-32 rounded-t-lg">
           {/* 블러 처리된 배경 이미지 */}
           <div
-            className="absolute inset-0 bg-cover bg-center"
+            className="absolute inset-0 bg-cover bg-center rounded-t-lg"
             style={{ backgroundImage: `url(${userBook.book.image})` }}
           >
-            <div className="w-full h-full inset-0 bg-black/40 backdrop-blur-md">
+            <div className="w-full h-full inset-0 bg-black/40 backdrop-blur-md rounded-t-lg">
               {/* 선명한 책 이미지와 정보 */}
-              <div className="relative flex items-end h-32">
+              <div className="relative flex items-end h-32 rounded-t-lg">
                 <Button
                   className="absolute right-0 top-0 text-white hover:bg-white/30 w-10 p-2.5"
                   variant="ghost"
                   onClick={onClose}
                 >
-                  <Image src="x-white.svg" alt="search" width={40} height={40} />
+                  <Image
+                    src="x-white.svg"
+                    alt="search"
+                    width={40}
+                    height={40}
+                  />
                 </Button>
                 <div className="absolute drop-shadow-lg">
                   <Image
@@ -330,24 +353,53 @@ const Library = () => {
                     className="rounded w-full h-full max-h-32 translate-y-4 ml-4"
                   />
                 </div>
-                <div className="pl-28 h-20 flex flex-col pr-2 translate-y-6">
+                <div className="pl-32 h-20 flex flex-col pr-2">
                   <h2 className="text-white text-md font-bold line-clamp-2">
                     {userBook.book.title}
                   </h2>
                   <div className="flex items-center mt-2">
                     <p className="text-xs text-gray-300 line-clamp-1">
-                      저자 {userBook.book.author} | 출판사 {userBook.book.publisher}
+                      저자 {userBook.book.author.split("^").join(", ")} | 출판사{" "}
+                      {userBook.book.publisher.split("^").join(", ")}
                     </p>
                   </div>
-                  <div className="flex mt-4">
-                    <Link
-                      href={`/detail?isbn=${userBook.book.isbn}`}
-                      className="text-[#9268EB] text-sm font-semibold"
-                    >
-                      도서 정보 보기 {">"}
-                    </Link>
-                  </div>
                 </div>
+              </div>
+              <div className="flex justify-end pl-32">
+                <div>
+                  <Link
+                    href={`/detail?isbn=${userBook.book.isbn}`}
+                    className="text-[#9268EB] text-xs font-semibold w-fit whitespace-nowrap"
+                  >
+                    도서 정보 보기 {">"}
+                  </Link>
+                </div>
+                <div className="w-full"></div>
+                <button
+                  className="w-10 h-10 p-1.5 mx-1 mt-1 text-center bg-red-400 hover:bg-red-300 rounded-md duration-300 transition-colors aspect-square"
+                  onClick={async () => {
+                    await userBooks
+                      .bookDelete(userBook.userBookId)
+                      .then((response) => {
+                        console.log("response", response);
+                        toast({
+                          description: "나의 서재에서 도서를 뺐습니다.",
+                        });
+                        setIsModalOpen(false);
+                        selectAllBooks();
+                      })
+                      .catch((error) => {
+                        toast({
+                          description:
+                            "나의 서재에서 도서를 빼는데 실패했습니다.",
+                        });
+                      });
+                  }}
+                >
+                  <div className=" text-white flex justify-center items-center ">
+                    <MdDelete size={"1.5rem"} />
+                  </div>
+                </button>
               </div>
             </div>
           </div>
@@ -357,7 +409,7 @@ const Library = () => {
 
     const Record = () => {
       return (
-        <div className="mx-6 mt-14">
+        <div className="mx-6 mt-10">
           <h1 className="text-xl font-bold mb-3">독서 기록</h1>
           <div className="flex justify-start items-center">
             <Button className="flex justify-start items-center font-bold text-xs text-gray-500 bg-white border border-gray-300 shadow-lg w-full hover:bg-gray-100 ">
@@ -394,8 +446,12 @@ const Library = () => {
       return `${year}년 ${month}월 ${day}일`;
     }
     const Review = () => {
-      const [review, setReview] = useState(userBook.ratingComment ? userBook.ratingComment : "");
-      const [rating, setRating] = useState(userBook.rating ? userBook.rating : 0); // 별점 상태 초기화
+      const [review, setReview] = useState(
+        userBook.ratingComment ? userBook.ratingComment : ""
+      );
+      const [rating, setRating] = useState(
+        userBook.rating ? userBook.rating : 0
+      ); // 별점 상태 초기화
       const [isSpoiler, setIsSpoiler] = useState(
         userBook.ratingSpoiler ? userBook.ratingSpoiler : false
       ); // 스포일러 체크박스 상태
@@ -437,7 +493,9 @@ const Library = () => {
         return stars;
       };
 
-      const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+      const handleCheckboxChange = (
+        event: React.ChangeEvent<HTMLInputElement>
+      ) => {
         setIsSpoiler(event.target.checked); // 체크박스 상태 업데이트
       };
 
@@ -458,10 +516,15 @@ const Library = () => {
           ratingSpoiler: isSpoiler,
         };
         console.log(ratingData);
-        const response = await instance.post("/api/v1/userbook/rating", ratingData);
+        const response = await instance.post(
+          "/api/v1/userbook/rating",
+          ratingData
+        );
         // user book 갱신
 
-        const { data } = await instance.get("/api/v1/userbook/detail/" + userBook.userBookId);
+        const { data } = await instance.get(
+          "/api/v1/userbook/detail/" + userBook.userBookId
+        );
         const historyList: History[] = data.data.historyList;
 
         const selectedUserBook: UserBook = {
@@ -491,14 +554,16 @@ const Library = () => {
       };
 
       return (
-        <div className="mx-6 mt-4">
+        <div className="mx-6 mt-6">
           <h1 className="mb-3 text-xl font-bold">나의 평점</h1>
           {
             // 리뷰가 없을때
             !userBook.rating && !userBook.ratingComment ? (
               <>
                 <div className="flex items-end justify-between mb-2">
-                  <div className="mr-2 text-m font-bold flex items-end">{renderStars()}</div>
+                  <div className="mr-2 text-m font-bold flex items-end">
+                    {renderStars()}
+                  </div>
                   <div className="flex items-center">
                     <Input
                       type="checkbox"
@@ -507,7 +572,10 @@ const Library = () => {
                       onChange={handleCheckboxChange}
                       className="w-4 h-4 text-blue-600 bg-gray-100 rounded border-gray-300 focus:ring-blue-500"
                     />
-                    <label htmlFor="spoilerCheckbox" className="ml-2 text-sm font-bold">
+                    <label
+                      htmlFor="spoilerCheckbox"
+                      className="ml-2 text-sm font-bold"
+                    >
                       스포일러 포함
                     </label>
                   </div>
@@ -517,13 +585,18 @@ const Library = () => {
                     value={review}
                     onChange={(e) => setReview(e.target.value)}
                     placeholder="리뷰를 입력하세요."
-                    className="w-5/6 p-2 mr-2 border rounded"
+                    className="w-full p-2 mr-2 border rounded"
                   />
                   <Button
                     onClick={() => saveReview(userBook)}
-                    className="bg-[#9268EB] rounded-md p-0.5 w-12 h-12"
+                    className="bg-[#9268EB] hover:bg-[#bfa1ff] rounded-md p-0.5 w-12 h-12 aspect-square"
                   >
-                    <Image src="mdi_pencil.svg" alt="pencil" width={30} height={30} />
+                    <Image
+                      src="mdi_pencil.svg"
+                      alt="pencil"
+                      width={30}
+                      height={30}
+                    />
                   </Button>
                 </div>
               </>
@@ -533,17 +606,25 @@ const Library = () => {
                 <div className="rounded border border-gray-300 shadow-lg p-4">
                   <div className="flex justify-between">
                     <div className="flex mb-1">
-                      <div className="text-sm font-bold mr-2">@{user.nickName} </div>
+                      <div className="text-sm font-bold mr-2">
+                        @{user.nickName}{" "}
+                      </div>
                     </div>
                     <Button className="bg-white text-xs text-gray-400 p-1 rounded-md h-6">
                       수정하기
                     </Button>
                   </div>
 
-                  <div className="flex items-center mb-1">{"평점 : " + userBook.rating}</div>
-                  <div className="text-sm mb-1">{"리뷰 내용 : " + userBook.ratingComment}</div>
+                  <div className="flex items-center mb-1">
+                    {"평점 : " + userBook.rating}
+                  </div>
+                  <div className="text-sm mb-1">
+                    {"리뷰 내용 : " + userBook.ratingComment}
+                  </div>
                   {/* 여기에 별점과 스포일러 여부도 표시 */}
-                  {userBook.ratingSpoiler && <div className="text-red-500">스포일러 포함</div>}
+                  {userBook.ratingSpoiler && (
+                    <div className="text-red-500">스포일러 포함</div>
+                  )}
                 </div>
               </>
             )
@@ -556,7 +637,9 @@ const Library = () => {
       const [api, setApi] = useState<CarouselApi>();
       const [current, setCurrent] = useState(0);
       const [count, setCount] = useState(0);
-      const [inputs, setInputs] = useState(userBook.commentList ? userBook.commentList : []); // 입력한 텍스트를 저장할 배열 상태를 추가
+      const [inputs, setInputs] = useState(
+        userBook.commentList ? userBook.commentList : []
+      ); // 입력한 텍스트를 저장할 배열 상태를 추가
       const [currentInput, setCurrentInput] = useState("");
 
       useEffect(() => {
@@ -592,12 +675,12 @@ const Library = () => {
       };
 
       return (
-        <div className="mx-6 mt-4 mb-2">
+        <div className="mx-6 mt-6 mb-2">
           <div className="flex justify-between">
             <h1 className="mb-3 text-xl font-bold">감명깊은 글귀</h1>
             <Button
               onClick={handleSave}
-              className="bg-[#9268EB] text-md text-white font-bold p-3 rounded-md h-8"
+              className="bg-[#9268EB] hover:bg-[#bfa1ff] text-sm text-white font-bold p-3 rounded-md h-8"
             >
               저장
             </Button>
@@ -634,8 +717,8 @@ const Library = () => {
                   </Card>
                 </CarouselItem>
               </CarouselContent>
-              <CarouselPrevious />
-              <CarouselNext />
+              <CarouselPrevious className="border-gray-600 ml-2" />
+              <CarouselNext className="border-gray-600 mr-2" />
             </Carousel>
           </div>
           <div className="py-2 text-center text-xs text-muted-foreground">
@@ -649,9 +732,9 @@ const Library = () => {
       if (!bookHistory || bookHistory.endDate) {
         // 독서 기록이 없을 때
         return (
-          <div className="flex justify-center pb-4">
+          <div className="flex flex-col items-center pb-4 px-4">
             <button
-              className="w-full p-1.5 mx-6 text-center bg-[#9268EB] rounded-md"
+              className="w-full p-1.5 mx-6 mb-2 text-center bg-[#9268EB] hover:bg-[#bfa1ff] rounded-md duration-300 transition-colors"
               onClick={() => startReading(userBook.userBookId)}
             >
               <div className=" text-white  ">독서 기록 시작하기</div>
@@ -672,7 +755,7 @@ const Library = () => {
       else if (!bookHistory.endDate) {
         //     // 독서 중일 때
         return (
-          <div className="flex justify-center mx-6">
+          <div className="flex justify-center mx-6 pb-4">
             <button
               className="w-full bg-[#F87171] text-white p-1.5 rounded-md mr-4"
               onClick={() => giveUpReading(bookHistory)}
@@ -695,7 +778,7 @@ const Library = () => {
         className={`fixed w-full h-full inset-0 bg-black z-40 bg-opacity-50 flex justify-center items-center px-4 overflow-y-hidden animate-modal-overlay-on`}
       >
         <div
-          className={`bg-white rounded-md w-full max-w-md h-3/4 overflow-y-auto duration-500 transition-all animate-fade-up`}
+          className={`bg-white rounded-lg w-full max-w-md h-3/4 overflow-y-auto duration-500 transition-all animate-fade-up scrollbar-hide`}
         >
           <Header />
           <Record />
@@ -756,39 +839,41 @@ const Library = () => {
           </div>
         </div>
         <div className="p-1 flex flex-col items-center">
-          <div className="grid md:grid-cols-4 grid-cols-3">
-            {currentBooks.map((book: BookData, index) => (
-              <>
-                <div
-                  key={index}
-                  className="drop-shadow-xl shadow-border pb-2 border-b-8 border-white flex justify-center items-end h-fit"
-                  onClick={() => openModal(book)}
-                >
+          <div className="grid sm:grid-cols-4 grid-cols-3">
+            {pageNumbers.length != 0 &&
+              currentBooks.map((book: BookData, index) => (
+                <>
                   <div
-                    className={`w-full h-40 mt-4 mx-1 bg-gray-200 flex items-end ${
-                      book.complete && "border-4 border-lime-500 border-opacity-70"
-                    }`}
+                    key={`book-${index}`}
+                    className="drop-shadow-xl shadow-border pb-2 border-b-8 border-white flex justify-center items-end h-fit"
+                    onClick={() => openModal(book)}
                   >
-                    <Image
-                      src={book.image}
-                      alt={`Book ${index + 1}`}
-                      width={400}
-                      height={400}
-                      className="w-full h-full"
-                    />
-                    <div className="absolute top-4 left-0 w-full h-40 bg-black bg-opacity-60 flex justify-start transition-opacity opacity-0 hover:opacity-100 duration-500 cursor-pointer">
-                      <p className="text-white text-sm mx-2 my-6 line-clamp-6 text-ellipsis break-words">
-                        {book.title}
-                      </p>
+                    <div
+                      className={`w-full h-40 mt-4 mx-1 bg-gray-200 flex items-end ${
+                        book.complete &&
+                        "border-4 border-lime-500 border-opacity-70"
+                      }`}
+                    >
+                      <Image
+                        src={book.image}
+                        alt={`Book ${index + 1}`}
+                        width={400}
+                        height={400}
+                        className="w-full h-full"
+                      />
+                      <div className="absolute top-4 left-0 w-full h-40 bg-black bg-opacity-60 flex justify-start transition-opacity opacity-0 hover:opacity-100 duration-500 cursor-pointer">
+                        <p className="text-white text-sm mx-2 my-6 line-clamp-6 text-ellipsis break-words">
+                          {book.title}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </>
-            ))}
+                </>
+              ))}
             {Array.from({ length: 12 - currentBooks.length }, (_, index) => (
               <div
                 key={`empty-${index}`}
-                className="drop-shadow-xl pb-2 shadow-border border-b-8 border-white flex justify-center items-end h-fit"
+                className="drop-shadow-xl pb-2 shadow-border border-b-8 border-white flex justify-center items-end h-fit min-w-28"
               >
                 <div className="w-full h-40 mt-4 mx-1"></div>
               </div>
@@ -799,37 +884,39 @@ const Library = () => {
             <BookModal userBook={selectedBook} onClose={closeModal} />
           )}
 
-          <nav className="mt-4 py-1 px-2 w-fit bg-white rounded-full flex items-center">
-            <ul className="pagination flex items-center justify-center">
-              {pageNumbers.map((number) => (
-                <li
-                  key={number}
-                  className={`page-item mx-0.5 ${
-                    currentPage === number
-                      ? "text-white bg-[#9268EB] rounded-full w-10 h-10 flex justify-center items-center font-bold"
-                      : "text-gray-900 w-10 h-10 rounded-full hover:bg-gray-200 flex justify-center items-center cursor-pointer transition-all duration-300"
-                  }`}
-                  onClick={() => {
-                    scrollTop();
-                    paginate(number);
-                  }}
-                >
-                  {number}
-                </li>
-              ))}
-              {pageNumbers.length > 0 && (
-                <li
-                  className="page-item mx-1 text-gray-900 w-10 h-10 rounded-full hover:bg-gray-200 font-bold cursor-pointer flex justify-center items-center transition-all duration-300"
-                  onClick={(e) => {
-                    scrollTop();
-                    paginate(pageNumbers[pageNumbers.length - 1]);
-                  }}
-                >
-                  <IoIosArrowForward />
-                </li>
-              )}
-            </ul>
-          </nav>
+          {pageNumbers.length != 0 && (
+            <nav className="mt-4 py-1 px-2 w-fit bg-white rounded-full flex items-center">
+              <ul className="pagination flex items-center justify-center">
+                {pageNumbers.map((number) => (
+                  <li
+                    key={number}
+                    className={`page-item mx-0.5 ${
+                      currentPage === number
+                        ? "text-white bg-[#9268EB] rounded-full w-10 h-10 flex justify-center items-center font-bold"
+                        : "text-gray-900 w-10 h-10 rounded-full hover:bg-gray-200 flex justify-center items-center cursor-pointer transition-all duration-300"
+                    }`}
+                    onClick={() => {
+                      scrollTop();
+                      paginate(number);
+                    }}
+                  >
+                    {number}
+                  </li>
+                ))}
+                {pageNumbers.length > 0 && (
+                  <li
+                    className="page-item mx-1 text-gray-900 w-10 h-10 rounded-full hover:bg-gray-200 font-bold cursor-pointer flex justify-center items-center transition-all duration-300"
+                    onClick={(e) => {
+                      scrollTop();
+                      paginate(pageNumbers[pageNumbers.length - 1]);
+                    }}
+                  >
+                    <IoIosArrowForward />
+                  </li>
+                )}
+              </ul>
+            </nav>
+          )}
         </div>
       </div>
     </div>
