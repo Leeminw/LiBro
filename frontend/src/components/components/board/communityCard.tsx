@@ -71,7 +71,7 @@ export default function CommunityInformCard(props: ClubInform) {
   };
 
   return (
-    <Card className="mx-2">
+    <Card>
       <CardHeader className="pb-4">
         <CardTitle className="flex items-center gap-2 justify-between">
           <Link href={`/club/${clubId}/inform`}>{clubName}</Link>
