@@ -369,10 +369,10 @@ const DetailPage = () => {
       <SubHeader title="도서 상세 정보" backArrow={true} />
       <div
         ref={scrollRef}
-        className="pt-24 h-full bg-white max-h-screen flex items-center relative flex-wrap overflow-y-scroll scrollbar-hide"
+        className="pt-24 h-full bg-white max-h-[94vh] flex items-center relative flex-wrap overflow-y-scroll scrollbar-hide"
       >
         {bookLoading ? (
-          <div className="w-full h-full min-h-screen bg-white flex flex-col relative overflow-hidden mb-24">
+          <div className="w-full h-full min-h-[94vh] bg-white flex flex-col relative overflow-hidden mb-12">
             <div
               className="w-full h-40 flex relative"
               style={{
@@ -765,7 +765,7 @@ const DetailPage = () => {
         )}
         {bookLoading && !!localStorage.getItem("accessToken") && (
           <Button
-            className="bg-[#9268EB] hover:bg-[#bfa1ff] sticky bottom-28 left-full max-w-md drop-shadow-lg rounded-full z-20 w-12 h-12 mr-3"
+            className="bg-[#9268EB] hover:bg-[#bfa1ff] sticky bottom-14 left-full max-w-md drop-shadow-lg rounded-full z-20 w-12 h-12 mr-3"
             onClick={() => mappingBook(bookDetail.id)}
           >
             <FaPlus size={30} />
