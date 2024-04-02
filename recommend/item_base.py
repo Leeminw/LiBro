@@ -10,21 +10,13 @@ from lightfm.data import Dataset
 from lightfm.cross_validation import random_train_test_split
 
 def train () : 
-    
-    model = LightFM(loss='warp')
-    
+
     engine = get_db()
 
-    model_url = get_model_url()
+    url = get_model_url()
 
     ratings = get_user_book_matrix(engine)
 
-
-    if ratings.empty : 
-        with open(model_url, 'wb') as f:
-            pickle.dump(model, f)
-
-        return 
     item_meta = get_book_matrix(engine)
 
     user_meta = get_user_matrix(engine)
@@ -57,6 +49,9 @@ def train () :
     interactions = interactions.tocsr().tocoo()
     train_weights = interactions.multiply(weights).tocoo()
 
+
+    model = LightFM(loss='warp')
+
     model.fit(interactions=interactions,
               item_features=item_features,
               user_features=user_features,
@@ -64,7 +59,7 @@ def train () :
               epochs=10,
               verbose=False)
 
-    with open(model_url, 'wb') as f:
+    with open(url, 'wb') as f:
         pickle.dump(model, f)
 
 if __name__ == "__main__" :
