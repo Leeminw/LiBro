@@ -6,7 +6,7 @@ import Image from "next/image"
 import 'react-calendar/dist/Calendar.css';
 
 import {getDaysInMonth, subMonths} from 'date-fns';
-import {Calendar} from "@/lib/axios-calendar"
+import {CalendarApi} from "@/lib/axios-calendar"
 
 interface ImageDates {
   [date: string]: string[];
@@ -126,7 +126,7 @@ type CALENDER_RESULT_LIST = WeekDay[][];
     useEffect(() => {
       // 컴포넌트가 마운트될 때 현재 연도와 월에 해당하는 데이터를 API로부터 불러옵니다.
       const fetchData = async () => {
-        const response = await Calendar.date(CurrentDateYear, CurrentDateMonth, 10);
+        const response = await CalendarApi.date(CurrentDateYear, CurrentDateMonth, 10);
         console.log(response)
         setResponse(response.data)
         // 필요한 경우 상태에 데이터 저장 등의 추가 작업을 수행
