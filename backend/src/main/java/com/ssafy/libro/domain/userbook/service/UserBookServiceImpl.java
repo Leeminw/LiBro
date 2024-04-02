@@ -217,8 +217,9 @@ public class UserBookServiceImpl implements UserBookService{
         }
         else{
             updateRating = (rating*count + requestDto.getRating())/(count+1);
+            count++;
         }
-        book.updateRating(updateRating, count+1);
+        book.updateRating(updateRating, count);
 
         bookRepository.save(book);
 
