@@ -90,7 +90,7 @@ const FindClubCard: React.FC = () => {
   return (
     isSuccess && (
       <>
-        <div className="flex items-center justify-between w-full">
+        <div className="flex items-center justify-between w-full px-2">
           <Select onValueChange={handleSortChange}>
             <SelectTrigger className={""}>
               <SelectValue placeholder="정렬기준" />
@@ -104,7 +104,7 @@ const FindClubCard: React.FC = () => {
           </Select>
         </div>
 
-        <div className="w-full py-1">
+        <div className="w-full py-1 px-2">
           <div className="relative ">
             <Search className="absolute left-2 top-3 h-4 w-4 text-muted-foreground" />
             <Input placeholder="Search" className="pl-8" onKeyDown={handleSearchKeyDown} />
@@ -112,7 +112,7 @@ const FindClubCard: React.FC = () => {
         </div>
 
         <Card>
-          <ScrollArea className="flex flex-col max-w-md mx-auto bg-white h-[65vh]">
+          <ScrollArea className="flex flex-col max-w-md mx-auto bg-white min-h-[50vh] h-fit px-2">
             <div>
               {clubs.pages
                 .flatMap((t) => t.content)
