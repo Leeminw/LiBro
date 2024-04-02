@@ -45,7 +45,11 @@ const UseCalendar = () => {
   const totalMonthDays = getDaysInMonth(currentDate);
 
   // 이전 달의 마지막 일요일까지의 날짜를 가져오는 로직
-  const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+  const firstDayOfMonth = new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth(),
+    1
+  );
   const prevMonthDays = firstDayOfMonth.getDay(); // 첫째 날이 월요일이 아니라면, 이전 달의 날짜를 가져와야 함
 
   const prevDayList = Array.from({
@@ -67,24 +71,32 @@ const UseCalendar = () => {
 
   // 다음 달의 날짜를 계산하는 로직
   const totalDays =
-    DAY_OF_WEEK * Math.ceil((prevDayList.length + currentDayList.length) / DAY_OF_WEEK);
+    DAY_OF_WEEK *
+    Math.ceil((prevDayList.length + currentDayList.length) / DAY_OF_WEEK);
   const nextDayList = Array.from({
     length: totalDays - currentDayList.length - prevDayList.length,
   }).map((_, i) => {
-    const day = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, i + 1).getDate();
+    const day = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth() + 1,
+      i + 1
+    ).getDate();
     return { day, otherMonth: true };
   });
 
   // 현재 캘린더 배열 생성
   const currentCalendarList = prevDayList.concat(currentDayList, nextDayList);
-  const weekCalendarList = currentCalendarList.reduce<CALENDER_RESULT_LIST>((acc, cur, idx) => {
-    const chunkIndex = Math.floor(idx / DAY_OF_WEEK);
-    if (!acc[chunkIndex]) {
-      acc[chunkIndex] = [];
-    }
-    acc[chunkIndex].push(cur);
-    return acc;
-  }, []);
+  const weekCalendarList = currentCalendarList.reduce<CALENDER_RESULT_LIST>(
+    (acc, cur, idx) => {
+      const chunkIndex = Math.floor(idx / DAY_OF_WEEK);
+      if (!acc[chunkIndex]) {
+        acc[chunkIndex] = [];
+      }
+      acc[chunkIndex].push(cur);
+      return acc;
+    },
+    []
+  );
 
   return {
     weekCalendarList: weekCalendarList,
@@ -103,7 +115,9 @@ const Cal = ({}: calProps) => {
   const countBooksForMonth = Object.keys(imageDates).reduce((acc, date) => {
     if (
       date.startsWith(
-        `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, "0")}`
+        `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1)
+          .toString()
+          .padStart(2, "0")}`
       )
     ) {
       return acc + imageDates[date].length;
@@ -116,7 +130,11 @@ const Cal = ({}: calProps) => {
   const CurrentDateMonth = currentDate.getMonth() + 1;
   const [response, setResponse] = useState([]);
 
-  const getImageCountForDate = (year: number, month: number, day: number): number => {
+  const getImageCountForDate = (
+    year: number,
+    month: number,
+    day: number
+  ): number => {
     const formattedDate = `${year}-${month.toString().padStart(2, "0")}-${day
       .toString()
       .padStart(2, "0")}`;
@@ -126,20 +144,18 @@ const Cal = ({}: calProps) => {
   useEffect(() => {
     // 컴포넌트가 마운트될 때 현재 연도와 월에 해당하는 데이터를 API로부터 불러옵니다.
     const fetchData = async () => {
-      const response = await CalendarApi.date(CurrentDateYear, CurrentDateMonth, 10);
+      const response = await CalendarApi.date(
+        CurrentDateYear,
+        CurrentDateMonth,
+        10
+      );
       console.log(response);
       setResponse(response.data);
       // 필요한 경우 상태에 데이터 저장 등의 추가 작업을 수행
     };
 
-    useEffect(() => {
-      // 컴포넌트가 마운트될 때 현재 연도와 월에 해당하는 데이터를 API로부터 불러옵니다.
-      const fetchData = async () => {
-        const response = await CalendarApi.date(CurrentDateYear, CurrentDateMonth, 10);
-        console.log(response)
-        setResponse(response.data)
-        // 필요한 경우 상태에 데이터 저장 등의 추가 작업을 수행
-      };
+    fetchData();
+  }, [CurrentDateYear, CurrentDateMonth]); // 연도나 월이 변경될 때마다 fetchData를 다시 호출
 
   return (
     <>
@@ -153,8 +169,8 @@ const Cal = ({}: calProps) => {
           </div>
           <div className="text-xs text-gray-400 font-bold">
             {" "}
-            {/* 'flex' 텍스트를 날짜 아래에 배치합니다. */}이 달에 {countBooksForMonth}권을
-            완독하였습니다.
+            {/* 'flex' 텍스트를 날짜 아래에 배치합니다. */}이 달에{" "}
+            {countBooksForMonth}권을 완독하였습니다.
           </div>
         </div>
         <div className="flex items-end">
@@ -165,6 +181,9 @@ const Cal = ({}: calProps) => {
             className="px-0 py-0 w-8 h-8 bg-[#9268EB] mr-3"
           >
             <Image src="left.svg" alt="left" width={9} height={9} />
+          </Button>
+          <Button className="px-0 py-0 w-8 h-8 bg-[#9268EB] mr-3">
+            <Image src="calendar.svg" alt="calendar" width={21} height={21} />
           </Button>
           <Button
             onClick={() => {
@@ -202,7 +221,11 @@ const Cal = ({}: calProps) => {
         <div className="flex w-full" key={index}>
           {week.map(({ day, otherMonth }, dayIndex) => {
             const imageCount = !otherMonth
-              ? getImageCountForDate(currentDate.getFullYear(), currentDate.getMonth() + 1, day)
+              ? getImageCountForDate(
+                  currentDate.getFullYear(),
+                  currentDate.getMonth() + 1,
+                  day
+                )
               : 0;
             const firstImage =
               imageCount > 0
@@ -213,10 +236,17 @@ const Cal = ({}: calProps) => {
                   ][0]
                 : null;
             const backgroundImageStyle = firstImage
-              ? { backgroundImage: `url(${firstImage})`, backgroundSize: "cover" }
+              ? {
+                  backgroundImage: `url(${firstImage})`,
+                  backgroundSize: "cover",
+                }
               : {};
 
-            const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+            const date = new Date(
+              currentDate.getFullYear(),
+              currentDate.getMonth(),
+              day
+            );
             const dayOfWeek = date.getDay();
             const isSunday = dayOfWeek === 0;
             const isSaturday = dayOfWeek === 6;
@@ -247,7 +277,8 @@ const Cal = ({}: calProps) => {
                 className={`relative flex justify-start items-start px-1 py-1 w-16 h-20 min-w-[calc(100%/7)] text-xs bg-white ${dayColor} border border-gray-400 rounded-none font-bold  ${
                   otherMonth ? "text-gray-500" : "hover:bg-blue-400"
                 } ${
-                  select.find((selectedDay) => selectedDay === day) && !otherMonth
+                  select.find((selectedDay) => selectedDay === day) &&
+                  !otherMonth
                     ? "bg-blue-600"
                     : ""
                 }`}
