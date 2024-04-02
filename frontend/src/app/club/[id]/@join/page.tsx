@@ -92,8 +92,8 @@ export default function CommunityPostPage({
               )}
             </GroupOwner>
           </div>
-          <ScrollArea className="flex flex-col max-w-md mx-auto bg-white h-fit rounded-lg border min-h-32">
-            <div className="font-semibold text-xl pt-4 pl-4">소개</div>
+          <ScrollArea className="flex flex-col max-w-md mx-auto bg-white h-fit rounded-lg border min-h-32 px-6">
+            <div className="font-semibold text-xl pt-4">소개</div>
             <div
               dangerouslySetInnerHTML={{
                 __html: club.description,
@@ -102,7 +102,7 @@ export default function CommunityPostPage({
                 marginTop: "10px",
                 whiteSpace: "pre-wrap",
               }}
-              className="pl-4 pb-4"
+              className="pb-4"
             />
           </ScrollArea>
           <div className="pb-20" />
