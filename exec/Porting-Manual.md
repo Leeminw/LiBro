@@ -49,6 +49,10 @@ Libro는 생성형 AI Stable Diffusion을 활용하여 도서 줄거리를 기�
 - Linux 환경에 대한 기본 지식
 - IntelliJ IDEA, VS Code와 같은 IDE 설치
 - Docker, Nginx, Jenkins, MySQL 설치 및 구성 경험
+- Naver Open API Client ID, Secret Key
+- Naver OAuth Client ID, Secret Key
+- Kakao OAuth Client ID, Secret Key
+- Google OAuth Client ID, Secret Key
 
 <div align="right">
 
