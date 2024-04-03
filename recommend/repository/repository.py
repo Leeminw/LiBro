@@ -31,12 +31,11 @@ def get_book_list(engine : Engine, recommended : tuple) -> List[dict] :
             '''
             SELECT *
             FROM book
-            WHERE id in {}
+            WHERE id in {} and shorts_url is not null
             '''.format(recommended)
         )
 
         result = con.execute(statement)
-        cnt = 0
         response = []
         keys = result.keys()
         for r in result :   
@@ -99,6 +98,20 @@ def get_user_book_count_distinct(engine : Engine) -> int :
         data = result.fetchone()[0]
         return data
     
+def get_exist_shorts_book_id_list(engine : Engine) -> list :
+    with engine.connect() as con : 
+        statement = text(
+            '''
+            SELECT id
+            FROM book
+            WHERE shorts_url is not null
+            '''
+        )
+        result = con.execute(statement)
+        data = result.fetchall()
+        numbers_list = [number[0] for number in data]
+        return numbers_list
+            
 def get_user_matrix(engine : Engine) -> pd.DataFrame :
     with engine.connect() as con : 
         statement = text(
