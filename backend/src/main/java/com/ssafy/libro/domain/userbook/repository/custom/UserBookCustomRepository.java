@@ -22,6 +22,7 @@ public interface UserBookCustomRepository {
     Optional<Long> countUserBookByBook(Book book);
     Optional<Long> countUserBookByBookReadComplete(Book book);
     Optional<Long> countUserBookByUser(User user);
+    Optional<Long> countUserBookByUserAndBook(User user, Book book);
     Optional<Long> countUserBookByUserReadComplete(User user);
 
     Optional<List<UserBook>> findUserBookCommentList(User user);

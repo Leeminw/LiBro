@@ -36,14 +36,15 @@ import java.util.*;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class UserBookServiceImpl implements UserBookService{
+public class UserBookServiceImpl implements UserBookService {
     private final UserBookRepository userBookRepository;
     private final BookRepository bookRepository;
     private final UserBookHistoryRepository userBookHistoryRepository;
     private final UserBookCommentRepository userBookCommentRepository;
     private final UserRepository userRepository;
     private final UserService userService;
-    public List<UserBookListResponseDto> getUserBookList(){
+
+    public List<UserBookListResponseDto> getUserBookList() {
         User user = userService.loadUser();
         List<UserBook> userBookList = userBookRepository.findUserBookByUser(user)
                 .orElseThrow(() -> new UserBookNotFoundException("user : " + user.getId()));
@@ -54,15 +55,15 @@ public class UserBookServiceImpl implements UserBookService{
     @Override
     public UserBookDetailResponseDto getUserBook(Long id) {
         UserBook userBook = userBookRepository.findById(id)
-                .orElseThrow(()-> new UserBookNotFoundException(id));
+                .orElseThrow(() -> new UserBookNotFoundException(id));
 
         UserBookDetailResponseDto responseDto = new UserBookDetailResponseDto(userBook);
 
         // 사용자의 해당 도서를 읽은 기록
-        Optional<List<UserBookHistory>>historyList = userBookHistoryRepository.findByUserBook(userBook);
-        if(historyList.isPresent() && !historyList.get().isEmpty()){
+        Optional<List<UserBookHistory>> historyList = userBookHistoryRepository.findByUserBook(userBook);
+        if (historyList.isPresent() && !historyList.get().isEmpty()) {
             List<UserBookHistoryDetailResponseDto> historyDetailList = new ArrayList<>();
-            for(UserBookHistory history : historyList.get()){
+            for (UserBookHistory history : historyList.get()) {
                 historyDetailList.add(new UserBookHistoryDetailResponseDto(history));
             }
             responseDto.updateHistoryList(historyDetailList);
@@ -70,9 +71,9 @@ public class UserBookServiceImpl implements UserBookService{
         // 사용자가 해당 도서에 남긴 글귀
 
         Optional<List<UserBookComment>> commentList = userBookCommentRepository.findByUserBook(userBook);
-        if(commentList.isPresent() && !commentList.get().isEmpty()){
+        if (commentList.isPresent() && !commentList.get().isEmpty()) {
             List<UserBookCommentDetailResponseDto> commentDetailList = new ArrayList<>();
-            for(UserBookComment comment : commentList.get()){
+            for (UserBookComment comment : commentList.get()) {
                 commentDetailList.add(new UserBookCommentDetailResponseDto(comment));
 
             }
@@ -81,6 +82,15 @@ public class UserBookServiceImpl implements UserBookService{
 
 
         return responseDto;
+    }
+
+    @Override
+    public Long getUserBookByUserAndBook(Long id) {
+        User user = userService.loadUser();
+        Book book = bookRepository.findById(id)
+                .orElseThrow(() -> new BookNotFoundException(id));
+        return userBookRepository.countUserBookByUserAndBook(user, book)
+                .orElse(0L);
     }
 
     @Override
@@ -129,16 +139,16 @@ public class UserBookServiceImpl implements UserBookService{
         int lastDayOfMonth = Month.of(month).length(Year.isLeap(year));
         LocalDateTime endDateTime = LocalDateTime.of(year, month, lastDayOfMonth, 23, 59, 59);
 
-        log.debug("service layer : startDate = {} , endDate = {}",startDateTime, endDateTime);
+        log.debug("service layer : startDate = {} , endDate = {}", startDateTime, endDateTime);
 
-        List<UserBook> result = userBookRepository.findUserBookByUserAndDate(user,startDateTime,endDateTime)
-                .orElseThrow(()-> new UserBookNotFoundException("userid : " + user.getId()));
+        List<UserBook> result = userBookRepository.findUserBookByUserAndDate(user, startDateTime, endDateTime)
+                .orElseThrow(() -> new UserBookNotFoundException("userid : " + user.getId()));
         List<UserBookListByDateResponseDto> responseDtoList = new ArrayList<>();
         log.debug("service layer : result size = {}", result.size());
 
-        for(UserBook userBook : result){
+        for (UserBook userBook : result) {
             List<UserBookHistoryDetailResponseDto> historyList = new ArrayList<>();
-            for(UserBookHistory history : userBook.getUserBookHistoryList()){
+            for (UserBookHistory history : userBook.getUserBookHistoryList()) {
                 historyList.add(new UserBookHistoryDetailResponseDto(history));
             }
             UserBookListByDateResponseDto responseDto = UserBookListByDateResponseDto.builder()
@@ -160,8 +170,8 @@ public class UserBookServiceImpl implements UserBookService{
         int lastDayOfMonth = Month.of(month).length(Year.isLeap(year));
         LocalDateTime endDateTime = LocalDateTime.of(year, month, lastDayOfMonth, 23, 59, 59);
 
-        List<UserBook> bookList = userBookRepository.findUserBookByUserAndDateV2(user,startDateTime,endDateTime)
-                .orElseThrow(()-> new UserBookNotFoundException("userid : " + user.getId()));
+        List<UserBook> bookList = userBookRepository.findUserBookByUserAndDateV2(user, startDateTime, endDateTime)
+                .orElseThrow(() -> new UserBookNotFoundException("userid : " + user.getId()));
 
         log.debug(bookList.size() + "");
 
@@ -185,19 +195,19 @@ public class UserBookServiceImpl implements UserBookService{
 
     @Override
     @Transactional
-    public UserBookDetailResponseDto updateRating(UserBookRatingRequestDto requestDto){
+    public UserBookDetailResponseDto updateRating(UserBookRatingRequestDto requestDto) {
         UserBook userBook = userBookRepository.findById(requestDto.getUserBookId())
                 .orElseThrow(() -> new UserBookNotFoundException(requestDto.getUserBookId()));
         // 다 못읽은 경우 에러처리
 
-        if(!userBook.getIsComplete()){
+        if (!userBook.getIsComplete()) {
             throw new NotReadBookException(requestDto.getUserBookId());
         }
         // 이미 한 기록을 수정하는지 여부 검사
         boolean isModify = false;
         double curRating = 0;
 
-        if (userBook.getRating() != null){
+        if (userBook.getRating() != null) {
             isModify = true;
             curRating = userBook.getRating();
         }
@@ -208,15 +218,14 @@ public class UserBookServiceImpl implements UserBookService{
         // book 정보 갱신
         Book book = userBook.getBook();
 
-        double rating = book.getRating()==null ? 0.0 : book.getRating();
-        int count = book.getRatingCount()==null ? 0 : book.getRatingCount();
+        double rating = book.getRating() == null ? 0.0 : book.getRating();
+        int count = book.getRatingCount() == null ? 0 : book.getRatingCount();
 
         double updateRating;
-        if(isModify){
-            updateRating = (rating*count - curRating + requestDto.getRating())/count;
-        }
-        else{
-            updateRating = (rating*count + requestDto.getRating())/(count+1);
+        if (isModify) {
+            updateRating = (rating * count - curRating + requestDto.getRating()) / count;
+        } else {
+            updateRating = (rating * count + requestDto.getRating()) / (count + 1);
             count++;
         }
         book.updateRating(updateRating, count);
@@ -249,7 +258,7 @@ public class UserBookServiceImpl implements UserBookService{
 
         return UserBookRatioResponseDto.builder()
                 .type("user")
-                .ratio(total == 0? 0 : 1.0*read/total)
+                .ratio(total == 0 ? 0 : 1.0 * read / total)
                 .totalSize(total)
                 .readSize(read)
                 .build();
@@ -263,7 +272,7 @@ public class UserBookServiceImpl implements UserBookService{
 
         long total = userBookRepository.countUserBookByBook(book)
                 .orElseThrow(() -> new UserBookNotFoundException("no data"));
-        long read  = userBookRepository.countUserBookByBookReadComplete(book)
+        long read = userBookRepository.countUserBookByBookReadComplete(book)
                 .orElse(0L);
 
         return UserBookRatioResponseDto.builder()
@@ -298,19 +307,19 @@ public class UserBookServiceImpl implements UserBookService{
                 .orElseThrow(() -> new UserBookNotFoundException("user id : " + user.getId()));
         List<UserCommentListResponseDto> responseDtoList = new ArrayList<>();
 
-        for(UserBook userBook : userBookList){
+        for (UserBook userBook : userBookList) {
             List<UserBookCommentDetailResponseDto> commentList = new ArrayList<>();
-            for(UserBookComment comment : userBook.getUserBookCommentList()){
+            for (UserBookComment comment : userBook.getUserBookCommentList()) {
                 commentList.add(new UserBookCommentDetailResponseDto(comment));
             }
 
 
             responseDtoList.add(
                     UserCommentListResponseDto.builder()
-                    .userBookId(userBook.getId())
-                    .bookDetailResponseDto(new BookDetailResponseDto(userBook.getBook()))
-                    .commentList(commentList)
-                    .build()
+                            .userBookId(userBook.getId())
+                            .bookDetailResponseDto(new BookDetailResponseDto(userBook.getBook()))
+                            .commentList(commentList)
+                            .build()
             );
         }
 
@@ -324,12 +333,12 @@ public class UserBookServiceImpl implements UserBookService{
                 .orElseThrow(() -> new BookNotFoundException(isbn));
         long total = userBookRepository.countUserBookByBook(book)
                 .orElseThrow(() -> new UserBookNotFoundException("no data"));
-        long read  = userBookRepository.countUserBookByBookReadComplete(book)
+        long read = userBookRepository.countUserBookByBookReadComplete(book)
                 .orElse(0L);
 
         return UserBookRatioResponseDto.builder()
                 .type("book")
-                .ratio(total == 0 ? 0 : 1.0*read/total)
+                .ratio(total == 0 ? 0 : 1.0 * read / total)
                 .totalSize(total)
                 .readSize(read)
                 .build();
@@ -342,17 +351,17 @@ public class UserBookServiceImpl implements UserBookService{
 
         List<Tuple> result = userBookRepository.getUserGenderAgeCounts(book);
         List<UserGenderAgeCountResponseDto> responseDtoList = new ArrayList<>();
-        for(Tuple tuple : result){
+        for (Tuple tuple : result) {
 //            log.debug(tuple.toString());
             Integer age = tuple.get(0, Integer.class);
             Character gender = tuple.get(1, Character.class);
             Long count = tuple.get(2, Long.class);
             responseDtoList.add(
                     UserGenderAgeCountResponseDto.builder()
-                    .age(age)
-                    .gender(gender)
-                    .count(count)
-                    .build()
+                            .age(age)
+                            .gender(gender)
+                            .count(count)
+                            .build()
             );
 
         }
@@ -367,16 +376,18 @@ public class UserBookServiceImpl implements UserBookService{
 
         List<Tuple> result = userBookRepository.getUserBookRating(book);
         List<UserBookRatingSummary> responseDtoList = new ArrayList<>();
-        for(Tuple tuple : result){
+        for (Tuple tuple : result) {
 //            log.debug(tuple.toString());
-            Integer score = tuple.get(0, Double.class).intValue();
+
+            Double value = tuple.get(0, Double.class);
+            Integer score = (value != null) ? value.intValue() : 0;
             Long count = tuple.get(1, Long.class);
-           responseDtoList.add(
-                   UserBookRatingSummary.builder()
-                           .score(score)
-                           .count(count)
-                           .build()
-           );
+            responseDtoList.add(
+                    UserBookRatingSummary.builder()
+                            .score(score)
+                            .count(count)
+                            .build()
+            );
         }
 
         return responseDtoList;
@@ -387,17 +398,17 @@ public class UserBookServiceImpl implements UserBookService{
         Book book = bookRepository.findById(bookId).orElseThrow(() -> new BookNotFoundException(bookId));
         List<UserBook> userBookList = userBookRepository.getUserBookRatingList(book).orElseThrow(() -> new UserBookNotFoundException("book :" + book.getId()));
         List<UserBookRatingResponseDto> responseDtoList = new ArrayList<>();
-        for(UserBook userbook : userBookList){
+        for (UserBook userbook : userBookList) {
 
             responseDtoList.add(
                     UserBookRatingResponseDto.builder()
-                    .ratingComment(userbook.getRatingComment())
-                    .rating(userbook.getRating())
-                    .ratingSpoiler(userbook.getRatingSpoiler())
-                    .nickName(userbook.getUser().getNickname())
-                    .email(userbook.getUser().getEmail())
-                    .createdDate(userbook.getUpdatedDate())
-                    .build()
+                            .ratingComment(userbook.getRatingComment())
+                            .rating(userbook.getRating())
+                            .ratingSpoiler(userbook.getRatingSpoiler())
+                            .nickName(userbook.getUser().getNickname())
+                            .email(userbook.getUser().getEmail())
+                            .createdDate(userbook.getUpdatedDate())
+                            .build()
             );
         }
 
@@ -406,7 +417,7 @@ public class UserBookServiceImpl implements UserBookService{
 
     private List<UserBookListResponseDto> getUserBookListResponseDtos(List<UserBook> userBookList) {
         List<UserBookListResponseDto> responseDtoList = new ArrayList<>();
-        for(UserBook userBook : userBookList){
+        for (UserBook userBook : userBookList) {
             UserBookListResponseDto responseDto = UserBookListResponseDto.builder()
                     .userBookId(userBook.getId())
                     .type(userBook.getType())
@@ -425,7 +436,6 @@ public class UserBookServiceImpl implements UserBookService{
 
         return responseDtoList;
     }
-
 
 
 }
