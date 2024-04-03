@@ -2,6 +2,7 @@
 import React, { useRef } from "react";
 import { Camera, CameraType } from "react-camera-pro";
 import axios from "axios";
+import { LuSwitchCamera } from "react-icons/lu";
 
 const BarcodeScannerComponent = ({
   onScanned,
@@ -23,8 +24,7 @@ const BarcodeScannerComponent = ({
             .then((response) => {
               onScanned(response.data.data.isbn);
             })
-            .catch((error) => {
-            });
+            .catch((error) => {});
         }
       } catch (error) {}
     }, 500);
@@ -35,13 +35,21 @@ const BarcodeScannerComponent = ({
 
   return (
     <div>
+      <div
+        className="absolute right-2 bottom-2 w-12 h-12 bg-black/60 rounded-full flex items-center justify-center z-10"
+        onClick={() => {
+          camera.current?.switchCamera();
+        }}
+      >
+        <LuSwitchCamera className="text-white w-6 h-6" />
+      </div>
       <Camera
         ref={camera}
         errorMessages={{
-          canvas: "Canvas is not supported",
-          noCameraAccessible: "No camera accessible",
-          permissionDenied: "Permission denied",
-          switchCamera: "It is not possible to switch camera",
+          canvas: "지원되지 않는 기기입니다.",
+          noCameraAccessible: "사용 가능한 카메라를 찾지 못했습니다.",
+          permissionDenied: "권한이 거부되었습니다.",
+          switchCamera: "카메라 전환에 실패했습니다.",
         }}
       />
     </div>
