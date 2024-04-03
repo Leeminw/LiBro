@@ -92,6 +92,7 @@ const DetailPage = () => {
     shortsUrl: "",
   });
   const [userBookId, setUserBookId] = useState<number>(0);
+  const [bookIdState, setBookIdState] = useState<number>(0);
   const [start, setStart] = useState<number>(1);
   const [curpage, setCurpage] = useState<number>(1);
 
@@ -264,7 +265,6 @@ const DetailPage = () => {
                   shortsUrl: "",
                 };
                 await registerBook(bookOutput);
-                setBookLoading(true);
               })
               .catch((err) => {
                 toast({
@@ -277,6 +277,7 @@ const DetailPage = () => {
           // DB에 도서 정보가 있을경우
           else {
             setBookDetail(response.data[0]);
+            setBookIdState(response.data[0].id);
             setBookLoading(true);
             updateRatingComment(response.data[0].id);
             updateUserBookMapping(response.data[0].id);
@@ -317,10 +318,13 @@ const DetailPage = () => {
             ...prevState,
             id: bookId,
           }));
+          setBookIdState(bookId);
+          setBookLoading(true);
           updateUserBookMapping(bookId);
         })
         .catch((error) => {
           console.error(error);
+          setBookLoading(true);
         });
     };
     updateBookDetail();
@@ -808,13 +812,18 @@ const DetailPage = () => {
             } sticky bottom-[4.5rem] p-3 left-full max-w-md drop-shadow-lg rounded-full z-20 w-14 h-14 mr-3
             
             `}
-            onClick={() =>
+            onClick={() => {
+              console.log(bookDetail);
               userBookId > 0
                 ? deleteMappingBook(userBookId)
-                : mappingBook(bookDetail.id)
-            }
+                : mappingBook(bookIdState);
+            }}
           >
-            {userBookId > 0 ? <TbBookOff size={60} /> : <TbBookUpload size={60} />}
+            {userBookId > 0 ? (
+              <TbBookOff size={60} />
+            ) : (
+              <TbBookUpload size={60} />
+            )}
           </Button>
         )}
       </div>
