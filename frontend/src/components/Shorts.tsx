@@ -43,7 +43,7 @@ const Shorts = ({
           <div
             className="absolute w-full h-1/3 z-10 bottom-0 cursor-pointer rounded-b-lg bg-gradient-to-t from-black/80 flex items-end"
             onClick={() => {
-              router.push(`/detail?isbn=${bookDetail.isbn}`);
+              router.push(`/detail?isbn=${bookDetail.isbn}${bgm !== null && "&bgm=" + bgm}`);
             }}
           >
             <div className="max-w-64 max-h-48 flex items-end justify-center">

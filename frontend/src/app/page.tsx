@@ -11,8 +11,7 @@ export default function Home() {
   const [pageLoad, setPageLoad] = useState<boolean>(false);
   const [curIndex, setCurIndex] = useState<number>(0);
   const carouselRef = useRef<HTMLDivElement>(null);
-  const [bgm, setBgm] = useState<string>("00.mp3");
-  const bgmIdx: number[] = [];
+  const [bgm, setBgm] = useState<string>("bgm0" + Math.floor(Math.random() * 10) + ".mp3");
   function shuffleArray<T>(array: T[]): T[] {
     for (let i = array.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -55,8 +54,6 @@ export default function Home() {
                     isbn: responseData.data[0].isbn,
                     src: responseData.data[0].shortsUrl,
                   });
-                  bgmIdx.push(Math.floor(Math.random() * 10));
-                  if (i == 0) setBgm("bgm0" + bgmIdx[0] + ".mp3");
                 })
                 .catch(() => {});
             }
@@ -83,7 +80,7 @@ export default function Home() {
         const currentIndex = Math.round(scrollRatio * (bookLength - 1));
         if (curIndex != currentIndex) {
           setCurIndex(currentIndex);
-          setBgm("bgm0" + bgmIdx[currentIndex] + ".mp3");
+          setBgm("bgm0" + Math.floor(Math.random() * 10) + ".mp3");
           console.log(bgm);
         }
         setCurrentLoad((current) =>
@@ -111,12 +108,7 @@ export default function Home() {
             <>
               <audio src={bgm} loop autoPlay></audio>
               {bookList.map((id, idx) => (
-                <Shorts
-                  key={id.isbn}
-                  shortsLoad={currentLoad[idx]}
-                  bookDetail={id}
-                  bgm={"bgm0" + bgmIdx[idx] + ".mp3"}
-                />
+                <Shorts key={id.isbn} shortsLoad={currentLoad[idx]} bookDetail={id} />
               ))}
             </>
           ) : (
