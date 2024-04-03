@@ -1,6 +1,11 @@
 from flask import Flask
 from http import HTTPStatus
-from service.service import get_random_book_list, get_recommend_book_list, get_exist_shorts
+from service.service import (
+    get_random_book_list, 
+    get_recommend_book_list, 
+    get_exist_shorts,
+    get_shorts_exist_book_list
+    )
 from data.response import make_response_entity
 import jwt
 from flask import request
@@ -71,7 +76,8 @@ def validateToken(token) -> tuple:
 @app.route('/')
 def random_book() :
 
-    result = get_exist_shorts()
+    # result = get_exist_shorts()
+    result = get_shorts_exist_book_list(10)
 
     return make_response_entity(result,HTTPStatus.OK)
 
