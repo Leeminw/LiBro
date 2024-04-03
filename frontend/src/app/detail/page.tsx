@@ -65,7 +65,7 @@ function StarEmptyIcon(props: any) {
   );
 }
 const DetailPage = () => {
-  const URL = "ex0" + 0 + ".mp4";
+  const bgm = useSearchParams().get("bgm");
   const isbn = useSearchParams().get("isbn");
   const ratingRef = useRef<HTMLDivElement>(null);
   const analyzeRef = useRef<HTMLDivElement>(null);
@@ -95,8 +95,9 @@ const DetailPage = () => {
   const [bookIdState, setBookIdState] = useState<number>(0);
   const [start, setStart] = useState<number>(1);
   const [curpage, setCurpage] = useState<number>(1);
-
   const [rating, setRating] = useState<RatingComment[]>([]);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   const [analyzePer, setAnalyzePer] = useState<number[]>([0, 0]);
   const [chartPer, setChartPer] = useState<number[]>([
@@ -455,9 +456,26 @@ const DetailPage = () => {
                     playsInline
                     controls
                     className="w-full h-[64vh] rounded-lg object-cover"
+                    onPause={() => {
+                      if (audioRef.current) {
+                        audioRef.current.pause();
+                      }
+                    }}
+                    onPlay={() => {
+                      if (audioRef.current) {
+                        audioRef.current.play();
+                      }
+                    }}
+                    ref={videoRef}
                   >
                     <source src={bookDetail.shortsUrl} type="video/mp4" />
                   </video>
+                  <audio
+                    src={bgm === null || bgm === undefined ? "bgm00.mp3" : bgm}
+                    autoPlay
+                    loop
+                    ref={audioRef}
+                  ></audio>
                 </>
               )}
 
@@ -666,7 +684,7 @@ const DetailPage = () => {
                 {rating
                   .slice((curpage - 1) * 10, (curpage - 1) * 10 + 10)
                   .map((key, index) => (
-                    <DetailRating key={key.email} userRating={key}/>
+                    <DetailRating key={key.email} userRating={key} />
                   ))}
               </div>
               <Pagination>
