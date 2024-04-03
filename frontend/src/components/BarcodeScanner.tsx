@@ -1,63 +1,50 @@
 "use client";
 import React, { useRef } from "react";
-import {
-  BarcodeFormat,
-  BrowserMultiFormatReader,
-  DecodeHintType,
-  EAN13Reader,
-  Result,
-} from "@zxing/library";
-import Webcam from "react-webcam";
+import { Camera, CameraType } from "react-camera-pro";
+import axios from "axios";
 
 const BarcodeScannerComponent = ({
-  width,
-  height,
-  onUpdate,
+  onScanned,
 }: {
-  width: number;
-  height: number;
-  onUpdate: (arg0: unknown, arg1?: Result) => void;
+  onScanned: (result: string) => void;
 }): React.ReactElement => {
-  const [isScanned, setIsScanned] = React.useState<boolean>(false);
-  const webcamRef = useRef<Webcam>(null);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const codeReader = new BrowserMultiFormatReader();
-  const capture = React.useCallback(() => {
-    const imageSrc = webcamRef?.current?.getScreenshot();
-    // const imageSrc = "testImg1.jpg";
-    if (imageSrc) {
-      codeReader
-        .decodeFromImage(undefined, imageSrc)
-        .then((result) => {
-          setIsScanned(true);
-          onUpdate(null, result);
-        })
-        .catch((err) => {
-          // onUpdate(err);
-        });
-    }
-  }, [codeReader, onUpdate]);
-
+  const camera = useRef<CameraType>(null);
   React.useEffect(() => {
-    intervalRef.current = setInterval(capture, 100);
-
+    const interval = setInterval(async () => {
+      try {
+        const screenShot = camera.current?.takePhoto();
+        if (screenShot) {
+          const response = await fetch(screenShot);
+          const blob = await response.blob();
+          const formData = new FormData();
+          formData.append("image", blob, "photo.png");
+          axios
+            .post("/flask/api/v1/isbn", formData)
+            .then((response) => {
+              onScanned(response.data.data.isbn);
+            })
+            .catch((error) => {
+            });
+        }
+      } catch (error) {}
+    }, 500);
     return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
+      clearInterval(interval);
     };
   }, []);
 
   return (
-    <Webcam
-      style= {{ objectFit: "cover", width: "100%", height: "100%" }
-}
-width = { width }
-height = { height }
-ref = { webcamRef }
-screenshotFormat = "image/png"
-videoConstraints = {{
-  facingMode: "environment",
-      }}
-/>
+    <div>
+      <Camera
+        ref={camera}
+        errorMessages={{
+          canvas: "Canvas is not supported",
+          noCameraAccessible: "No camera accessible",
+          permissionDenied: "Permission denied",
+          switchCamera: "It is not possible to switch camera",
+        }}
+      />
+    </div>
   );
 };
 
