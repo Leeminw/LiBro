@@ -892,7 +892,62 @@ $ ./install-mysql.sh
 
 ### 단계 4: Nginx 설정
 
-`/etc/nginx/sites-avaialble/default`
+#### 방화벽 설정
+
+```bash
+$ sudo ufw enable
+$ sudo ufw allow 80
+$ sudo ufw allow 443
+```
+
+#### NginX 설치
+
+```bash
+$ sudo apt update
+$ sudo apt install nginx -y
+$ sudo vi /etc/nginx/sites-available/default
+```
+```bash
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+
+    server_name example.com www.example.com;
+
+    location / {
+        root /home/ubuntu/puzzlepop/deploy/dist;
+        index index.html index.htm index.nginx-debian.html;
+        try_files $uri $uri/ /index.html =404;
+    }
+}
+```
+```bash
+$ sudo systemctl start nginx
+```
+
+#### letsencrypt & Certbot 설치
+```bash
+$ sudo apt-get install letsencrypt
+$ sudo apt-get install certbot python3-certbot-nginx
+```
+
+#### Certbot NginX 연결
+```bash
+$ sudo certbot --nginx -d 도메인 이름 -d www.도메인 이름
+$ sudo certbot --nginx
+$ 이메일 입력
+$ 약관 동의 - Y
+$ 이메일 수신동의
+$ 도메인 입력 - i10{팀코드}.p.ssafy.io
+$ http 입력시 리다이렉트 여부 - 2
+```
+
+
+#### NginX 설정
+
+```shell
+$ sudo vi /etc/nginx/sites-available/default
+```
 
 ```shell
 server {
