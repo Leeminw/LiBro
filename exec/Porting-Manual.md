@@ -7,6 +7,13 @@
 - [시스템 요구 사항](#시스템-요구-사항)
   - [원본 시스템(Linux)](#원본-시스템linux)
   - [타겟 시스템(Linux)](#타겟-시스템linux)
+- [프론트엔드 포팅 절차 (React, Next.js)](#프론트엔드-포팅-절차-react-nextjs)
+  - [단계 1: Dockerfile 작성](#단계-1-dockerfile-작성)
+  - [단계 2: Shell Script 작성](#단계-2-shell-script-작성)
+- [백엔드 포팅 절차 (Spring Boot)](#백엔드-포팅-절차-spring-boot)
+  - [단계 1: Dockerfile 작성](#eb8ba8eab384-1-dockerfile-ec9e91ec84b1-1)
+  - [단계 2: Shell Script 작성](#eb8ba8eab384-2-shell-script-ec9e91ec84b1-1)
+  - [단계 3: application.properties 작성](#단계-3-applicationproperties-작성)
 - [인프라 포팅 절차](#인프라-포팅-절차)
   - [단계 0: 서버 환경 설정](#단계-0-서버-환경-설정)
   - [단계 1: Docker 환경 구성](#단계-1-docker-환경-구성)
@@ -18,12 +25,7 @@
   - [단계 2: Models 파일 설정](#단계-2-models-파일-설정)
   - [단계 3: Conda 환경 구성](#단계-3-conda-환경-구성)
   - [단계 4: Command Line Arguments 설정](#단계-4-command-line-arguments-설정)
-- [백엔드 포팅 절차 (Spring Boot)](#백엔드-포팅-절차-spring-boot)
-  - [단계 1: Docker 이미지 생성](#단계-1-docker-이미지-생성)
-  - [단계 2: 데이터베이스 연결 및 마이그레이션](#단계-2-데이터베이스-연결-및-마이그레이션)
-- [프론트엔드 포팅 절차 (React, Next.js)](#프론트엔드-포팅-절차-react-nextjs)
-  - [단계 1: Docker 이미지 생성](#단계-1-docker-이미지-생성-1)
-  - [단계 2: Docker 및 Nginx를 이용한 배포](#단계-2-docker-및-nginx를-이용한-배포)
+  - [단계 5: Stable Diffusion 실행](#단계-5-stable-diffusion-실행)
 - [CI/CD 파이프라인 설정 (Jenkins)](#cicd-파이프라인-설정-jenkins)
 - [문제 해결 가이드](#문제-해결-가이드)
 - [참고 자료](#참고-자료)
@@ -81,6 +83,470 @@ Libro는 생성형 AI Stable Diffusion을 활용하여 도서 줄거리를 기�
 [[맨 위로](#)]
 
 </div>
+
+## 프론트엔드 포팅 절차 (React, Next.js)
+
+### 단계 1: Dockerfile 작성
+
+`Dockerfile`
+
+```shell
+# Node.js 공식 이미지 사용. 버전 20.11.1, 경량화된 Alpine Linux 기반
+FROM node:20.11.1-alpine as build-stage
+
+# 작업 디렉토리 설정. 컨테이너 내 앱의 기본 경로
+WORKDIR /home/app
+
+# 현재 디렉토리의 package.json과 package-lock.json 파일이 존재한다면
+# 컨테이너의 작업 디렉토리로 package.json과 package-lock.json 복사
+COPY package*.json ./
+
+# package.json에 명시된 애플리케이션 의존성 설치
+# package-lock.json이 있을 경우 더 빠르게 설치 가능
+RUN npm install --force
+
+# 현재 디렉토리의 모든 파일을 컨테이너의 작업 디렉토리로 복사
+COPY . .
+
+# React 애플리케이션 빌드
+RUN npm run build
+
+# .next 폴더와 그 안의 모든 파일에 대한 권한 설정
+RUN chmod -R 755 /home/app/.next
+
+# React 애플리케이션 실행
+CMD ["npm", "start"]
+```
+
+<div align="right">
+
+[[맨 위로](#)]
+
+</div>
+
+---
+
+### 단계 2: Shell Script 작성
+
+`build-frontend.sh`
+
+```shell
+#!/bin/bash
+
+IMAGE_NAME="server/frontend"
+IMAGE_ID=$(docker images -q $IMAGE_NAME)
+
+CONTAINER_NAME="server-frontend"
+CONTAINER_ID=$(docker ps -aqf "name=$CONTAINER_NAME")
+
+
+echo -e "\n<<<<<<<<<< Frontend Build Process Start >>>>>>>>>>\n"
+
+
+echo ">>> CURRENT DOCKER INFORMATION:"
+echo ">>> DOCKER IMAGE NAME: $IMAGE_NAME"
+echo ">>> DOCKER IMAGE ID: $IMAGE_ID"
+echo ""
+
+
+# Stop & Remove Existing Container
+echo ">>> DOCKER CONTAINER $CONTAINER_NAME 존재 여부 검사 시작..."
+if [ ! -z "$CONTAINER_ID" ]; then
+    echo ">>> DOCKER CONTAINER $CONTAINER_NAME 존재 확인."
+    echo ">>> DOCKER CONTAINER $CONTAINER_NAME 중지 시작..."
+    docker stop $CONTAINER_ID || {
+        echo ">>> DOCKER CONTAINER $CONTAINER_NAME 중지 실패."
+        exit 1
+    }
+    echo ">>> DOCKER CONTAINER $CONTAINER_NAME 중지 완료."
+
+
+    echo ">>> DOCKER CONTAINER $CONTAINER_NAME 삭제 시작..."
+    docker rm -f $CONTAINER_ID || {
+        echo ">>> DOCKER CONTAINER $CONTAINER_NAME 삭제 실패."
+        exit 1
+    }
+    echo ">>> DOCKER CONTAINER $CONTAINER_NAME 삭제 완료."
+fi
+echo ">>> DOCKER CONTAINER $CONTAINER_NAME 존재 여부 검사 완료."
+echo ""
+
+
+# Remove Existing Docker Image
+echo ">>> DOCKER IMAGE $IMAGE_NAME 존재 여부 검사 시작..."
+if [ ! -z "$IMAGE_ID" ]; then
+    echo ">>> DOCKER IMAGE $IMAGE_NAME 존재 확인."
+    echo ">>> DOCKER IMAGE $IMAGE_NAME 삭제 시작..."
+    docker rmi -f $IMAGE_ID || {
+        echo ">>> DOCKER IMAGE $IMAGE_NAME 삭제 실패."
+        exit 1
+    }
+    echo ">>> DOCKER IMAGE $IMAGE_NAME 삭제 완료."
+fi
+echo ">>> DOCKER IMAGE $IMAGE_NAME 존재 여부 검사 완료."
+echo ""
+
+
+## Build Docker Image
+echo ">>> DOCKER IMAGE $IMAGE_NAME 빌드 시작..."
+docker build -t $IMAGE_NAME . || {
+    echo ">>> DOCKER IMAGE $IMAGE_NAME 빌드 실패."
+    exit 1
+}
+echo ">>> DOCKER IMAGE $IMAGE_NAME 빌드 완료."
+echo ""
+
+
+echo -e "\n<<<<<<<<<< Frontend Build Complete Successfully >>>>>>>>>>\n"
+```
+
+`deploy-frontend.sh`
+
+```shell
+#!/bin/bash
+
+IMAGE_NAME="server/frontend"
+CONTAINER_NAME="server-frontend"
+CONTAINER_ID=$(docker ps -aqf "name=$CONTAINER_NAME")
+
+
+echo -e "\n<<<<<<<<<< Frontend Deploy Process Start >>>>>>>>>>\n"
+
+
+echo ">>> CURRENT DOCKER INFORMATION:"
+echo ">>> DOCKER CONTAINER NAME: $CONTAINER_NAME"
+echo ">>> DOCKER CONTAINER ID: $CONTAINER_ID"
+echo ""
+
+
+# Stop & Remove Existing Container
+echo ">>> DOCKER CONTAINER $CONTAINER_NAME 존재 여부 검사 시작..."
+if [ ! -z "$CONTAINER_ID" ]; then
+    echo ">>> DOCKER CONTAINER $CONTAINER_NAME 존재 확인."
+    echo ">>> DOCKER CONTAINER $CONTAINER_NAME 중지 시작..."
+    docker stop $CONTAINER_ID || {
+        echo ">>> DOCKER CONTAINER $CONTAINER_NAME 중지 실패."
+        exit 1
+    }
+    echo ">>> DOCKER CONTAINER $CONTAINER_NAME 중지 완료."
+
+
+    echo ">>> DOCKER CONTAINER $CONTAINER_NAME 삭제 시작..."
+    docker rm -f $CONTAINER_ID || {
+        echo ">>> DOCKER CONTAINER $CONTAINER_NAME 삭제 실패."
+        exit 1
+    }
+    echo ">>> DOCKER CONTAINER $CONTAINER_NAME 삭제 완료."
+fi
+echo ">>> DOCKER CONTAINER $CONTAINER_NAME 존재 여부 검사 완료."
+echo ""
+
+
+## Run Docker Container
+echo ">>> DOCKER CONTAINER $CONTAINER_NAME 실행 시작..."
+docker run -d \
+    -p 3000:3000 -v ./:/home/app \
+    --name $CONTAINER_NAME $IMAGE_NAME || {
+        echo ">>> DOCKER IMAGE $IMAGE_NAME 실행 실패."
+        exit 1
+}
+echo ">>> DOCKER CONTAINER $CONTAINER_NAME 실행 완료."
+echo ""
+
+
+echo -e "\n<<<<<<<<<< Frontend Deploy Complete Successfully >>>>>>>>>>\n"
+```
+
+<div align="right">
+
+[[맨 위로](#)]
+
+</div>
+
+---
+
+## 백엔드 포팅 절차 (Spring Boot)
+
+### 단계 1: Dockerfile 작성
+
+`Dockerfile`
+
+```shell
+# OpenJDK 17을 포함하는 경량화된 Alpine Linux 베이스 이미지 사용
+FROM openjdk:17-jdk-buster
+
+# 컨테이너 내부의 작업 디렉토리를 /home/app로 설정
+WORKDIR /home/app
+
+# 호스트 시스템의 SpringBoot 애플리케이션 JAR 파일을 컨테이너 내부 작업 디렉토리로 복사
+COPY build/libs/*.jar app.jar
+
+RUN apt-get update && \
+    apt-get install -y fonts-noto-cjk && \
+    apt-get install -y fonts-nanum-extra && \
+    rm -rf /var/lib/apt/lists/* && \
+    fc-cache -fv
+
+# 컨테이너가 시작될 때 실행될 명령어 정의, 작업 디렉토리 /home/app/app.jar 파일 실행
+ENTRYPOINT ["java", "-Dfile.encoding=UTF-8", "-jar", "./app.jar"]
+
+# 컨테이너의 8080 포트를 외부로 노출
+EXPOSE 8080
+```
+
+<div align="right">
+
+[[맨 위로](#)]
+
+</div>
+
+---
+
+### 단계 2: Shell Script 작성
+
+`build-backend.sh`
+
+```shell
+#!/bin/bash
+
+IMAGE_NAME="server/backend"
+IMAGE_ID=$(docker images -q $IMAGE_NAME)
+
+CONTAINER_NAME="server-backend"
+CONTAINER_ID=$(docker ps -aqf "name=$CONTAINER_NAME")
+
+
+echo -e "\n<<<<<<<<<< Backend Build Start >>>>>>>>>>\n"
+
+
+echo ">>> CURRENT DOCKER INFORMATION:"
+echo ">>> DOCKER IMAGE NAME: $IMAGE_NAME"
+echo ">>> DOCKER IMAGE ID: $IMAGE_ID"
+echo ""
+
+
+# Stop & Remove Existing Container
+echo ">>> DOCKER CONTAINER $CONTAINER_NAME 존재 여부 검사 시작..."
+if [ ! -z "$CONTAINER_ID" ]; then
+    echo ">>> DOCKER CONTAINER $CONTAINER_NAME 존재 확인."
+    echo ">>> DOCKER CONTAINER $CONTAINER_NAME 중지 시작..."
+    docker stop $CONTAINER_ID || {
+        echo ">>> DOCKER CONTAINER $CONTAINER_NAME 중지 실패."
+        exit 1
+    }
+    echo ">>> DOCKER CONTAINER $CONTAINER_NAME 중지 완료."
+
+
+    echo ">>> DOCKER CONTAINER $CONTAINER_NAME 삭제 시작..."
+    docker rm -f $CONTAINER_ID || {
+        echo ">>> DOCKER CONTAINER $CONTAINER_NAME 삭제 실패."
+        exit 1
+    }
+    echo ">>> DOCKER CONTAINER $CONTAINER_NAME 삭제 완료."
+fi
+echo ">>> DOCKER CONTAINER $CONTAINER_NAME 존재 여부 검사 완료."
+echo ""
+
+
+# Remove Existing Docker Image
+echo ">>> DOCKER IMAGE $IMAGE_NAME 존재 여부 검사 시작..."
+if [ ! -z "$IMAGE_ID" ]; then
+    echo ">>> DOCKER IMAGE $IMAGE_NAME 존재 확인."
+    echo ">>> DOCKER IMAGE $IMAGE_NAME 삭제 시작..."
+    docker rmi -f $IMAGE_ID || {
+        echo ">>> DOCKER IMAGE $IMAGE_NAME 삭제 실패."
+        exit 1
+    }
+    echo ">>> DOCKER IMAGE $IMAGE_NAME 삭제 완료."
+fi
+echo ">>> DOCKER IMAGE $IMAGE_NAME 존재 여부 검사 완료."
+echo ""
+
+
+## Build Docker Image
+echo ">>> DOCKER IMAGE $IMAGE_NAME 빌드 시작..."
+docker build -t $IMAGE_NAME . || {
+    echo ">>> DOCKER IMAGE $IMAGE_NAME 빌드 실패."
+    exit 1
+}
+echo ">>> DOCKER IMAGE $IMAGE_NAME 빌드 완료."
+echo ""
+
+
+echo -e "\n<<<<<<<<<< Backend Build Complete Successfully >>>>>>>>>>\n"
+```
+
+`deploy-backend.sh`
+
+```shell
+#!/bin/bash
+
+IMAGE_NAME="server/backend"
+CONTAINER_NAME="server-backend"
+CONTAINER_ID=$(docker ps -aqf "name=$CONTAINER_NAME")
+
+
+echo -e "\n<<<<<<<<<< Backend Deploy Process Start >>>>>>>>>>\n"
+
+
+echo ">>> CURRENT DOCKER INFORMATION:"
+echo ">>> DOCKER CONTAINER NAME: $CONTAINER_NAME"
+echo ">>> DOCKER CONTAINER ID: $CONTAINER_ID"
+echo ""
+
+
+# Stop & Remove Existing Container
+echo ">>> DOCKER CONTAINER $CONTAINER_NAME 존재 여부 검사 시작..."
+if [ ! -z "$CONTAINER_ID" ]; then
+    echo ">>> DOCKER CONTAINER $CONTAINER_NAME 존재 확인."
+    echo ">>> DOCKER CONTAINER $CONTAINER_NAME 중지 시작..."
+    docker stop $CONTAINER_ID || {
+        echo ">>> DOCKER CONTAINER $CONTAINER_NAME 중지 실패."
+        exit 1
+    }
+    echo ">>> DOCKER CONTAINER $CONTAINER_NAME 중지 완료."
+
+
+    echo ">>> DOCKER CONTAINER $CONTAINER_NAME 삭제 시작..."
+    docker rm -f $CONTAINER_ID || {
+        echo ">>> DOCKER CONTAINER $CONTAINER_NAME 삭제 실패."
+        exit 1
+    }
+    echo ">>> DOCKER CONTAINER $CONTAINER_NAME 삭제 완료."
+fi
+echo ">>> DOCKER CONTAINER $CONTAINER_NAME 존재 여부 검사 완료."
+echo ""
+
+
+## Run Docker Container
+echo ">>> DOCKER CONTAINER $CONTAINER_NAME 실행 시작..."
+docker run -d -p 8080:8080 \
+    --name $CONTAINER_NAME $IMAGE_NAME || {
+        echo ">>> DOCKER IMAGE $IMAGE_NAME 실행 실패."
+        exit 1
+}
+echo ">>> DOCKER CONTAINER $CONTAINER_NAME 실행 완료."
+echo ""
+
+
+echo -e "\n<<<<<<<<<< Backend Deploy Complete Successfully >>>>>>>>>>\n"
+```
+
+<div align="right">
+
+[[맨 위로](#)]
+
+</div>
+
+---
+
+### 단계 3: application.properties 작성
+
+`application.properties`
+
+```shell
+# Server Settings
+server.port=8080
+server.servlet.context-path=/
+server.servlet.encoding.force=true
+server.servlet.encoding.enabled=true
+server.servlet.encoding.charset=UTF-8
+
+
+# MySQL Server Settings
+spring.datasource.url=jdbc:mysql://your-server-domain:3306/libro?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&useUnicode=true
+spring.datasource.username=your-username
+spring.datasource.password=your-password
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+
+
+# MySQL Develop Settings
+# spring.datasource.url=jdbc:mysql://localhost:3306/libro?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&useUnicode=true&allowPublicKeyRetrieval=true
+# spring.datasource.username=your-username
+# spring.datasource.password=your-password
+# spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+
+
+### JPA/Hibernate Settings
+spring.jpa.show-sql=true
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.properties.hibernate.format_sql=true
+spring.jpa.properties.hibernate.use_sql_comments=true
+spring.jpa.properties.hibernate.jdbc.time_zone=Asia/Seoul
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect
+
+
+# Slf4j Logging Debug Settings
+logging.level.org.hibernate.type.descriptor.sql=trace
+logging.level.com.ssafy.libro.domain=debug
+
+
+# JWT Settings
+#jwt.secret=ao_yongjae_shichi_ao_yongjae_shichi
+jwt.secret=your-jwt-secret
+jwt.accessExpTime=1800000
+jwt.refreshExpTime=7200000
+
+
+# OAuth2 Settings google (YJW)
+spring.security.oauth2.client.registration.google.client-id=your-client-id
+spring.security.oauth2.client.registration.google.client-secret=your-client-secret
+spring.security.oauth2.client.registration.google.scope=email,profile
+
+
+# OAuth2 Settings naver (YJW)
+spring.security.oauth2.client.registration.naver.client-id=your-client-id
+spring.security.oauth2.client.registration.naver.client-secret=your-client-secret
+spring.security.oauth2.client.registration.naver.authorization-grant-type=authorization_code
+spring.security.oauth2.client.registration.naver.redirect-uri=http://your-domain:8080/login/oauth2/code/naver
+spring.security.oauth2.client.registration.naver.scope=email,nickname,profile_image,name
+spring.security.oauth2.client.registration.naver.client-name=Naver
+spring.security.oauth2.client.provider.naver.authorization-uri=https://nid.naver.com/oauth2.0/authorize
+spring.security.oauth2.client.provider.naver.token-uri=https://nid.naver.com/oauth2.0/token
+spring.security.oauth2.client.provider.naver.user-info-uri=https://openapi.naver.com/v1/nid/me
+spring.security.oauth2.client.provider.naver.user-name-attribute=response
+
+
+# OAuth2 Settings kakao (YJW)
+spring.security.oauth2.client.registration.kakao.client-id=your-client-id
+spring.security.oauth2.client.registration.kakao.authorization-grant-type=authorization_code
+spring.security.oauth2.client.registration.kakao.redirect-uri=http://your-domain:8080/login/oauth2/code/kakao
+spring.security.oauth2.client.registration.kakao.scope=profile_nickname, profile_image, account_email
+spring.security.oauth2.client.provider.kakao.authorization-uri=https://kauth.kakao.com/oauth/authorize
+spring.security.oauth2.client.provider.kakao.token-uri=https://kauth.kakao.com/oauth/token
+spring.security.oauth2.client.provider.kakao.user-info-uri=https://kapi.kakao.com/v2/user/me
+spring.security.oauth2.client.provider.kakao.user-name-attribute=id
+
+
+# Redis Settings
+spring.data.redis.port=6379
+spring.data.redis.host=your-domain
+
+
+# S3 Credential Settings
+cloud.aws.credentials.access-key=your-access-key
+cloud.aws.credentials.secret-key=your-secret-key
+cloud.aws.region.static=your-regieon-name
+cloud.aws.bucket-name=your-bucket-name
+
+
+# File Upload Size Settings
+spring.servlet.multipart.maxFileSize=10MB
+spring.servlet.multipart.maxRequestSize=50MB
+
+
+# Naver Open API Settings
+naver.developers.openapi.client-id=your-client-id
+naver.developers.openapi.client-secret=your-client-secret
+```
+
+<div align="right">
+
+[[맨 위로](#)]
+
+</div>
+
+---
 
 ## 인프라 포팅 절차
 
@@ -148,6 +614,12 @@ $ free -h                         # 메모리 크기를 사람이 읽기 쉬운 
     /swapfile        none          swap        sw       0          0
 ```
 
+<div align="right">
+
+[[맨 위로](#)]
+
+</div>
+
 ---
 
 ### 단계 1: Docker 환경 구성
@@ -181,6 +653,12 @@ $ sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugi
 ```shell
 $ sudo docker run hello-world
 ```
+
+<div align="right">
+
+[[맨 위로](#)]
+
+</div>
 
 ---
 
@@ -303,6 +781,12 @@ $ sudo chmod +x ./install-jenkins.sh
 $ ./install-jenkins.sh
 ```
 
+<div align="right">
+
+[[맨 위로](#)]
+
+</div>
+
 ---
 
 ### 단계 3: MySQL 설정
@@ -398,37 +882,434 @@ $ sudo chmod +x ./uninstall-mysql.sh
 $ ./install-mysql.sh
 ```
 
+<div align="right">
+
+[[맨 위로](#)]
+
+</div>
+
 ---
 
 ### 단계 4: Nginx 설정
+
+`/etc/nginx/sites-avaialble/default`
+
+```shell
+server {
+        listen 80 default_server;
+        listen [::]:80 default_server;
+
+        root /var/www/html;
+        index index.html index.htm index.nginx-debian.html;
+
+        server_name _;
+
+        location / {
+                proxy_pass http://localhost:3000;
+                proxy_redirect off;
+                charset utf-8;
+
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection 'upgrade';
+                proxy_cache_bypass $http_upgrade;
+
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+
+                # try_files $uri $uri/ /index.html =404;
+                location /_next/static/ {
+                        alias /var/jenkins_home/workspace/Libro-Pipeline-Master/frontend/.next/static>                        expires 1y;
+                        access_log off;
+                        add_header Cache-Control "public";
+                }
+
+                location /public/ {
+                        alias /var/jenkins_home/workspace/Libro-Pipeline-Master/frontend/public/;
+                        expires 1y;
+                        access_log off;
+                        add_header Cache-Control "public";
+                }
+        }
+
+        location /api {
+                proxy_pass http://localhost:8080;
+                proxy_redirect default;
+                charset utf-8;
+
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection 'upgrade';
+                proxy_cache_bypass $http_upgrade;
+
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        location /api/v1/shorts {
+                proxy_pass http://localhost:8080;
+                proxy_read_timeout 600s;
+                proxy_connect_timeout 600s;
+        }
+
+        location /stable-diffusion-webui/ {
+                proxy_pass http://localhost:7860/;
+                proxy_redirect default;
+                charset utf-8;
+
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection 'upgrade';
+                proxy_cache_bypass $http_upgrade;
+
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        location /info {
+                proxy_pass http://localhost:7860;
+                proxy_redirect default;
+                charset utf-8;
+
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection 'upgrade';
+                proxy_cache_bypass $http_upgrade;
+
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        location /theme.css {
+                proxy_pass http://localhost:7860;
+                proxy_redirect default;
+                charset utf-8;
+
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection 'upgrade';
+                proxy_cache_bypass $http_upgrade;
+
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        location /run {
+                proxy_pass http://localhost:7860;
+                proxy_redirect default;
+                charset utf-8;
+
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection 'upgrade';
+                proxy_cache_bypass $http_upgrade;
+
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+}
+
+server {
+        # Managed by Certbot
+        listen 443 ssl;
+        listen [::]:443 ssl ipv6only=on;
+
+        ssl_certificate /etc/letsencrypt/live/j10a301.p.ssafy.io/fullchain.pem;
+        ssl_certificate_key /etc/letsencrypt/live/j10a301.p.ssafy.io/privkey.pem;
+
+        include /etc/letsencrypt/options-ssl-nginx.conf;
+        ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+
+        root /var/www/html;
+        index index.html index.htm index.nginx-debian.html;
+
+        server_name j10a301.p.ssafy.io;
+        client_max_body_size 100M;
+
+        location / {
+                proxy_pass http://localhost:3000;
+                proxy_redirect off;
+                charset utf-8;
+
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection 'upgrade';
+                proxy_cache_bypass $http_upgrade;
+
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+
+                # try_files $uri $uri/ /index.html =404;
+                location /_next/static/ {
+                        alias /var/jenkins_home/workspace/Libro-Pipeline-Master/frontend/.next/static>                        expires 1y;
+                        access_log off;
+                        add_header Cache-Control "public";
+                }
+
+                location /public/ {
+                        alias /var/jenkins_home/workspace/Libro-Pipeline-Master/frontend/public/;
+                        expires 1y;
+                        access_log off;
+                        add_header Cache-Control "public";
+                }
+        }
+
+        location /api {
+                proxy_pass http://localhost:8080;
+                proxy_redirect default;
+                charset utf-8;
+
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection 'upgrade';
+                proxy_cache_bypass $http_upgrade;
+
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        location /api/v1/shorts {
+                proxy_pass http://localhost:8080;
+                proxy_read_timeout 600s;
+                proxy_connect_timeout 600s;
+        }
+        location /stable-diffusion-webui/ {
+                proxy_pass http://localhost:7860/;
+                proxy_redirect default;
+                charset utf-8;
+
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection 'upgrade';
+                proxy_cache_bypass $http_upgrade;
+
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        location /info {
+                proxy_pass http://localhost:7860;
+                proxy_redirect default;
+                charset utf-8;
+
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection 'upgrade';
+                proxy_cache_bypass $http_upgrade;
+
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        location /theme.css {
+                proxy_pass http://localhost:7860;
+                proxy_redirect default;
+                charset utf-8;
+
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection 'upgrade';
+                proxy_cache_bypass $http_upgrade;
+
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        location /run {
+                proxy_pass http://localhost:7860;
+                proxy_redirect default;
+                charset utf-8;
+
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection 'upgrade';
+                proxy_cache_bypass $http_upgrade;
+
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+        }
+}
+
+server {
+        if ($host = j10a301.p.ssafy.io) {
+                return 301 https://$host$request_uri;
+        } # managed by Certbot
+
+
+        listen 80 ;
+        listen [::]:80 ;
+
+        server_name j10a301.p.ssafy.io;
+        return 404; # managed by Certbot
+}
+```
 
 <div align="right">
 
 [[맨 위로](#)]
 
 </div>
+
+---
 
 ## Stable Diffusion 포팅 절차
 
 ### 단계 1: Github Pull
 
+```shell
+$ sudo apt install wget git python3 python3-venv libgl1 libglib2.0-0
+$ git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui
+$ wget -q https://raw.githubusercontent.com/AUTOMATIC1111/stable-diffusion-webui/master/webui.sh
+```
+
+<div align="right">
+
+[[맨 위로](#)]
+
+</div>
+
+---
+
 ### 단계 2: Models 파일 설정
+
+```shell
+# Download CheckPoint
+$ sudo mkdir -p ./models/Lora && sudo wget -O ./models/Stable-diffusion/animePastelDream_softBakedVae.safetensors "https://civitai.com/api/download/models/28100"
+$ sudo mkdir -p ./models/Lora && sudo wget -O ./models/Stable-diffusion/xxmix9realistic_v40.safetensors "https://civitai.com/api/download/models/102222"
+
+# Download LoRa
+$ sudo mkdir -p ./models/Lora && sudo wget -O ./models/Lora/more_details.safetensors "https://civitai.com/api/download/models/87153?type=Model&format=SafeTensor"
+
+# Download VAE
+$ sudo mkdir -p ./models/VAE && sudo wget -O ./models/VAE/vaeFtMse840000Ema_v100.pt "https://huggingface.co/casque/vaeFtMse840000Ema_v100/resolve/main/vaeFtMse840000Ema_v100.pt?download=true"
+```
+
+<div align="right">
+
+[[맨 위로](#)]
+
+</div>
+
+---
 
 ### 단계 3: Conda 환경 구성
 
+```shell
+$ conda create -n venv python=3.10.6
+$ conda activate venv
+```
+
+<div align="right">
+
+[[맨 위로](#)]
+
+</div>
+
+---
+
 ### 단계 4: Command Line Arguments 설정
 
+`webui-user.sh`
+
+```shell
+#!/bin/bash
+#########################################################
+# Uncomment and change the variables below to your need:#
+#########################################################
+
+# Install directory without trailing slash
+#install_dir="/home/$(whoami)"
+
+# Name of the subdirectory
+#clone_dir="stable-diffusion-webui"
+
+# Commandline arguments for webui.py, for example: export COMMANDLINE_ARGS="--medvram --opt-split-attention"
+#export COMMANDLINE_ARGS=""
+#export COMMANDLINE_ARGS="--listen --share --precision full --xformers --no-half --no-half-vae --api --skip-torch-cuda-test"
+export COMMANDLINE_ARGS="--listen --share --port 7860 --nowebui --device-id 8 --medvram --skip-torch-cuda-test --precision full --no-half --no-half-vae --api"
+export PYTORCH_CUDA_ALLOC_CONF=garbage_collection_threshold:0.6,max_split_size_mb:512
+
+# python3 executable
+#python_cmd="python3"
+
+# git executable
+#export GIT="git"
+
+# python3 venv without trailing slash (defaults to ${install_dir}/${clone_dir}/venv)
+#venv_dir="venv"
+
+# script to launch to start the app
+#export LAUNCH_SCRIPT="launch.py"
+
+# install command for torch
+#export TORCH_COMMAND="pip install torch==1.12.1+cu113 --extra-index-url https://download.pytorch.org/whl/cu113"
+export TORCH_COMMAND="pip install torch==2.0.1+cu117 --extra-index-url https://download.pytorch.org/whl/cu117"
+
+# Requirements file to use for stable-diffusion-webui
+#export REQS_FILE="requirements_versions.txt"
+
+# Fixed git repos
+#export K_DIFFUSION_PACKAGE=""
+#export GFPGAN_PACKAGE=""
+
+# Fixed git commits
+#export STABLE_DIFFUSION_COMMIT_HASH=""
+#export CODEFORMER_COMMIT_HASH=""
+#export BLIP_COMMIT_HASH=""
+
+# Uncomment to enable accelerated launch
+#export ACCELERATE="True"
+
+# Uncomment to disable TCMalloc
+#export NO_TCMALLOC="True"
+
+###########################################
+```
+
 <div align="right">
 
 [[맨 위로](#)]
 
 </div>
 
-## 백엔드 포팅 절차 (Spring Boot)
+---
 
-### 단계 1: Docker 이미지 생성
+### 단계 5: Stable Diffusion 실행
 
-### 단계 2: 데이터베이스 연결 및 마이그레이션
+```shell
+$ ./webui.sh
+```
+
+<div align="right">
+
+[[맨 위로](#)]
+
+</div>
 
 <div align="right">
 
@@ -436,17 +1317,7 @@ $ ./install-mysql.sh
 
 </div>
 
-## 프론트엔드 포팅 절차 (React, Next.js)
-
-### 단계 1: Docker 이미지 생성
-
-### 단계 2: Docker 및 Nginx를 이용한 배포
-
-<div align="right">
-
-[[맨 위로](#)]
-
-</div>
+---
 
 ## CI/CD 파이프라인 설정 (Jenkins)
 
@@ -707,6 +1578,8 @@ pipeline {
 
 </div>
 
+---
+
 ## 문제 해결 가이드
 
 - **문제:** Jenkins에서 Docker 명령어 실행 시 권한 문제 발생
@@ -730,6 +1603,8 @@ pipeline {
 
 </div>
 
+---
+
 ## 참고 자료
 
 - [Ubuntu 공식 문서](https://ubuntu.com/)
@@ -743,6 +1618,8 @@ pipeline {
 [[맨 위로](#)]
 
 </div>
+
+---
 
 ## FAQ
 

@@ -45,6 +45,18 @@ const userBooks = {
       console.error(error);
     }
   },
+  bookContain: async (id: number) => {
+    try {
+      const response = await instance.get(`/api/v1/userbook/contain`, {
+        params: {
+          bookId:id
+        },
+      });
+      console.log(response.data);
+      return response.data;
+    } catch (error) {
+    }
+  },
 };
 
 export { userBooks };
