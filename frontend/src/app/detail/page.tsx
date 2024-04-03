@@ -765,7 +765,7 @@ const DetailPage = () => {
         )}
         {bookLoading && !!localStorage.getItem("accessToken") && (
           <Button
-            className="bg-[#9268EB] hover:bg-[#bfa1ff] sticky bottom-14 left-full max-w-md drop-shadow-lg rounded-full z-20 w-12 h-12 mr-3"
+            className="bg-[#9268EB] hover:bg-[#bfa1ff] sticky bottom-[4.5rem] left-full max-w-md drop-shadow-lg rounded-full z-20 w-12 h-12 mr-3"
             onClick={() => mappingBook(bookDetail.id)}
           >
             <FaPlus size={30} />
