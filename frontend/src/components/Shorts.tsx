@@ -4,7 +4,15 @@ import { useEffect, useState } from "react";
 import { BsBookmark, BsBookmarkFill } from "react-icons/bs";
 import { Skeleton } from "./ui/skeleton";
 import { SearchApi } from "@/lib/axios-search";
-const Shorts = ({ bookDetail, shortsLoad }: { bookDetail: BookShorts; shortsLoad: boolean }) => {
+const Shorts = ({
+  bookDetail,
+  shortsLoad,
+  bgm,
+}: {
+  bookDetail: BookShorts;
+  shortsLoad: boolean;
+  bgm?: string | null;
+}) => {
   const [bookmark, setBookmark] = useState<boolean>(false);
   const router = useRouter();
   return (
