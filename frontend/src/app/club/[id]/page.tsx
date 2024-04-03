@@ -56,7 +56,7 @@ export default function CommunityPostPage({
           backArrow={true}
           src={"/club"}
         />
-        <hr className="pt-28" />
+        <hr className="pt-16" />
         <CommunityInformCard
           clubId={clubInfo.info}
           clubName={clubInfo.clubName}

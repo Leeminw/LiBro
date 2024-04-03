@@ -118,7 +118,7 @@ export default function InputForm() {
   return (
     <>
       <SubHeader title="글 작성하기" backArrow={true} />
-      <div className="pt-24" />
+      <div className="pt-14" />
 
       <Form {...form}>
         <form

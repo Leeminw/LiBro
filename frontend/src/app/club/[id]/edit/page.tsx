@@ -144,7 +144,7 @@ export default function InputForm() {
       {/*<div className="pt-24"/>*/}
       <Form {...form}>
         <SubHeader title="커뮤니티 수정하기" backArrow={true} />
-        <form className="space-y-2 pt-28 px-2">
+        <form className="space-y-2 pt-16 px-2">
           <FormField
             control={form.control}
             name="title"

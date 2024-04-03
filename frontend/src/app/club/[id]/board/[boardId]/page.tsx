@@ -40,7 +40,7 @@ export default function CommunityPostPage({
             backArrow={true}
             src={`/club/${clubId}`}
           />
-          <div className="pt-28"></div>
+          <div className="pt-16"></div>
           <TitleCard title={post.title} createdDate={post.createdDate} />
 
           <Writter
