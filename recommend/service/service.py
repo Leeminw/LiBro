@@ -1,12 +1,30 @@
 from config.db import get_db, get_model_url
 from typing import List
 from data.book import Book
-from repository.repository import get_book_list, get_total_book_count, get_user_book_count_distinct
+from repository.repository import (
+    get_book_list, 
+    get_total_book_count, 
+    get_user_book_count_distinct,
+    get_exist_shorts_book_id_list
+)
 import random
 import pickle
 import numpy as np
 from lightfm import LightFM
 
+
+def get_shorts_exist_book_list(size : int) -> List[dict] :
+    engine = get_db()
+    shorts_exist = get_exist_shorts_book_id_list(engine)
+    # length = len(result)
+
+    random_numbers = random.sample(shorts_exist, 10)
+
+    response_data = get_book_list(engine,tuple(random_numbers))
+
+    return response_data
+    
+    
 
 def get_exist_shorts() -> List[dict] :
     engine = get_db()
@@ -78,15 +96,17 @@ def get_recommend_book_list(user_id : int, size : int ) -> List[dict] :
 
     # 남은 만큼은 랜덤하게 합쳐서 리턴하자.
     random_count = size - top_count - low_count
+    shorts_exist = get_exist_shorts_book_id_list(engine)
+    # length = len(result)
 
-    numbers = random.sample(range(0, total_count+1), random_count)
+    random_numbers = random.sample(shorts_exist, random_count*2)
 
-    for number in numbers : 
+    for number in random_numbers : 
         choosed.add(number)
 
 
     response_data = get_book_list(engine,tuple(choosed))
-
-    return response_data
+    random.shuffle(response_data)
+    return response_data[:size]
     
 
