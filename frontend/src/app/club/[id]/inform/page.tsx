@@ -31,7 +31,7 @@ export default function CommunityPostPage({params}: { params: { id: number } }) 
     return isFetchingSuccess && (
         <>
             <SubHeader title="커뮤니티 정보 보기" backArrow={true}/>
-            <div className="pt-24"/>
+            <div className="pt-16"/>
             <CommunityInformCard clubId={club.clubId} clubName={club.clubName} createdDate={club.createdDate}
                                  memberType={"NONE"} memberCount={club.memberCount}/>
             <GroupOwner nickName={club.clubOwnerName} profileUrl={club.profile}/>

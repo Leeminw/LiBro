@@ -27,7 +27,7 @@ export default function ClubPage() {
   return (
     <div className="relative flex h-screen">
       <SubHeader title="커뮤니티" backArrow={false} />
-      <Tabs defaultValue={"find"} className="w-full pt-28 -translate-y-2">
+      <Tabs defaultValue={"find"} className="w-full pt-16 -translate-y-2">
         <TabsList className="grid w-full h-12 grid-cols-2">
           <TabsTrigger value="find" onClick={() => setTabState("find")}>
             커뮤니티 찾기

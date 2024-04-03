@@ -68,7 +68,7 @@ export default function CommunityPostPage({
     isFetchingSuccess && (
       <>
         <SubHeader title="커뮤니티 가입하기" backArrow={true} />
-        <div className="pt-28 px-2">
+        <div className="pt-16 px-2">
           <CommunityInformCard
             clubId={club.clubId}
             clubName={club.clubName}
