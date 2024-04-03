@@ -2,6 +2,7 @@ package com.ssafy.libro.domain.book.service;
 
 import com.ssafy.libro.domain.book.dto.*;
 import com.ssafy.libro.domain.book.entity.Book;
+import com.ssafy.libro.domain.book.exception.BookAlreadyExistException;
 import com.ssafy.libro.domain.book.exception.BookNotFoundException;
 import com.ssafy.libro.domain.book.repository.BookRepository;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -20,6 +22,8 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public BookDetailResponseDto createBook(BookCreateRequestDto requestDto) {
+        Optional<Book> optionalBook = bookRepository.findByIsbn(requestDto.getIsbn());
+        if(optionalBook.isPresent()) throw new BookAlreadyExistException();
         Book book = bookRepository.save(requestDto.toEntity());
         return new BookDetailResponseDto(book);
     }

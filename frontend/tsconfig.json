@@ -23,6 +23,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/app/search/[isbn].js", "src/app/search/[isbn]", "src/api/setupProxy.js"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/app/search/[isbn].js", "src/app/search/[isbn]", "src/api/setupProxy.js", "src/components/BarcodeScannerTestMk2tsx"],
   "exclude": ["node_modules"]
 }

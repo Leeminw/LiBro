@@ -6,6 +6,8 @@ import { Progress } from "@/components/ui/progress";
 import DetailAnalyze from "@/components/components/detailAnalyze";
 import { Button } from "@/components/ui/button";
 import { FaPlus, FaStar } from "react-icons/fa6";
+import { TbBookUpload } from "react-icons/tb";
+import { TbBookOff } from "react-icons/tb";
 import { SearchApi } from "@/lib/axios-search";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -22,6 +24,7 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import booksApi from "@/lib/axios-book";
 import { ToastAction } from "@/components/ui/toast";
+import { userBooks } from "@/lib/axios-userBook";
 
 function StarFillIcon(props: any) {
   return (
@@ -88,7 +91,8 @@ const DetailPage = () => {
     id: 0,
     shortsUrl: "",
   });
-
+  const [userBookId, setUserBookId] = useState<number>(0);
+  const [bookIdState, setBookIdState] = useState<number>(0);
   const [start, setStart] = useState<number>(1);
   const [curpage, setCurpage] = useState<number>(1);
 
@@ -221,7 +225,19 @@ const DetailPage = () => {
     console.log("rating comment", response.data.data);
     setRating(response.data.data);
   };
-
+  // set user book mapping
+  const updateUserBookMapping = async (id: number) => {
+    if (id) {
+      const response = await userBooks
+        .bookContain(id)
+        .then((response) => {
+          setUserBookId(response);
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    }
+  };
   useEffect(() => {
     const updateBookDetail = async () => {
       await booksApi
@@ -249,7 +265,6 @@ const DetailPage = () => {
                   shortsUrl: "",
                 };
                 await registerBook(bookOutput);
-                setBookLoading(true);
               })
               .catch((err) => {
                 toast({
@@ -262,8 +277,10 @@ const DetailPage = () => {
           // DB에 도서 정보가 있을경우
           else {
             setBookDetail(response.data[0]);
+            setBookIdState(response.data[0].id);
             setBookLoading(true);
             updateRatingComment(response.data[0].id);
+            updateUserBookMapping(response.data[0].id);
           }
         })
         .catch((error) => {
@@ -301,9 +318,13 @@ const DetailPage = () => {
             ...prevState,
             id: bookId,
           }));
+          setBookIdState(bookId);
+          setBookLoading(true);
+          updateUserBookMapping(bookId);
         })
         .catch((error) => {
           console.error(error);
+          setBookLoading(true);
         });
     };
     updateBookDetail();
@@ -312,7 +333,8 @@ const DetailPage = () => {
   const mappingBook = async (bookId: number) => {
     booksApi
       .userBookMapping({ bookId: bookId, type: "관심" })
-      .then(() => {
+      .then((response) => {
+        setUserBookId(response.data.data.userBookId);
         toast({
           title: "나의 서재에 도서를 담았습니다.",
           description: "나의 서재로 이동하시겠습니까?",
@@ -331,6 +353,23 @@ const DetailPage = () => {
       .catch((error) => {
         toast({
           title: "나의 서재에 도서를 담는데 실패했습니다.",
+          description: "잠시 후 다시 시도해주세요.",
+        });
+      });
+  };
+
+  const deleteMappingBook = async (id: number) => {
+    userBooks
+      .bookDelete(id)
+      .then(() => {
+        setUserBookId(0);
+        toast({
+          description: "나의 서재에서 도서를 삭제했습니다.",
+        });
+      })
+      .catch((error) => {
+        toast({
+          title: "나의 서재에서 도서를 삭제하는데 실패했습니다.",
           description: "잠시 후 다시 시도해주세요.",
         });
       });
@@ -414,6 +453,7 @@ const DetailPage = () => {
                     loop
                     muted
                     playsInline
+                    controls
                     className="w-full h-[64vh] rounded-lg object-cover"
                   >
                     <source src={bookDetail.shortsUrl} type="video/mp4" />
@@ -765,10 +805,25 @@ const DetailPage = () => {
         )}
         {bookLoading && !!localStorage.getItem("accessToken") && (
           <Button
-            className="bg-[#9268EB] hover:bg-[#bfa1ff] sticky bottom-[4.5rem] left-full max-w-md drop-shadow-lg rounded-full z-20 w-12 h-12 mr-3"
-            onClick={() => mappingBook(bookDetail.id)}
+            className={`${
+              userBookId > 0
+                ? "bg-red-400 hover:bg-red-300"
+                : "bg-[#9268EB] hover:bg-[#bfa1ff]"
+            } sticky bottom-[4.5rem] p-3 left-full max-w-md drop-shadow-lg rounded-full z-20 w-14 h-14 mr-3
+            
+            `}
+            onClick={() => {
+              console.log(bookDetail);
+              userBookId > 0
+                ? deleteMappingBook(userBookId)
+                : mappingBook(bookIdState);
+            }}
           >
-            <FaPlus size={30} />
+            {userBookId > 0 ? (
+              <TbBookOff size={60} />
+            ) : (
+              <TbBookUpload size={60} />
+            )}
           </Button>
         )}
       </div>

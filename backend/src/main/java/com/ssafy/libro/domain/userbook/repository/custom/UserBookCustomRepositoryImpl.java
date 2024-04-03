@@ -144,6 +144,19 @@ public class UserBookCustomRepositoryImpl implements UserBookCustomRepository{
     }
 
     @Override
+    public Optional<Long> countUserBookByUserAndBook(User user, Book book) {
+        Long result = jpaQueryFactory
+                .select(userBook.id)
+                .from(userBook)
+                .leftJoin(userBook.user, QUser.user)
+                .where(userBook.user.eq(user)
+                        .and((userBook.isDeleted.eq(false)).or(userBook.isDeleted.isNull()))
+                        .and(userBook.book.eq(book)))
+                .fetchFirst();
+        return Optional.of(result);
+    }
+
+    @Override
     public Optional<Long> countUserBookByUserReadComplete(User user) {
         Long result = jpaQueryFactory
                 .select(userBook.count())
