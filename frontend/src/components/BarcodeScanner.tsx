@@ -45,6 +45,7 @@ const BarcodeScannerComponent = ({
       </div>
       <Camera
         ref={camera}
+        facingMode="environment"
         errorMessages={{
           canvas: "지원되지 않는 기기입니다.",
           noCameraAccessible: "사용 가능한 카메라를 찾지 못했습니다.",

@@ -85,6 +85,12 @@ const config = {
       backgroundImage: {
         "bg-svg": "url('/BG.svg')", // 배경 이미지로 사용할 SVG 파일 경로를 지정합니다.
       },
+      height: {
+        'real-screen': 'calc(var(--vh) * 100)',
+      },
+    },
+    realMinHeight: {
+      'real-screen': 'calc(var(--vh) * 100)',
     },
   },
   plugins: [require("tailwindcss-animate"), require("tailwind-scrollbar-hide")],

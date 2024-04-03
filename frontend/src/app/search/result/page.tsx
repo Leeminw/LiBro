@@ -63,7 +63,7 @@ const ResultPage = () => {
       <SubHeader title={`"${query}" 검색 결과`} backArrow={true} />
       <div
         ref={scrollRef}
-        className="py-24 flex h-full max-h-screen justify-center flex-wrap overflow-y-scroll scrollbar-hide relative"
+        className="pt-14 pb-24 flex h-full max-h-[90vh] justify-center flex-wrap overflow-y-scroll scrollbar-hide relative"
       >
         {pageLoad ? (
           bookList.length > 0 ? (

@@ -28,6 +28,7 @@ import instance from "@/lib/interceptor";
 import SubHeader from "@/components/SubHeader";
 import { useToast } from "@/components/ui/use-toast";
 import { MdDelete } from "react-icons/md";
+import useUserState from "@/lib/login-state";
 
 interface User {
   profileUrl: string;
@@ -92,10 +93,11 @@ interface Review {
 const Library = () => {
   const isbn = useSearchParams().get("isbn");
   const { toast } = useToast();
+  const { getUserInfo } = useUserState();
   const [user, setUser] = useState<User>({
     profileUrl: "https://github.com/shadcn.png",
-    id: "",
-    nickName: "11",
+    id: getUserInfo().id.toString(),
+    nickName: getUserInfo().nickname,
     truename: "",
     birth: "11",
     readRate: 0,
@@ -283,6 +285,9 @@ const Library = () => {
         userBookId: userBookId,
         startDate: localDateTimeString,
       });
+      toast({
+        description: "독서 기록을 시작합니다.",
+      });
       console.log("read start");
       setBookHistory(response.data.data);
     };
@@ -297,7 +302,9 @@ const Library = () => {
         const currentResponse = await instance.get(
           "/api/v1/bookhistory/recent/" + userBook.userBookId
         );
-
+        toast({
+          description: "독서를 포기하셨습니다.",
+        });
         setBookHistory(currentResponse.data.data);
       } catch (error) {
         console.log("error", error);
@@ -312,6 +319,9 @@ const Library = () => {
       const response = await instance.get(
         "/api/v1/bookhistory/complete/" + bookHistory.userBookHistoryId
       );
+      toast({
+        description: "도서를 완독하셨어요! 평점을 등록하실 수 있습니다.",
+      });
       // 가장 최근 도서기록 가져오기
       const currentResponse = await instance.get(
         "/api/v1/bookhistory/recent/" + userBook.userBookId
@@ -501,13 +511,14 @@ const Library = () => {
 
       const saveReview = async (userBook: UserBook) => {
         if (!userBook.isCompleted) {
-          console.log("432번째줄 토스트 추가좀.. ");
-          // toast({
-          //     title: "완독 x",
-          //     description: "완독해야 적을 수 있음!",
-          //   });
+          toast({
+            description: "완독하셔야 평점 등록이 가능합니다.",
+          });
           return;
         }
+        toast({
+          description: "평점이 등록되었습니다.",
+        });
         console.log("save button");
         const ratingData = {
           userBookId: userBook.userBookId,
@@ -605,25 +616,19 @@ const Library = () => {
               <>
                 <div className="rounded border border-gray-300 shadow-lg p-4">
                   <div className="flex justify-between">
-                    <div className="flex mb-1">
-                      <div className="text-sm font-bold mr-2">
-                        @{user.nickName}{" "}
-                      </div>
+                    <div className="text-lg font-bold mr-2 flex w-full">
+                      {user.nickName}
                     </div>
-                    <Button className="bg-white text-xs text-gray-400 p-1 rounded-md h-6">
-                      수정하기
-                    </Button>
+                    <div className="w-full flex justify-end text-nowrap">
+                      {renderStars()}
+                    </div>
                   </div>
-
-                  <div className="flex items-center mb-1">
-                    {"평점 : " + userBook.rating}
-                  </div>
-                  <div className="text-sm mb-1">
-                    {"리뷰 내용 : " + userBook.ratingComment}
+                  <div className="text-sm mb-1 pt-2">
+                    {userBook.ratingComment}
                   </div>
                   {/* 여기에 별점과 스포일러 여부도 표시 */}
                   {userBook.ratingSpoiler && (
-                    <div className="text-red-500">스포일러 포함</div>
+                    <div className="text-red-500 w-full flex justify-end">스포일러 포함</div>
                   )}
                 </div>
               </>
@@ -737,7 +742,7 @@ const Library = () => {
               className="w-full p-1.5 mx-6 mb-2 text-center bg-[#9268EB] hover:bg-[#bfa1ff] rounded-md duration-300 transition-colors"
               onClick={() => startReading(userBook.userBookId)}
             >
-              <div className=" text-white  ">독서 기록 시작하기</div>
+              <div className="text-white ">독서 기록 시작하기</div>
             </button>
           </div>
         );
@@ -778,7 +783,7 @@ const Library = () => {
         className={`fixed w-full h-full inset-0 bg-black z-40 bg-opacity-50 flex justify-center items-center px-4 overflow-y-hidden animate-modal-overlay-on`}
       >
         <div
-          className={`bg-white rounded-lg w-full max-w-md h-3/4 overflow-y-auto duration-500 transition-all animate-fade-up scrollbar-hide`}
+          className={`bg-white rounded-lg w-full max-w-md h-3/4 overflow-y-auto duration-500 transition-all scrollbar-hide`}
         >
           <Header />
           <Record />
@@ -793,10 +798,10 @@ const Library = () => {
   return (
     <div
       ref={scrollRef}
-      className="bg-bg-svg bg-no-repeat bg-cover scrollbar-hide overflow-y-scroll relative h-screen"
+      className="bg-bg-svg bg-no-repeat bg-cover scrollbar-hide overflow-y-scroll relative h-screen max-h-[90vh]"
     >
       <SubHeader title="나의 서재" backArrow={false} />
-      <div className="absolute flex w-full justify-between items-center h-12 bg-black/60 backdrop-blur-md pl-3 py-3 text-white text-sm mt-24 top-2">
+      <div className="absolute flex w-full justify-between items-center h-12 bg-black/60 backdrop-blur-md pl-3 py-3 text-white text-sm mt-12 top-2">
         <div className="pl-3">전체 {books.length}권</div>
         <div className="flex w-2/5 pr-2">
           <Select onValueChange={(value) => setArrange(value)}>
@@ -816,7 +821,7 @@ const Library = () => {
           </Select>
         </div>
       </div>
-      <div className="px-3 pt-44 pb-28">
+      <div className="px-3 pt-32 pb-28">
         <div className="flex items-center justify-end rounded-lg mx-3 bg-white h-10 relative">
           <Input
             value={searchTerm}
@@ -842,9 +847,8 @@ const Library = () => {
           <div className="grid sm:grid-cols-4 grid-cols-3">
             {pageNumbers.length != 0 &&
               currentBooks.map((book: BookData, index) => (
-                <>
+                <div key={`book-${index}`}>
                   <div
-                    key={`book-${index}`}
                     className="drop-shadow-xl shadow-border pb-2 border-b-8 border-white flex justify-center items-end h-fit"
                     onClick={() => openModal(book)}
                   >
@@ -868,7 +872,7 @@ const Library = () => {
                       </div>
                     </div>
                   </div>
-                </>
+                </div>
               ))}
             {Array.from({ length: 12 - currentBooks.length }, (_, index) => (
               <div
