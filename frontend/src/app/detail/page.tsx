@@ -65,7 +65,7 @@ function StarEmptyIcon(props: any) {
   );
 }
 const DetailPage = () => {
-  const URL = "ex0" + 0 + ".mp4";
+  const bgm = useSearchParams().get("bgm");
   const isbn = useSearchParams().get("isbn");
   const ratingRef = useRef<HTMLDivElement>(null);
   const analyzeRef = useRef<HTMLDivElement>(null);
@@ -95,13 +95,12 @@ const DetailPage = () => {
   const [bookIdState, setBookIdState] = useState<number>(0);
   const [start, setStart] = useState<number>(1);
   const [curpage, setCurpage] = useState<number>(1);
-
   const [rating, setRating] = useState<RatingComment[]>([]);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   const [analyzePer, setAnalyzePer] = useState<number[]>([0, 0]);
-  const [chartPer, setChartPer] = useState<number[]>([
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  ]);
+  const [chartPer, setChartPer] = useState<number[]>([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
   const [ratingPer, setRatingPer] = useState<number[]>([0, 0, 0, 0, 0, 0]);
 
   const ratingPaging = (input: number, isNext: boolean) => {
@@ -190,9 +189,7 @@ const DetailPage = () => {
       if (response.data.data[i].gender == "f") {
         ++idx;
       }
-      totalPer[idx] = Number(
-        ((response.data.data[i].count / total) * 100).toFixed(1)
-      );
+      totalPer[idx] = Number(((response.data.data[i].count / total) * 100).toFixed(1));
     }
     setChartPer(totalPer);
   };
@@ -201,8 +198,7 @@ const DetailPage = () => {
     const response = await booksApi.ratingCount(value);
     console.log("rating count", response.data.data);
     let ratingTotal = response.data.data.reduce(
-      (acc: number, currentValue: RatingSummary) =>
-        acc + currentValue.score * currentValue.count,
+      (acc: number, currentValue: RatingSummary) => acc + currentValue.score * currentValue.count,
       0
     );
     let ratingTotalCount = response.data.data.reduce(
@@ -214,10 +210,7 @@ const DetailPage = () => {
       eachRatingPer[response.data.data[i].score - 1] =
         (response.data.data[i].count / ratingTotalCount) * 100;
     }
-    setRatingPer([
-      ratingTotalCount === 0 ? 0 : ratingTotal / ratingTotalCount,
-      ...eachRatingPer,
-    ]);
+    setRatingPer([ratingTotalCount === 0 ? 0 : ratingTotal / ratingTotalCount, ...eachRatingPer]);
   };
   // set rating comment
   const updateRatingComment = async (value: number) => {
@@ -295,10 +288,10 @@ const DetailPage = () => {
       console.log("output", bookOutput);
       setBookDetail(bookOutput);
       const dateString: string = bookOutput.pub_date;
-      const formattedDateString: string = `${dateString.slice(
-        0,
-        4
-      )}-${dateString.slice(4, 6)}-${dateString.slice(6)}`;
+      const formattedDateString: string = `${dateString.slice(0, 4)}-${dateString.slice(
+        4,
+        6
+      )}-${dateString.slice(6)}`;
       const isoDateTime: string = new Date(formattedDateString).toISOString();
       const addBook = {
         isbn: bookOutput.isbn,
@@ -395,9 +388,7 @@ const DetailPage = () => {
           </div>
         );
       } else {
-        stars.push(
-          <StarEmptyIcon className="text-[#E5E7EB] w-8 h-8" key={i} />
-        );
+        stars.push(<StarEmptyIcon className="text-[#E5E7EB] w-8 h-8" key={i} />);
       }
     }
     return stars;
@@ -434,8 +425,7 @@ const DetailPage = () => {
                       {bookDetail.title}
                     </p>
                     <p className="text-gray-300 text-xs mt-1">
-                      저자 {bookDetail.author.split("^").join(", ")} | 출판사{" "}
-                      {bookDetail.publisher}
+                      저자 {bookDetail.author.split("^").join(", ")} | 출판사 {bookDetail.publisher}
                     </p>
                   </div>
                 </div>
@@ -445,9 +435,7 @@ const DetailPage = () => {
             <div className="w-full h-full px-6">
               {bookDetail.shortsUrl && (
                 <>
-                  <p className="mt-4 mb-3 text-lg text-gray-800 font-semibold">
-                    트레일러
-                  </p>
+                  <p className="mt-4 mb-3 text-lg text-gray-800 font-semibold">트레일러</p>
                   <video
                     autoPlay
                     loop
@@ -455,18 +443,33 @@ const DetailPage = () => {
                     playsInline
                     controls
                     className="w-full h-[64vh] rounded-lg object-cover"
+                    onPause={() => {
+                      if (audioRef.current) {
+                        audioRef.current.pause();
+                      }
+                    }}
+                    onPlay={() => {
+                      if (audioRef.current) {
+                        audioRef.current.play();
+                      }
+                    }}
+                    ref={videoRef}
                   >
                     <source src={bookDetail.shortsUrl} type="video/mp4" />
                   </video>
+                  <audio
+                    src={"bgm0" + Math.floor(Math.random() * 10) + ".mp3"}
+                    autoPlay
+                    loop
+                    ref={audioRef}
+                  ></audio>
                 </>
               )}
 
               <div className="mt-8 w-full h-fit">
                 <p className="text-lg text-gray-800 font-semibold">책 소개</p>
                 <hr className="mt-2 mb-3" />
-                <p className="text-xs text-gray-600 leading-6 indent-1.5">
-                  {bookDetail.summary}
-                </p>
+                <p className="text-xs text-gray-600 leading-6 indent-1.5">{bookDetail.summary}</p>
               </div>
 
               <div className="mt-8 w-full h-fit">
@@ -488,14 +491,9 @@ const DetailPage = () => {
                 <hr className="mt-2 mb-4" />
                 <div ref={analyzeRef} id="analyze">
                   <div className="w-full flex justify-between px-1 pb-1">
-                    <Label className="text-sm text-gray-800 flex items-center">
-                      완독율
-                    </Label>
+                    <Label className="text-sm text-gray-800 flex items-center">완독율</Label>
                     <Label className="text-lg text-gray-800">
-                      {analyzePer[1] === 0
-                        ? 0
-                        : (analyzePer[0] / analyzePer[1]) * 100}
-                      %
+                      {analyzePer[1] === 0 ? 0 : (analyzePer[0] / analyzePer[1]) * 100}%
                     </Label>
                   </div>
                   <Progress
@@ -503,22 +501,14 @@ const DetailPage = () => {
                     value={(analyzePer[0] / analyzePer[1]) * 100}
                   />
                   <div className="w-full px-1 flex justify-between pt-1">
-                    <Label className="text-xs text-[#666666]">
-                      완독 수 {analyzePer[0]}
-                    </Label>
-                    <Label className="ml-4 text-xs text-[#666666]">
-                      담은 수 {analyzePer[1]}
-                    </Label>
+                    <Label className="text-xs text-[#666666]">완독 수 {analyzePer[0]}</Label>
+                    <Label className="ml-4 text-xs text-[#666666]">담은 수 {analyzePer[1]}</Label>
                   </div>
                   <div className="w-full flex justify-between px-1 pb-1 mt-6 flex-wrap">
                     <Label className="text-xs text-gray-800 font-semibold pb-2">
                       성별 / 연령대 분석
                     </Label>
-                    <div
-                      ref={chartRef}
-                      className="w-full h-36 flex justify-between"
-                      id="chart"
-                    >
+                    <div ref={chartRef} className="w-full h-36 flex justify-between" id="chart">
                       <div className="w-full h-36 flex flex-col absolute justify-between my-2">
                         <hr className="w-5/6 border-gray-300 mx-6" />
                         <hr className="w-5/6 border-gray-300 mx-6" />
@@ -589,8 +579,7 @@ const DetailPage = () => {
                 </div>
               </div>
               <p className="text-sm font-medium text-gray-500 dark:text-gray-400 pt-2">
-                {bookDetail.ratingCount == null ? 0 : bookDetail.ratingCount}{" "}
-                개의 리뷰가 있습니다.
+                {bookDetail.ratingCount == null ? 0 : bookDetail.ratingCount} 개의 리뷰가 있습니다.
               </p>
               <div className="flex items-center mt-4">
                 <p className="text-sm w-4 font-medium text-blue-600 dark:text-blue-500 select-none">
@@ -618,11 +607,7 @@ const DetailPage = () => {
                   {ratingPer[4].toFixed(1)}%
                 </p>
               </div>
-              <div
-                ref={ratingRef}
-                className="flex items-center mt-4"
-                id="rating"
-              >
+              <div ref={ratingRef} className="flex items-center mt-4" id="rating">
                 <p className="text-sm w-4 font-medium text-blue-600 dark:text-blue-500 select-none">
                   3
                 </p>
@@ -663,11 +648,9 @@ const DetailPage = () => {
               </div>
               <div className="mt-8 w-full h-fit pl-1">
                 {/* 리뷰 */}
-                {rating
-                  .slice((curpage - 1) * 10, (curpage - 1) * 10 + 10)
-                  .map((key, index) => (
-                    <DetailRating key={key.email} userRating={key}/>
-                  ))}
+                {rating.slice((curpage - 1) * 10, (curpage - 1) * 10 + 10).map((key, index) => (
+                  <DetailRating key={key.email} userRating={key} />
+                ))}
               </div>
               <Pagination>
                 <PaginationContent>
@@ -689,9 +672,7 @@ const DetailPage = () => {
                   {Array.from(
                     {
                       length:
-                        curpage + 10 <= rating?.length
-                          ? 10
-                          : Math.ceil((rating?.length % 10) / 10),
+                        curpage + 10 <= rating?.length ? 10 : Math.ceil((rating?.length % 10) / 10),
                     },
                     (_, index) => (
                       <div key={index}>
@@ -748,24 +729,16 @@ const DetailPage = () => {
         {bookLoading && (
           <Button
             className={`${
-              userBookId > 0
-                ? "bg-red-400 hover:bg-red-300"
-                : "bg-[#9268EB] hover:bg-[#bfa1ff]"
+              userBookId > 0 ? "bg-red-400 hover:bg-red-300" : "bg-[#9268EB] hover:bg-[#bfa1ff]"
             } fixed right-0 sm:right-0 md:right-1/4 lg:right-1/3 bottom-20 p-3  max-w-md drop-shadow-lg rounded-full z-20 w-14 h-14 mr-3
             
             `}
             onClick={() => {
               console.log(bookDetail);
-              userBookId > 0
-                ? deleteMappingBook(userBookId)
-                : mappingBook(bookIdState);
+              userBookId > 0 ? deleteMappingBook(userBookId) : mappingBook(bookIdState);
             }}
           >
-            {userBookId > 0 ? (
-              <TbBookOff size={60} />
-            ) : (
-              <TbBookUpload size={60} />
-            )}
+            {userBookId > 0 ? <TbBookOff size={60} /> : <TbBookUpload size={60} />}
           </Button>
         )}
       </div>
