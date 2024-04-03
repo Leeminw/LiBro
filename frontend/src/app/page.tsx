@@ -1,10 +1,8 @@
 "use client";
 import Shorts from "@/components/Shorts";
-import { Button } from "@/components/ui/button";
-import { AiOutlineSearch } from "react-icons/ai";
 import { useEffect, useRef, useState } from "react";
 import SubHeader from "@/components/SubHeader";
-import { SearchApi } from "@/lib/axios-search";
+import { ShortsApi } from "@/lib/axios-shorts";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Home() {
@@ -18,23 +16,26 @@ export default function Home() {
       setPageLoad(true);
     } else {
       const requestBooks = async () => {
-        await SearchApi.searchBooks("베르나르 베르베르", 1)
+        await ShortsApi.loadShorts(!!localStorage.getItem("accessToken"))
           .then((data) => {
             console.log("응답 값", data);
-            const updateBookList = data.items.map((item: Book) => ({
+            const updateBookList = data.data.map((item:MainBook) => ({
               title: item.title,
-              image: item.image,
+              image: item.thumbnail,
               author: item.author,
               publisher: item.publisher,
               isbn: item.isbn,
-              src: "ex00.mp4",
+              src: item.shorts_url,
             }));
-            setBookList(updateBookList);
-            setCurrentLoad(Array(updateBookList.length).fill(false));
-            setCurrentLoad((current) =>
-              current.map((item, index) => (index === 0 ? true : item))
+            // 일단 50개까지만 로드
+            setBookList(updateBookList.slice(0, 50));
+            setCurrentLoad(
+              Array(updateBookList.slice(0, 50).length).fill(false)
             );
-            loadComplete(updateBookList.length);
+            setCurrentLoad((current) =>
+              current.map((item, index) => (index < 5 ? true : item))
+            );
+            loadComplete(updateBookList.slice(0, 50).length);
           })
           .catch((err) => console.log(err));
       };
@@ -50,9 +51,11 @@ export default function Home() {
         const scrollRatio = element.scrollTop / totalScrollHeight;
         const currentIndex = Math.round(scrollRatio * (bookLength - 1));
         setCurrentLoad((current) =>
-          current.map((item, index) => (index === currentIndex ? true : item))
+          current.map((item, index) =>
+            index + 2 >= currentIndex && index - 2 <= currentIndex ? true : item
+          )
         );
-        console.log(currentIndex);
+        // console.log("currentIndex", currentIndex);
       }
     };
     const element = carouselRef.current;
@@ -75,14 +78,13 @@ export default function Home() {
               {bookList.map((id, idx) => (
                 <Shorts
                   key={id.isbn}
-                  idx={idx}
                   shortsLoad={currentLoad[idx]}
                   bookDetail={id}
                 />
               ))}
             </>
           ) : (
-            <div className="w-full h-full min-h-screen flex items-center justify-center text-4xl font-bold text-white drop-shadow-lg">
+            <div className="w-full h-full min-h-[95vh] max-h-[95vh] flex items-center justify-center text-4xl font-bold text-white drop-shadow-lg">
               <div className="bg-gray-300 text-black flex justify-end rounded-lg items-start w-3/4 h-2/3 relative animate-pulse">
                 <div className="absolute w-full h-1/3 z-10 bottom-0 cursor-pointer rounded-b-lg bg-gradient-to-t from-black/40 flex p-4">
                   <Skeleton className="h-full min-w-20" />

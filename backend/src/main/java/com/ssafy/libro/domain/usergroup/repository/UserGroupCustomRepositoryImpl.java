@@ -1,7 +1,10 @@
 package com.ssafy.libro.domain.usergroup.repository;
 
 import com.nimbusds.oauth2.sdk.util.StringUtils;
-import com.querydsl.core.types.*;
+import com.querydsl.core.types.Expression;
+import com.querydsl.core.types.ExpressionUtils;
+import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.SimpleExpression;
@@ -46,7 +49,7 @@ public class UserGroupCustomRepositoryImpl implements UserGroupCustomRepository 
                         userGroup.club.name.as("clubName"),
                         userGroup.club.description,
                         userGroup.club.createdDate,
-                        userGroup.user.name.as("clubOwnerName"),
+                        userGroup.user.nickname.as("clubOwnerName"),
                         userGroup.user.profile,
                         memberCount
 
@@ -90,7 +93,7 @@ public class UserGroupCustomRepositoryImpl implements UserGroupCustomRepository 
         List<ClubListDetailResponseDto> fetch = jpaQueryFactory.select(Projections.constructor(
                         ClubListDetailResponseDto.class,
                         userGroup.club.id.as("clubId"),
-                        userGroup.user.name.as("clubOwnerName"),
+                        userGroup.user.nickname.as("clubOwnerName"),
                         userGroup.club.name.as("clubName"),
                         userGroup.club.createdDate
                 ))
@@ -113,7 +116,7 @@ public class UserGroupCustomRepositoryImpl implements UserGroupCustomRepository 
         return jpaQueryFactory.select(Projections.constructor(
                         ClubMemberDetailResponseDto.class,
                         userGroup.user.id.as("userId"),
-                        userGroup.user.name.as("name"),
+                        userGroup.user.nickname.as("name"),
                         userGroup.user.profile,
                         userGroup.createdDate,
                         userGroup.role
@@ -130,7 +133,7 @@ public class UserGroupCustomRepositoryImpl implements UserGroupCustomRepository 
         QUserGroup subUserGroup = new QUserGroup("sub");
 
         Expression<String> clubOwnerName = ExpressionUtils.as(JPAExpressions
-                .select(subUserGroup.user.name)
+                .select(subUserGroup.user.nickname)
                 .from(subUserGroup)
                 .where(subUserGroup.club.id.eq(userGroup.club.id)
                         .and(subUserGroup.role.eq(ClubRole.CLUB_ADMIN))), "clubOwnerName");

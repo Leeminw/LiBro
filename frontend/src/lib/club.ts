@@ -1,8 +1,6 @@
 import {AxiosRequestConfig} from "axios"
 import instance from '@/lib/interceptor'
 
-const baseURL = 'http://localhost:8080/api'
-
 const config = {
     headers: {
         'Content-Type': 'application/json',
@@ -207,3 +205,5 @@ export const getClubMemberShip = async (
     const axiosResponse = await instance.get(`/api/usergroup/hasPermission/${clubId}/${userId}`)
     return axiosResponse.data.data
 }
+
+

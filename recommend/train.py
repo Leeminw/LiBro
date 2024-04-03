@@ -1,60 +1,74 @@
 from config.db import get_db, get_model_url
-from repository.repository import get_user_book_matrix, get_book_matrix
+from repository.repository import get_user_book_matrix, get_book_matrix, get_user_matrix
 from lightfm import LightFM
 import pandas as pd 
 from scipy.sparse import coo_matrix, csr_matrix
 import numpy as np
 import pickle
 import os
+from lightfm.data import Dataset
+from lightfm.cross_validation import random_train_test_split
 
-# 가중치 어떻게 적용하지..
-USER_BOOK_WEIGHT = 0.5
-BOOK_REGIST_WEIHGT = 0.2
-VIEW_COUNT_WEIGHT = 0.2
-
-
-# 볼떄마다 다르게 하려면 어떻게..
-# 협업 상위 n개중 랜덤한 m 개
-# 다른 추천 방식 ex 그냥 랜덤 
-# 하위 n개중 랜덤한 m개 
-
-# 주기적으로 학습해서 모델
-def train() : 
+def train () : 
+    
     model = LightFM(loss='warp')
-    model_url = get_model_url()
     
     engine = get_db()
 
-    df = get_user_book_matrix(engine)
-    book_df = get_book_matrix(engine)
-    one_hot = pd.get_dummies(book_df)
+    model_url = get_model_url()
 
-    # 빈데이터인경우 그냥 저장.
-    if df.empty : 
+    ratings = get_user_book_matrix(engine)
+
+
+    if ratings.empty : 
         with open(model_url, 'wb') as f:
             pickle.dump(model, f)
 
-        return    
+        return 
+    item_meta = get_book_matrix(engine)
 
-    users = df['user_id'].unique()
-    books = df['book_id'].unique()
-    # row_indices = pd.Index(users, name='user_id')
-    # col_indices = pd.Index(books, name='book_id')
-    data_values = df['rating'].values
+    user_meta = get_user_matrix(engine)
 
-    user_book_matrix = coo_matrix((data_values, (df['user_id'] , df['book_id'])))
-    # book_matrix = csr_matrix(one_hot.values)    
-    # print(book_matrix)
-    # print(sparse_matrix)
-    model.fit(user_book_matrix, epochs=30 )
-    
+    # print(books.head())
+    ratings_source = [(ratings['user_id'][i], ratings['book_id'][i]) for i in range(ratings.shape[0])]
 
-    # 모델 저장
+    item_meta = item_meta[['book_id', 'author', 'rating', 'title']]
+
+    item_features_source = [(item_meta['book_id'][i],
+                            [item_meta['author'][i],
+                            item_meta['rating'][i]]) for i in range(item_meta.shape[0])]
+
+    user_meta = user_meta[['user_id','age', 'gender', 'interest']]
+
+    user_features_source = [(user_meta['user_id'][i],
+                            [user_meta['age'][i],
+                            user_meta['gender'][i]]) for i in range(user_meta.shape[0])]
+
+    dataset = Dataset()
+    dataset.fit(users = ratings['user_id'].unique(),
+                items = ratings['book_id'].unique(),
+                item_features=item_meta[item_meta.columns[1:]].values.flatten(),
+                user_features=user_meta[user_meta.columns[1:]].values.flatten())
+
+    interactions, weights = dataset.build_interactions(ratings_source)
+    item_features = dataset.build_item_features(item_features_source)
+    user_features = dataset.build_user_features(user_features_source)
+
+    interactions = interactions.tocsr().tocoo()
+    train_weights = interactions.multiply(weights).tocoo()
+
+    model.fit(interactions=interactions,
+              item_features=item_features,
+              user_features=user_features,
+              sample_weight=train_weights,
+              epochs=10,
+              verbose=False)
+
     with open(model_url, 'wb') as f:
         pickle.dump(model, f)
 
-if __name__ == "__main__":
+if __name__ == "__main__" :
     print("train start")
-    recommendations = train()
+    train()
     print("train end")
-    
+

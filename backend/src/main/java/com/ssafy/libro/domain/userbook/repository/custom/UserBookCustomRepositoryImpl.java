@@ -1,6 +1,9 @@
 package com.ssafy.libro.domain.userbook.repository.custom;
 
+import com.querydsl.core.Tuple;
+import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPAExpressions;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.ssafy.libro.domain.book.entity.Book;
 import com.ssafy.libro.domain.user.entity.QUser;
@@ -13,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import static com.ssafy.libro.domain.book.entity.QBook.book;
+import static com.ssafy.libro.domain.user.entity.QUser.user;
 import static com.ssafy.libro.domain.userbook.entity.QUserBook.userBook;
 import static com.ssafy.libro.domain.userbookhistory.entity.QUserBookHistory.userBookHistory;
 import static com.ssafy.libro.domain.userbookcomment.entity.QUserBookComment.userBookComment;
@@ -57,6 +61,21 @@ public class UserBookCustomRepositoryImpl implements UserBookCustomRepository{
 
         return Optional.of(bookList);
     }
+
+    @Override
+    public Optional<List<UserBook>> findUserBookByUserAndDateV2(User user, LocalDateTime startDate, LocalDateTime endDate) {
+        List<UserBook> bookList = jpaQueryFactory
+                .select(userBook)
+                .from(userBook)
+                .leftJoin(userBook.userBookHistoryList, userBookHistory).fetchJoin()
+                .leftJoin(userBook.book, book).fetchJoin()
+                .where(userBook.user.eq(user),
+                        (userBook.isDeleted.eq(false)).or(userBook.isDeleted.isNull()),
+                        userBookHistory.endDate.between(startDate, endDate))
+                .fetch();
+        return Optional.ofNullable(bookList);
+    }
+
     // 읽고있는 도서 (유저) 가장 최근 데이터가 null 값인것.
     @Override
     public Optional<List<UserBook>> findUserBookOnReading(User user) {
@@ -125,6 +144,19 @@ public class UserBookCustomRepositoryImpl implements UserBookCustomRepository{
     }
 
     @Override
+    public Optional<Long> countUserBookByUserAndBook(User user, Book book) {
+        Long result = jpaQueryFactory
+                .select(userBook.id)
+                .from(userBook)
+                .leftJoin(userBook.user, QUser.user)
+                .where(userBook.user.eq(user)
+                        .and((userBook.isDeleted.eq(false)).or(userBook.isDeleted.isNull()))
+                        .and(userBook.book.eq(book)))
+                .fetchFirst();
+        return Optional.of(result);
+    }
+
+    @Override
     public Optional<Long> countUserBookByUserReadComplete(User user) {
         Long result = jpaQueryFactory
                 .select(userBook.count())
@@ -147,6 +179,60 @@ public class UserBookCustomRepositoryImpl implements UserBookCustomRepository{
                 .leftJoin(userBook.userBookCommentList, userBookComment).fetchJoin()
                 .where(userBook.user.eq(user)
                         .and((userBook.isDeleted.eq(false)).or(userBook.isDeleted.isNull()))
+                ).fetch();
+
+
+        return Optional.of(result);
+    }
+
+    @Override
+    public List<Tuple> getUserGenderAgeCounts(Book book) {
+
+        return jpaQueryFactory
+                .select(
+                        user.age.floor(),
+                        user.gender,
+                        user.id.count().as("count")
+                )
+                .from(user)
+                .leftJoin(user.userBookList,userBook)
+                .leftJoin(userBook.book, QBook.book)
+                .where(QBook.book.eq(book)
+                        .and(
+                                (userBook.isDeleted.eq(false)).or(userBook.isDeleted.isNull())
+                        )
+                )
+                .groupBy(user.gender,user.age.floor())
+                .fetch();
+    }
+
+    @Override
+    public List<Tuple> getUserBookRating(Book book) {
+        return jpaQueryFactory
+                .select(
+                        userBook.rating.floor(),
+                        userBook.count().as("count")
+                )
+                .from(userBook)
+                .leftJoin(userBook.book, QBook.book)
+                .where(QBook.book.eq(book).and(
+                        (userBook.isDeleted.eq(false)).or(userBook.isDeleted.isNull())
+                ))
+                .groupBy(userBook.rating.floor())
+                .fetch();
+
+    }
+
+    @Override
+    public Optional<List<UserBook>> getUserBookRatingList(Book book) {
+        List<UserBook> result = jpaQueryFactory
+                .select(userBook)
+                .from(userBook)
+                .leftJoin(userBook.book, QBook.book).fetchJoin()
+                .leftJoin(userBook.user, user).fetchJoin()
+                .where(QBook.book.eq(book)
+                        .and((userBook.isDeleted.eq(false)).or(userBook.isDeleted.isNull()))
+                        .and(userBook.ratingComment.isNotNull())
                 ).fetch();
 
 

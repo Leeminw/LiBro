@@ -14,10 +14,10 @@ export default function MemberAdminPage() {
 
     return (
         <>
-            <SubHeader title="게시판 관리" backArrow={true}/>
+            <SubHeader title="회원 관리" backArrow={true}/>
             <div className="pt-24"/>
             <div className="flex flex-col bg-white">
-                <div className="flex justify-between px-4 py-2">
+                <div className="flex justify-between px-4 pt-6">
                     <span className="font-bold text-xl ">전체 유저</span>
                 </div>
 

@@ -1,62 +1,58 @@
 "use client";
 import React, { useRef } from "react";
-import {
-  BarcodeFormat,
-  BrowserMultiFormatReader,
-  DecodeHintType,
-  EAN13Reader,
-  Result,
-} from "@zxing/library";
-import Webcam from "react-webcam";
+import { Camera, CameraType } from "react-camera-pro";
+import axios from "axios";
+import { LuSwitchCamera } from "react-icons/lu";
 
 const BarcodeScannerComponent = ({
-  width,
-  height,
-  onUpdate,
+  onScanned,
 }: {
-  width: number;
-  height: number;
-  onUpdate: (arg0: unknown, arg1?: Result) => void;
+  onScanned: (result: string) => void;
 }): React.ReactElement => {
-  const [isScanned, setIsScanned] = React.useState<boolean>(false);
-  const webcamRef = useRef<Webcam>(null);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const codeReader = new BrowserMultiFormatReader();
-  const capture = React.useCallback(() => {
-    // const imageSrc = webcamRef?.current?.getScreenshot();
-    const imageSrc = "testImg1.jpg";
-    if (imageSrc) {
-      codeReader
-        .decodeFromImage(undefined, imageSrc)
-        .then((result) => {
-          setIsScanned(true);
-          onUpdate(null, result);
-        })
-        .catch((err) => {
-          onUpdate(err);
-        });
-    }
-  }, [codeReader, onUpdate]);
-
+  const camera = useRef<CameraType>(null);
   React.useEffect(() => {
-    intervalRef.current = setInterval(capture, 100);
-
+    const interval = setInterval(async () => {
+      try {
+        const screenShot = camera.current?.takePhoto();
+        if (screenShot) {
+          const response = await fetch(screenShot);
+          const blob = await response.blob();
+          const formData = new FormData();
+          formData.append("image", blob, "photo.png");
+          axios
+            .post("/flask/api/v1/isbn", formData)
+            .then((response) => {
+              onScanned(response.data.data.isbn);
+            })
+            .catch((error) => {});
+        }
+      } catch (error) {}
+    }, 500);
     return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
+      clearInterval(interval);
     };
   }, []);
 
   return (
-    <Webcam
-      style={{ objectFit: "cover", width: "100%", height: "100%" }}
-      width={width}
-      height={height}
-      ref={webcamRef}
-      screenshotFormat="image/png"
-      videoConstraints={{
-        facingMode: "environment",
-      }}
-    />
+    <div>
+      <div
+        className="absolute right-2 bottom-2 w-12 h-12 bg-black/60 rounded-full flex items-center justify-center z-10"
+        onClick={() => {
+          camera.current?.switchCamera();
+        }}
+      >
+        <LuSwitchCamera className="text-white w-6 h-6" />
+      </div>
+      <Camera
+        ref={camera}
+        errorMessages={{
+          canvas: "지원되지 않는 기기입니다.",
+          noCameraAccessible: "사용 가능한 카메라를 찾지 못했습니다.",
+          permissionDenied: "권한이 거부되었습니다.",
+          switchCamera: "카메라 전환에 실패했습니다.",
+        }}
+      />
+    </div>
   );
 };
 

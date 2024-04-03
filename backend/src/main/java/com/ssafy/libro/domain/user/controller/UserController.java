@@ -1,5 +1,6 @@
 package com.ssafy.libro.domain.user.controller;
 
+import com.ssafy.libro.domain.user.dto.UserProfileEditRequestDto;
 import com.ssafy.libro.domain.user.dto.OAuthUser;
 import com.ssafy.libro.domain.user.dto.UserJoinRequestDto;
 import com.ssafy.libro.domain.user.entity.User;
@@ -10,8 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Optional;
 
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
@@ -50,10 +49,25 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(ResponseData.success("회원가입 성공"));
     }
 
-    @GetMapping("/test")
-    public ResponseEntity<?> getTest() {
-        log.info("call test");
-        return ResponseEntity.status(HttpStatus.CREATED).body(ResponseData.success("성공"));
+    @GetMapping("/verify")
+    public ResponseEntity<?> getVerify() {
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success("성공"));
+    }
+
+    @PostMapping("/editProfile")
+    public ResponseEntity<?> editProfile(@RequestBody UserProfileEditRequestDto requestDto){
+        userService.editProfile(requestDto);
+        User user = userService.loadUser();
+        OAuthUser result = OAuthUser.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .profile(user.getProfile())
+                .name(user.getName())
+                .authType(user.getAuthType())
+                .role(user.getRole())
+                .nickName(user.getNickname())
+                .build();
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success("성공", result));
     }
 
 }

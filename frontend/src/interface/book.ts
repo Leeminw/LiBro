@@ -1,19 +1,99 @@
 interface Book {
-    title: string;
-    image: string;
-    author: string;
-    discount: number;
-    publisher: string;
-    pubdate: string;
-    isbn: number;
-    description: string;
-  }
+  author: string;
+  createdDate: string | null;
+  id: number;
+  isbn: number;
+  price: number;
+  pub_date: string;
+  publisher: string;
+  rating: number | null;
+  ratingCount: number | null;
+  shortsUrl: string | null;
+  summary: string;
+  thumbnail: string;
+  title: string;
+  translator: string | null;
+  updatedDate: string | null;
+}
+
+interface MainBook {
+  author: string;
+  created_date: string | null;
+  id: number;
+  isbn: number;
+  price: number;
+  pub_date: string;
+  publisher: string;
+  rating: number | null;
+  ratingCount: number | null;
+  shorts_url: string | null;
+  summary: string;
+  thumbnail: string;
+  title: string;
+  translator: string | null;
+  updated_date: string | null;
+}
+
+
+interface AddBook {
+  author: string;
+  isbn: number;
+  price: number;
+  pubDate: string;
+  publisher: string;
+  summary: string;
+  thumbnail: string;
+  title: string;
+}
+
+interface MappingBook {
+  bookId: number;
+  type: string;
+}
+
+interface NaverBook {
+  title: string;
+  image: string;
+  author: string;
+  discount: number;
+  publisher: string;
+  pubdate: string;
+  isbn: number;
+  description: string;
+}
 
 interface BookShorts {
-    title: string;
-    image: string;
-    author: string;
-    publisher: string;
-    isbn: number;
-    src: number;
+  title: string;
+  author: string;
+  image: string;
+  publisher: string;
+  isbn: number;
+  src: string;
+}
+
+interface ReadRatio {
+  type: string;
+  ratio: number;
+  totalSize: number;
+  readSize: number;
+}
+
+interface AgeGender {
+  age: number;
+  count: number;
+  gender: string;
+}
+
+interface RatingSummary {
+  score: number;
+  count: number;
+}
+
+interface RatingComment {
+  rating: number;
+  ratingComment: string;
+  ratingSpoiler: boolean;
+  nickName: string;
+  email: string;
+  createdDate: string;
 }

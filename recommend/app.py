@@ -22,7 +22,8 @@ import numpy as np
 
 def read_isbn_barcode(image_file):
     # 이미지를 읽어옵니다.
-    image = cv2.imdecode(np.fromstring(image_file.read(), np.uint8), cv2.IMREAD_UNCHANGED)    
+    image_data = np.frombuffer(image_file.read(), dtype=np.uint8)
+    image = cv2.imdecode(image_data, cv2.IMREAD_UNCHANGED)
     barcodes = decode(image)
     
     if barcodes:
@@ -71,7 +72,11 @@ def validateToken(token) -> tuple:
     except Exception as e :
         return False, 'no data'
 
+@app.route('/test')
+def get_recommend() :
+    result = get_recommend_book_list(100,10)
 
+    return make_response_entity(result,HTTPStatus.OK)
 
 @app.route('/')
 def random_book() :
@@ -111,13 +116,13 @@ def get_book_list() :
 def get_isbn() :
     if 'image' not in request.files :
         return make_response_entity("no data", HTTPStatus.BAD_REQUEST)
-    
     image_file = request.files['image']
 
     if image_file.filename == '' :
         return make_response_entity("no data", HTTPStatus.BAD_REQUEST)
-
     isbn = read_isbn_barcode(image_file)
+
+    print("isbn : " , isbn)
     if isbn : 
         return make_response_entity({'isbn' : isbn}, HTTPStatus.OK)
     else :
@@ -125,4 +130,4 @@ def get_isbn() :
 
 if __name__ == '__main__':
 
-    app.run(debug=False, host='0.0.0.0', port=5000 )
+    app.run(debug=True, host='0.0.0.0', port=5000 )

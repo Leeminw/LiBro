@@ -15,5 +15,6 @@ public class ShortsResponseDto {
     private String content;
     private String korPrompt;
     private String engPrompt;
+    private String filename;
     private Resource resource;
 }
