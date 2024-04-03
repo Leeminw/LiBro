@@ -21,6 +21,14 @@ const ShortsApi = {
       }
     }
   },
+  loadTestShorts: async (isbn:string) => {
+    try{
+      const response = await axios.get("/api/v1/book-list/search?isbn="+isbn);
+      return response.data;
+    } catch (error) {
+
+    }
+  }
 };
 
 export { ShortsApi };
