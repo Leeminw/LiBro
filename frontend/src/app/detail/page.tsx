@@ -25,6 +25,7 @@ import { useToast } from "@/components/ui/use-toast";
 import booksApi from "@/lib/axios-book";
 import { ToastAction } from "@/components/ui/toast";
 import { userBooks } from "@/lib/axios-userBook";
+import DetailRating from "@/components/components/detailRating";
 
 function StarFillIcon(props: any) {
   return (
@@ -63,7 +64,6 @@ function StarEmptyIcon(props: any) {
     </svg>
   );
 }
-
 const DetailPage = () => {
   const URL = "ex0" + 0 + ".mp4";
   const isbn = useSearchParams().get("isbn");
@@ -408,7 +408,7 @@ const DetailPage = () => {
       <SubHeader title="도서 상세 정보" backArrow={true} />
       <div
         ref={scrollRef}
-        className="pt-24 h-full bg-white max-h-[94vh] flex items-center relative flex-wrap overflow-y-scroll scrollbar-hide"
+        className="pt-12 pb-24 h-full bg-white max-h-[94vh] flex items-center relative flex-wrap overflow-y-scroll scrollbar-hide"
       >
         {bookLoading ? (
           <div className="w-full h-full min-h-[94vh] bg-white flex flex-col relative overflow-hidden mb-12">
@@ -666,71 +666,13 @@ const DetailPage = () => {
                 {rating
                   .slice((curpage - 1) * 10, (curpage - 1) * 10 + 10)
                   .map((key, index) => (
-                    <div
-                      key={key.email}
-                      className="flex flex-col space-y-1 justify-between bg-white border border-gray-200 w-full min-h-28 rounded-lg drop-shadow-md p-4 my-4"
-                    >
-                      <div className="flex">
-                        <p className="font-semibold text-sm w-full flex">
-                          {key.nickName}
-                        </p>
-                        <div className="flex">
-                          <FaStar
-                            className={`w-5 h-5 ${
-                              key.rating > 0
-                                ? "text-yellow-300"
-                                : "text-gray-300"
-                            } me-1`}
-                          />
-                          <FaStar
-                            className={`w-5 h-5 ${
-                              key.rating > 1
-                                ? "text-yellow-300"
-                                : "text-gray-300"
-                            } me-1`}
-                          />
-                          <FaStar
-                            className={`w-5 h-5 ${
-                              key.rating > 2
-                                ? "text-yellow-300"
-                                : "text-gray-300"
-                            } me-1`}
-                          />
-                          <FaStar
-                            className={`w-5 h-5 ${
-                              key.rating > 3
-                                ? "text-yellow-300"
-                                : "text-gray-300"
-                            } me-1`}
-                          />
-                          <FaStar
-                            className={`w-5 h-5 ${
-                              key.rating > 4
-                                ? "text-yellow-300"
-                                : "text-gray-300"
-                            } me-1`}
-                          />
-                        </div>
-                      </div>
-                      <p className="text-xs text-gray-400">
-                        {new Intl.DateTimeFormat("ko-KR", {
-                          year: "numeric",
-                          month: "2-digit",
-                          day: "2-digit",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                          hour12: false,
-                        }).format(new Date(key.createdDate))}
-                      </p>
-
-                      <p className="text-sm py-2">{key.ratingComment}</p>
-                    </div>
+                    <DetailRating key={key.email} userRating={key}/>
                   ))}
               </div>
               <Pagination>
                 <PaginationContent>
                   {/* 이전 버튼 */}
-                  {start != 1 && (
+                  {curpage != 1 && (
                     <PaginationItem>
                       <PaginationPrevious
                         className="rounded-full"
@@ -738,7 +680,7 @@ const DetailPage = () => {
                           ratingRef.current?.scrollIntoView({
                             behavior: "smooth",
                           });
-                          ratingPaging(start - 50, false);
+                          ratingPaging(curpage - 10, false);
                         }}
                       />
                     </PaginationItem>
@@ -747,9 +689,9 @@ const DetailPage = () => {
                   {Array.from(
                     {
                       length:
-                        start + 49 <= rating?.length
-                          ? 5
-                          : Math.ceil((rating?.length % 50) / 10),
+                        curpage + 10 <= rating?.length
+                          ? 10
+                          : Math.ceil((rating?.length % 10) / 10),
                     },
                     (_, index) => (
                       <div key={index}>
@@ -776,7 +718,7 @@ const DetailPage = () => {
                     )
                   )}
                   {/* 다음 버튼 */}
-                  {start + 50 <= rating?.length && (
+                  {curpage + 10 <= rating?.length && (
                     <PaginationItem>
                       <PaginationNext
                         className="rounded-full scale-50"
@@ -784,7 +726,7 @@ const DetailPage = () => {
                           ratingRef.current?.scrollIntoView({
                             behavior: "smooth",
                           });
-                          ratingPaging(start + 50, true);
+                          ratingPaging(curpage + 10, true);
                         }}
                       />
                     </PaginationItem>
@@ -803,13 +745,13 @@ const DetailPage = () => {
             <Skeleton className="h-[360px] w-full rounded-xl" />
           </div>
         )}
-        {bookLoading && !!localStorage.getItem("accessToken") && (
+        {bookLoading && (
           <Button
             className={`${
               userBookId > 0
                 ? "bg-red-400 hover:bg-red-300"
                 : "bg-[#9268EB] hover:bg-[#bfa1ff]"
-            } sticky bottom-[4.5rem] p-3 left-full max-w-md drop-shadow-lg rounded-full z-20 w-14 h-14 mr-3
+            } fixed right-0 sm:right-0 md:right-1/4 lg:right-1/3 bottom-20 p-3  max-w-md drop-shadow-lg rounded-full z-20 w-14 h-14 mr-3
             
             `}
             onClick={() => {

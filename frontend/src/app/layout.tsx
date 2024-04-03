@@ -24,8 +24,9 @@ export default function RootLayout({
       <body className={inter.className}>
         <ReactQueryProvider>
           <Suspense>
-            <div className="App min-h-[95vh] max-h-[95vh] max-w-md relative bg-gray-100 mx-auto overscroll-y-none touch-none">
+            <div className="App min-h-screen max-h-screen max-w-md relative bg-gray-100 mx-auto overscroll-y-none touch-none">
               <Header />
+              <div className="pt-12"/>
               {children}
               <BottomNavigation />
               <Toaster />

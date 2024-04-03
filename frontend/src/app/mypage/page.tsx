@@ -26,7 +26,7 @@ const Mypage = () => {
   }, []);
 
   return (
-    <div className="bg-white h-full pt-12 overflow-auto pb-24">
+    <div className="bg-white h-full overflow-auto pb-24 max-h-[90vh]">
       <div className="p-4">
         <div className="mb-2 pb-2 ">
           <div className="text-xl font-bold ml-2 ">마이페이지</div>
