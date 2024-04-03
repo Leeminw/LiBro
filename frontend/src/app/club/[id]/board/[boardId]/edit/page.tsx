@@ -150,7 +150,7 @@ export default function InputForm({
       <SubHeader title="글 수정하기" backArrow={true} />
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-2 pt-28 px-2"
+        className="space-y-2 pt-16 px-2"
       >
         <FormField
           control={form.control}

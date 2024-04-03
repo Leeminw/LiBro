@@ -107,7 +107,7 @@ export default function InputForm() {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="pt-28 flex flex-col px-2"
+          className="pt-16 flex flex-col px-2"
         >
           <FormField
             control={form.control}

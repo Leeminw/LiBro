@@ -14,7 +14,7 @@ const SubHeader = ({
   const router = useRouter();
   return (
     <>
-      <div className="border-b border-gray-200 bg-white w-full flex h-14 items-center mt-12 pl-2 text-md font-semibold text-[#333333] absolute z-10">
+      <div className="border-b border-gray-200 bg-white w-full flex h-14 items-center pl-2 text-md font-semibold text-[#333333] absolute z-10">
         {backArrow ? (
           <FaChevronLeft
             className="cursor-pointer mx-1"
