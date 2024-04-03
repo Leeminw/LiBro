@@ -17,13 +17,8 @@ RUN apt-get -y install libgl1-mesa-glx
 RUN apt-get -y install libzbar0
 # 필요한 라이브러리를 설치합니다. requirements.txt 파일이 있어야 합니다.
 RUN pip install --no-cache-dir -r requirements.txt
-#cron 설치
-# RUN apt-get update && apt-get -y install cron
-
-# COPY cronjob /etc/cron.d/cronjob
-# RUN crontab /etc/cron.d/cronjob
 
 # 최초 1회 학습 실행
 RUN python -m train
-# Gunicorn을 사용하여 Flask 애플리케이션을 실행합니다.
+# Flask 애플리케이션을 실행합니다.
 CMD ["python", "-m", "app"]
