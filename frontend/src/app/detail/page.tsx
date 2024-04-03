@@ -602,7 +602,7 @@ const DetailPage = () => {
                   value={ratingPer[5]}
                 />
                 <p className="text-sm w-8 text-end font-medium text-gray-500 dark:text-gray-400">
-                  {ratingPer[5]}%
+                  {ratingPer[5].toFixed(1)}%
                 </p>
               </div>
               <div className="flex items-center mt-4">
@@ -615,7 +615,7 @@ const DetailPage = () => {
                   value={ratingPer[4]}
                 />
                 <p className="text-sm w-8 text-end font-medium text-gray-500 dark:text-gray-400">
-                  {ratingPer[4]}%
+                  {ratingPer[4].toFixed(1)}%
                 </p>
               </div>
               <div
@@ -632,7 +632,7 @@ const DetailPage = () => {
                   value={ratingPer[3]}
                 />
                 <p className="text-sm w-8 text-end font-medium text-gray-500 dark:text-gray-400">
-                  {ratingPer[3]}%
+                  {ratingPer[3].toFixed(1)}%
                 </p>
               </div>
               <div className="flex items-center mt-4">
@@ -645,7 +645,7 @@ const DetailPage = () => {
                   value={ratingPer[2]}
                 />
                 <p className="text-sm w-8 text-end font-medium text-gray-500 dark:text-gray-400">
-                  {ratingPer[2]}%
+                  {ratingPer[2].toFixed(1)}%
                 </p>
               </div>
               <div className="flex items-center mt-4">
@@ -658,7 +658,7 @@ const DetailPage = () => {
                   value={ratingPer[1]}
                 />
                 <p className="text-sm w-8 text-end font-medium text-gray-500 dark:text-gray-400">
-                  {ratingPer[1]}%
+                  {ratingPer[1].toFixed(1)}%
                 </p>
               </div>
               <div className="mt-8 w-full h-fit pl-1">
