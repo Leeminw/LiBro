@@ -107,7 +107,7 @@
   },
   "proxy": {
     "/api": {
-      "target": "http://localhost:8080"
+      "target": "http://j10a301.p.ssafy.io:8080"
     },
     "/flask": {
       "target": "http://j10a301.p.ssafy.io:5000"
