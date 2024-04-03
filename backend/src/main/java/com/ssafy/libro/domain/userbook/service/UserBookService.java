@@ -15,6 +15,9 @@ public interface UserBookService {
 
     // 등록도서 상세 >> history, comment 같이 조회
     UserBookDetailResponseDto getUserBook(Long id);
+
+    Long getUserBookByUserAndBook(Long id);
+
     // 등록도서 추가
     UserBookDetailResponseDto mappingUserBook(UserBookMappingRequestDto requestDto);
     // 등록도서 수정
