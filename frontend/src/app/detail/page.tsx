@@ -602,7 +602,7 @@ const DetailPage = () => {
               <div className="mr-2 text-sm font-bold text-end w-fit flex items-end">
                 <div className="flex pb-1">{renderStars(ratingPer[0])}</div>
                 <div className="flex items-end pl-4">
-                  <p className="text-4xl">{ratingPer[0]} </p>
+                  <p className="text-4xl">{ratingPer[0].toFixed(1)} </p>
                   <p className="text-gray-400 font-normal px-2 pb-1">/ 5점</p>
                 </div>
               </div>
