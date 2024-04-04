@@ -269,15 +269,6 @@
 
 ```
 📦frontend
- ┣ 📂.idea
- ┃ ┣ 📂shelf
- ┃ ┃ ┣ 📂Uncommitted_changes_before_Checkout_at_2024-03-25_오전_9_52_[Changes]
- ┃ ┃ ┃ ┗ 📜shelved.patch
- ┃ ┃ ┗ 📜Uncommitted_changes_before_Checkout_at_2024-03-25__9_52__Changes_.xml
- ┃ ┣ 📜misc.xml
- ┃ ┣ 📜modules.xml
- ┃ ┣ 📜vcs.xml
- ┃ ┗ 📜workspace.xml
  ┣ 📂public
  ┃ ┣ 📜back.svg
  ┃ ┣ 📜BG.svg
