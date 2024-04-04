@@ -12,27 +12,17 @@
 
 사용자별 맞춤형 도서를 쇼츠 형태의 동영상으로 제공해줍니다.
 
-<details>
-<summary>서비스 화면</summary>
-<div>
-
 ![숏츠](docs/img/service/숏츠.gif)
-</div>
-</details>
-<br>
+
 
 ### 🔓 로그인 페이지
 
 카카오, 구글, 네이버 등의 다양한 간편 로그인을 지원합니다.
 최초 가입시 사용자 기반 추천을 위하여 추가 데이터를 제공 받습니다.
-<details>
-<summary>서비스 화면</summary>
-<div>
+
 
 ![로그인](docs/img/service/로그인.gif)
-</div>
-</details>
-<br>
+
 
 ### 🔍 도서 검색 서비스
 
@@ -40,29 +30,16 @@
 검색시 해당 책을 읽고 있는 사용자들의 평점과 통계들을 확인 할 수 있습니다.
 사용자가 현재 읽고 있거나 관심있는 도서를 등록 할 수 있습니다.
 
-<details>
-<summary>서비스 화면</summary>
-<div>
-
 ![바코드스캔](docs/img/service/바코드스캔.gif)
 ![도서검색](docs/img/service/도서검색.gif)
-</div>
-</details>
-<br>
+
 
 ### 👪  커뮤니티 
 
 사용자들끼리 소통할 수 있는 커뮤니티 공간입니다.
 자신의 생각을 자유롭게 공유할 수 있습니다.
 
-<details>
-<summary>서비스 화면</summary>
-<div>
-
 ![커뮤니티](docs/img/service/커뮤니티.gif)
-</div>
-</details>
-<br>
 
 ### 📚 나의 서재
 
@@ -70,34 +47,16 @@
 내가 등록한 도서들 관리하는 페이지 입니다.
 해당 페이지를 통해 도서의 완독 여부를 관리 할 수 있으며, 마음에 드는 글귀.평점 등을 등록할 수 있습니다. 
 
-<details>
-<summary>서비스 화면</summary>
-<div>
-
 ![나의서재](docs/img/service/나의%20서재.gif)
-</div>
-</details>
-<br>
 
 ### 📃 마이 페이지
 
 마이 페이지에서 나의 회원정보, 해당 유저의 독서 통계를 확인 할 수 있습니다.
 
-
-<details>
-<summary>서비스 화면</summary>
-<div>
-
 ![마이페이지](docs/img/service/마이페이지.gif)
-</div>
-</details>
-<br>
+
 
 ## 👐 기술 특이점 👐
-
-<details>
-<summary>자세히 보기</summary>
-<div markdown="1">
 <ol>
     <li>Stable Diffusion 을 사용한 이미지 생성</li>
     <li>최소공배수 등의 기법을 활용한 이미지+자막을 합성한 영상 제작</li>
@@ -107,30 +66,29 @@
     <li>No-Offset 방식의 쿼리를 통한 조회 성능 개선</li>
     <li>무한 스크롤 기능</li>
 </ol>
-</div>
-</details>
+
 
 ## 👐 팀원 구성 및 역할 분담👐
 
 <table align="center">
     <tr align="center">
         <td style="width: 250px;">
-            <a href="https://github.com/manju0329">
+            <a href="https://github.com/Leeminw">
               <img src="https://avatars.githubusercontent.com/u/92208022?v=4" width="100">
               <br />
               <b>이민우 (팀장)</b>
             </a>
         </td>
         <td style="width: 250px">
-            <a href="">
-              <img src="">
+            <a href="https://github.com/yeogeru">
+              <img src="https://avatars.githubusercontent.com/u/139696084?v=4">
                 <br />
               <b>유지웅 (팀원)</b>
             </a> 
         </td>
          <td style="width: 250px">
-            <a href="">
-              <img src="" width="100">
+            <a href="https://github.com/JoSihun">
+              <img src="https://avatars.githubusercontent.com/u/59362257?v=4" width="100">
                 <br />
               <b>조시훈 (팀원)</b>
             </a> 
@@ -140,7 +98,6 @@
         <td>
         1. 도서 추천 시스템<br>
         2. 도서 도메인 API<br>
-        3. <br>
         </td>
         <td>
         1. 소셜 로그인<br>
@@ -155,8 +112,8 @@
     </tr>
     <tr align="center">
         <td style="width: 250px;">
-            <a href="">
-              <img src="" width="100">
+            <a href="https://github.com/KrswJo">
+              <img src="https://avatars.githubusercontent.com/u/45043145?v=4" width="100">
               <br />
               <b>조승우 (팀원)</b>
             </a>
@@ -180,7 +137,6 @@
         <td>
         1. 커뮤니티 도메인 API 및 페이지<br>
         2. 마이페이지 <br>
-        3. <br>
         </td>
         <td>
         1. <br>
@@ -199,10 +155,6 @@
 
 ### [기술스택]()
 
-
-<details>
-<summary>자세히 보기</summary>
-<div markdown="2">
 <h2>BackEnd</h2>
 
 ![TechStack](docs/img/stack/back.png)
@@ -219,43 +171,20 @@
 ![TechStack](docs/img/stack/infra.png)
 
 
-</div>
-
-
-</details>
-
 ### [Figma]()
 
-<details>
-<summary>자세히 보기</summary>
-<div markdown="1">
-
 ![Figma](docs/img/diagram/figma.png)
-</div>
-</details>
-
 
 ### [ERD]()
 
-<details>
-<summary>자세히 보기</summary>
-<div markdown="1">
-
 ### ![ERD](docs/img/diagram/erd.png)
-</div>
-</details>
+
 
 ### [API 명세서](https://docs.google.com/spreadsheets/d/1s436dPvQNBRy-j07uLH9vGCNiFMIAVaR/edit#gid=410163342)
 
 ### [아키텍처]()
 
-<details>
-<summary>자세히 보기</summary>
-<div markdown="1">
-
 ![image](docs/img/diagram/arc.png)
-</div>
-</details>
 
 ### [포팅 매뉴얼](exec/Porting-Manual.md)
 
