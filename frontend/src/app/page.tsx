@@ -27,38 +27,41 @@ export default function Home() {
         await ShortsApi.loadShorts(!!localStorage.getItem("accessToken"))
           .then(async (data) => {
             console.log("응답 값", data);
-            // const updateBookList = data.data.map((item:MainBook) => ({
-            //   title: item.title,
-            //   image: item.thumbnail,
-            //   author: item.author,
-            //   publisher: item.publisher,
-            //   isbn: item.isbn,
-            //   src: item.shorts_url,
-            // }));
-            let inputIsbn = [
-              9791193839010, 9791191657111, 9791192483207, 9791193324141, 9791192579887,
-              9791193128381, 9788937460753, 9791192674414, 9788954697354, 9791192579504,
-              9791191290271, 9791193080122, 9791166836404, 9788937443848,
-              9788974314040, 9791190073240, 9791168682429, 9788932027098, 9788936448523,
-            ];
-            const shuffledIsbnList: BookShorts[] = [];
-            for (let i = 0; i < inputIsbn.length; i++) {
-              await ShortsApi.loadTestShorts(inputIsbn[i].toString())
-                .then((responseData) => {
-                  console.log(responseData);
-                  shuffledIsbnList.push({
-                    title: responseData.data[0].title,
-                    image: responseData.data[0].thumbnail,
-                    author: responseData.data[0].author,
-                    publisher: responseData.data[0].publisher,
-                    isbn: responseData.data[0].isbn,
-                    src: responseData.data[0].shortsUrl,
-                  });
-                })
-                .catch(() => {});
-            }
+            const updateBookList = data.data.map((item:MainBook) => ({
+              title: item.title,
+              image: item.thumbnail,
+              author: item.author,
+              publisher: item.publisher,
+              isbn: item.isbn,
+              src: item.shorts_url,
+            }));
+
+            //// 시연용 코드
+            // let inputIsbn = [
+            //   9791193839010, 9791191657111, 9791192483207, 9791193324141, 9791192579887,
+            //   9791193128381, 9788937460753, 9791192674414, 9788954697354, 9791192579504,
+            //   9791191290271, 9791193080122, 9791166836404, 9788937443848,
+            //   9788974314040, 9791190073240, 9791168682429, 9788932027098, 9788936448523,
+            // ];
+            // const shuffledIsbnList: BookShorts[] = [];
+            // for (let i = 0; i < inputIsbn.length; i++) {
+            //   await ShortsApi.loadTestShorts(inputIsbn[i].toString())
+            //     .then((responseData) => {
+            //       console.log(responseData);
+            //       shuffledIsbnList.push({
+            //         title: responseData.data[0].title,
+            //         image: responseData.data[0].thumbnail,
+            //         author: responseData.data[0].author,
+            //         publisher: responseData.data[0].publisher,
+            //         isbn: responseData.data[0].isbn,
+            //         src: responseData.data[0].shortsUrl,
+            //       });
+            //     })
+            //     .catch(() => {});
+            // }
             // isbnList를 랜덤하게 섞기
-            const updateBookList = shuffleArray([...shuffledIsbnList]);
+            // const updateBookList = shuffleArray([...shuffledIsbnList]);
+
             // 일단 50개까지만 로드
             setBookList(updateBookList.slice(0, 50));
             setCurrentLoad(Array(updateBookList.slice(0, 50).length).fill(false));
