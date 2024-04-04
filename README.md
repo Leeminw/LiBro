@@ -74,21 +74,21 @@
     <tr align="center">
         <td style="width: 250px;">
             <a href="https://github.com/Leeminw">
-              <img src="https://avatars.githubusercontent.com/u/92208022?v=4" width="100">
+              <img src="https://avatars.githubusercontent.com/u/92208022?v=4" width="100" height="100">
               <br />
               <b>이민우 (팀장)</b>
             </a>
         </td>
         <td style="width: 250px">
             <a href="https://github.com/yeogeru">
-              <img src="https://avatars.githubusercontent.com/u/139696084?v=4">
+              <img src="https://avatars.githubusercontent.com/u/139696084?v=4" width="100" height="100">
                 <br />
               <b>유지웅 (팀원)</b>
             </a> 
         </td>
          <td style="width: 250px">
             <a href="https://github.com/JoSihun">
-              <img src="https://avatars.githubusercontent.com/u/59362257?v=4" width="100">
+              <img src="https://avatars.githubusercontent.com/u/59362257?v=4" width="100" height="100">
                 <br />
               <b>조시훈 (팀원)</b>
             </a> 
@@ -113,7 +113,7 @@
     <tr align="center">
         <td style="width: 250px;">
             <a href="https://github.com/KrswJo">
-              <img src="https://avatars.githubusercontent.com/u/45043145?v=4" width="100">
+              <img src="https://avatars.githubusercontent.com/u/45043145?v=4" width="100" height="100">
               <br />
               <b>조승우 (팀원)</b>
             </a>
