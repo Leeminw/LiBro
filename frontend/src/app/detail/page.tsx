@@ -512,7 +512,7 @@ const DetailPage = () => {
                     <Label className="text-lg text-gray-800">
                       {analyzePer[1] === 0
                         ? 0
-                        : (analyzePer[0] / analyzePer[1]) * 100}
+                        : ((analyzePer[0] / analyzePer[1]) * 100).toFixed(1)}
                       %
                     </Label>
                   </div>
